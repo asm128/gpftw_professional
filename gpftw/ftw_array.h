@@ -1,0 +1,10 @@
+#include "ftw_array_view.h"
+
+#ifndef FTW_ARRAY_H_29837498237498237429837
+#define FTW_ARRAY_H_29837498237498237429837
+
+namespace ftw 
+{
+}
+
+#endif // FTW_ARRAY_H_29837498237498237429837
