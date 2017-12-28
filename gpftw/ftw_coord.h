@@ -56,8 +56,8 @@ namespace ftw {
 	};	// struct SCoord2
 
 #define NWOL_DEFAULT_OPERATOR_NE(_otherType, ...)	\
-		inline constexpr									bool				operator!=				(const _otherType		& other)											const	noexcept	{ return !operator==(other);	}	\
-		inline constexpr									bool				operator==				(const _otherType		& other)											const	noexcept	{ return __VA_ARGS__;			}
+		inline constexpr									bool						operator!=				(const _otherType		& other)											const	noexcept	{ return !operator==(other);	}	\
+		inline constexpr									bool						operator==				(const _otherType		& other)											const	noexcept	{ return __VA_ARGS__;			}
 
 	// ---- Geometric figures and other coord-related POD structs.
 	template<typename _tElement>	struct SRange			{ _tElement				Offset, Count			; NWOL_DEFAULT_OPERATOR_NE(SRange		<_tElement>,	Offset	== other.Offset	&& Count	== other.Count							); };

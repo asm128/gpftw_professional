@@ -185,6 +185,7 @@
   <ItemGroup>
     <ClCompile Include="ftw_ascii_display.cpp" />
     <ClCompile Include="ftw_ascii_target.cpp" />
+    <ClCompile Include="ftw_log.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

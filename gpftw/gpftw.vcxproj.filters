@@ -65,5 +65,8 @@
     <ClCompile Include="ftw_ascii_target.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ftw_log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

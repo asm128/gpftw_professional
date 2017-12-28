@@ -1,7 +1,7 @@
 #ifndef FTW_PLATFORM_H_9028734982734
 #define FTW_PLATFORM_H_9028734982734
 
-#if (defined(WIN32) || defined(_WIN32)) && !defined(FTW_WINDOWS)
+#if (defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(WIN64)) && !defined(FTW_WINDOWS)
 #	define FTW_WINDOWS
 #elif defined(__linux__) && !defined(FTW_LINUX)
 #	define FTW_LINUX
