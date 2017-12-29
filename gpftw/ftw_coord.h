@@ -3,8 +3,8 @@
 #ifndef FTW_COORD_H_928374982364923322
 #define FTW_COORD_H_928374982364923322
 
-namespace ftw {
-
+namespace ftw 
+{
 #pragma pack(push, 1)	// You can read about pragma pack() here: https://www.google.com/search?q=pragma+pack
 	template<typename _tBase>
 	struct SCoord2 {
@@ -60,12 +60,12 @@ namespace ftw {
 		inline constexpr									bool						operator==				(const _otherType		& other)											const	noexcept	{ return __VA_ARGS__;			}
 
 	// ---- Geometric figures and other coord-related POD structs.
-	template<typename _tElement>	struct SRange			{ _tElement				Offset, Count			; NWOL_DEFAULT_OPERATOR_NE(SRange		<_tElement>,	Offset	== other.Offset	&& Count	== other.Count							); };
-	template<typename _tElement>	struct SLine2D			{ SCoord2<_tElement>	A, B					; NWOL_DEFAULT_OPERATOR_NE(SLine2D		<_tElement>,	A		== other.A		&& B		== other.B								); };
-	template<typename _tElement>	struct STriangle2D		{ SCoord2<_tElement>	A, B, C					; NWOL_DEFAULT_OPERATOR_NE(STriangle2D	<_tElement>,	A		== other.A		&& B		== other.B			&& C == other.C		); };
-	template<typename _tElement>	struct SRectangle2D		{ SCoord2<_tElement>	Offset, Size			; NWOL_DEFAULT_OPERATOR_NE(SRectangle2D	<_tElement>,	Offset	== other.Offset	&& Size		== other.Size							); };
-	template<typename _tElement>	struct SCircle2D		{ double Radius;	SCoord2<_tElement> Center	; NWOL_DEFAULT_OPERATOR_NE(SCircle2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius							); };
-	template<typename _tElement>	struct SSphere2D		{ double Radius;	SCoord2<_tElement> Center	; NWOL_DEFAULT_OPERATOR_NE(SSphere2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius							); };
+	template<typename _tElement>	struct SRange			{ _tElement				Offset, Count			; NWOL_DEFAULT_OPERATOR_NE(SRange		<_tElement>,	Offset	== other.Offset	&& Count	== other.Count					); };
+	template<typename _tElement>	struct SLine2D			{ SCoord2<_tElement>	A, B					; NWOL_DEFAULT_OPERATOR_NE(SLine2D		<_tElement>,	A		== other.A		&& B		== other.B						); };
+	template<typename _tElement>	struct STriangle2D		{ SCoord2<_tElement>	A, B, C					; NWOL_DEFAULT_OPERATOR_NE(STriangle2D	<_tElement>,	A		== other.A		&& B		== other.B		&& C == other.C	); };
+	template<typename _tElement>	struct SRectangle2D		{ SCoord2<_tElement>	Offset, Size			; NWOL_DEFAULT_OPERATOR_NE(SRectangle2D	<_tElement>,	Offset	== other.Offset	&& Size		== other.Size					); };
+	template<typename _tElement>	struct SCircle2D		{ double Radius; SCoord2<_tElement> Center		; NWOL_DEFAULT_OPERATOR_NE(SCircle2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius					); };
+	template<typename _tElement>	struct SSphere2D		{ double Radius; SCoord2<_tElement> Center		; NWOL_DEFAULT_OPERATOR_NE(SSphere2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius					); };
 #pragma pack(pop)
 
 	// ---- Line
@@ -89,7 +89,6 @@ namespace ftw {
 
 	// Returns the volume of a sphere. This is used to calculate how to recurse into the bounding volume tree. For a bounding sphere it is a simple calculation.
 	template<typename _tElement>	static					double					sphereSize				(const SSphere2D<_tElement> &sphere)										noexcept	{ return 1.3333333333333333 * ::ftw::math_pi * sphere.Radius * sphere.Radius * sphere.Radius; }
-
 }
 
 #endif // FTW_COORD_H_928374982364923322
