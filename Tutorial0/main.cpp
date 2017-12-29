@@ -5,7 +5,7 @@
 #include "ftw_frameinfo.h"
 #include "ftw_timer.h"
 #include "ftw_bitmap_target.h"
-#include "ftw_memory.h"
+#include "ftw_array.h"
 
 #include <windows.h>    // for interacting with Windows
 
@@ -48,7 +48,7 @@ struct SDisplay {
 
 struct SApplication {
 						::SDisplay																		MainWindow									= {};
-						::std::vector<::ftw::SColorBGRA>												BitmapOffsceen								= {};
+						::ftw::array_pod<::ftw::SColorBGRA>												BitmapOffsceen								= {};
 						::SRuntimeValues																RuntimeValues								= {};
 						::SInput																		SystemInput									= {};
 						::ftw::STimer																	Timer										= {};
@@ -134,7 +134,7 @@ struct SOffscreenPlatformDetail {
 }
 
 		void																						updateOffscreen								(::SApplication& applicationInstance)											{ 
-	::std::vector<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
+	::ftw::array_pod<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	uint32_t																								linearScreenSize							= applicationInstance.MainWindow.Size.x * applicationInstance.MainWindow.Size.y;
 	if(bmpOffscreen.size() < linearScreenSize) {
 		bmpOffscreen.resize(linearScreenSize);
@@ -152,7 +152,7 @@ struct SOffscreenPlatformDetail {
 	if(0 == windowHandle)
 		return;
 	::HDC																									dc											= ::GetDC(windowHandle);
-	::std::vector<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
+	::ftw::array_pod<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	::drawBuffer(dc, applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y, &bmpOffscreen[0]);
 	::ReleaseDC(windowHandle, dc);
 }
@@ -288,7 +288,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 		void																						draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	const ::SDisplay																						& mainWindow								= applicationInstance.MainWindow;
 	::memset(&applicationInstance.BitmapRenderTarget.Colors[0][0], 0, sizeof(::ftw::SColorBGRA) * applicationInstance.BitmapRenderTarget.Colors.size());
-	::std::vector<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
+	::ftw::array_pod<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	::ftw::SCoord2		<int32_t>																			screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
 	::ftw::SRectangle2D<int32_t>																			geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
 	::ftw::SCircle2D	<int32_t>																			geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	

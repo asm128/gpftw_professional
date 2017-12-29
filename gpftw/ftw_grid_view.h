@@ -8,6 +8,7 @@ namespace ftw
 #pragma pack(push, 1)
 	template <typename _tElement>
 	class grid_view {
+	protected:
 		// Properties / Member Variables
 							_tElement								* Data						= 0;
 							uint32_t								Width						= 0;

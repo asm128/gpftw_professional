@@ -10,6 +10,7 @@ namespace ftw
 {
 	template <typename _tElement>
 	class array_view {
+	protected:
 		// Properties / Member Variables
 							_tElement				* Data						= 0;
 							uint32_t				Count						= 0;
