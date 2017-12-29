@@ -203,8 +203,6 @@ namespace ftw
 		}
 
 		// returns the new size of the list or -1 on failure.
-		template<size_t _chainLength>
-		inline				int32_t						insert										(uint32_t index, const _tPOD* (&chainToInsert)[_chainLength])							{ return insert(index, chainToInsert, _chainLength); }
 							int32_t						insert										(uint32_t index, const _tPOD* chainToInsert, uint32_t chainLength)						{
 			ree_if(index >= Count, "Invalid index: %u.", index);
 
@@ -229,6 +227,9 @@ namespace ftw
 			}
 			return Count += chainLength;
 		}
+
+		template<size_t _chainLength>
+		inline				int32_t						insert										(uint32_t index, const _tPOD* (&chainToInsert)[_chainLength])							{ return insert(index, chainToInsert, _chainLength); }
 
 		// Returns the new size of the list or -1 if the array pointer is not initialized.
 		inline				int32_t						remove_unordered							(uint32_t index)																		{ 
@@ -468,8 +469,6 @@ namespace ftw
 		//	return -1;
 		//}
 	}; // array_obj
-
-
 }
 
 #endif // FTW_ARRAY_H_29837498237498237429837
