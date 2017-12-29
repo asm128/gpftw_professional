@@ -34,13 +34,13 @@ namespace ftw {
 		inline constexpr										TCoord2					operator-				()																	const	noexcept	{ return {x*-1, y*-1};													}
 		//
 		template<typename _t>
-		constexpr inline										SCoord2<_t>				Cast					()																	const	noexcept	{ return {(_t)x, (_t)y};																									}
-		inline													TCoord2&				Scale					(double scalar)																noexcept	{ return *this *= scalar;																									}
+		constexpr inline										SCoord2<_t>				Cast					()																	const	noexcept	{ return {(_t)x, (_t)y};																								}
+		inline													TCoord2&				Scale					(double scalar)																noexcept	{ return *this *= scalar;																								}
 		inline													TCoord2&				Normalize				()																						{ const _tBase sqLen = LengthSquared(); return (sqLen) ? *this /= ::ftw::sqrt_safe(sqLen) : *this;						}
-		constexpr												double					Dot						(const TCoord2& other)												const	noexcept	{ return x * other.x + y * other.y;																							}
-		constexpr												_tBase					LengthSquared			()																	const	noexcept	{ return x * x + y * y;																										}
-		constexpr												double					Length					()																	const				{ const _tBase sqLen = LengthSquared(); return sqLen ? ::sqrt(sqLen) : 0;													}
-		constexpr												double					AngleWith				(const TCoord2& other)												const				{ double lengthsProduct = Length() * other.Length(); return lengthsProduct ? ::acos( Dot(other) / (lengthsProduct) ) : 0;	}
+		constexpr												double					Dot						(const TCoord2& other)												const	noexcept	{ return x * other.x + y * other.y;																						}
+		constexpr												_tBase					LengthSquared			()																	const	noexcept	{ return x * x + y * y;																									}
+		constexpr												double					Length					()																	const				{ const _tBase sqLen = LengthSquared(); return sqLen ? ::sqrt(sqLen) : 0;												}
+		constexpr												double					AngleWith				(const TCoord2& other)												const				{ double lengthsProduct = Length() * other.Length(); return lengthsProduct ? ::acos(Dot(other) / lengthsProduct) : 0;	}
 																void					AddScaled				(const TCoord2& vectorToScaleAndAdd, float scale)										{
 			x																				+= vectorToScaleAndAdd.x * scale;
 			y																				+= vectorToScaleAndAdd.y * scale;

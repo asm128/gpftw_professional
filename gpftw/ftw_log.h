@@ -54,38 +54,38 @@ namespace ftw
 #define warning_printf(format, ...)									 debug_printf(1, "warning"	, format, __VA_ARGS__)
 #define info_printf(format, ...)									 debug_printf(2, "info"		, format, __VA_ARGS__)
 
-#define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); throw(exception); }
-#define error_if(condition, format, ...)						if(condition) error_printf		(format, __VA_ARGS__); 
-#define warn_if(condition, format, ...)							if(condition) warning_printf	(format, __VA_ARGS__)
-#define info_if(condition, format, ...)							if(condition) info_printf		(format, __VA_ARGS__)
+#define throw_if(condition, exception, format, ...)				if(condition) { base_debug_print(#condition, -1); error_printf	(format, __VA_ARGS__); throw(exception);	}
+#define error_if(condition, format, ...)						if(condition) { base_debug_print(#condition, -1); error_printf	(format, __VA_ARGS__);						}
+#define warn_if(condition, format, ...)							if(condition) { base_debug_print(#condition, -1); warning_printf(format, __VA_ARGS__);						}
+#define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); }
 
-#define ret_error_if(condition, format, ...)					if(condition) { error_printf	(format, __VA_ARGS__); return; }
-#define ret_warn_if(condition, format, ...)						if(condition) { warning_printf	(format, __VA_ARGS__); return; }
-#define ret_info_if(condition, format, ...)						if(condition) { info_printf		(format, __VA_ARGS__); return; }
+#define ret_error_if(condition, format, ...)					if(condition) { error_printf	(format, __VA_ARGS__); return;			}
+#define ret_warn_if(condition, format, ...)						if(condition) { warning_printf	(format, __VA_ARGS__); return;			}
+#define ret_info_if(condition, format, ...)						if(condition) { info_printf		(format, __VA_ARGS__); return;			}
 
-#define break_error_if(condition, format, ...)					if(condition) { error_printf	(format, __VA_ARGS__); break; }
-#define break_warn_if(condition, format, ...)					if(condition) { warning_printf	(format, __VA_ARGS__); break; }
-#define break_info_if(condition, format, ...)					if(condition) { info_printf		(format, __VA_ARGS__); break; }
+#define break_error_if(condition, format, ...)					if(condition) { error_printf	(format, __VA_ARGS__); break;			}
+#define break_warn_if(condition, format, ...)					if(condition) { warning_printf	(format, __VA_ARGS__); break;			}
+#define break_info_if(condition, format, ...)					if(condition) { info_printf		(format, __VA_ARGS__); break;			}
 
-#define continue_error_if(condition, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); continue; }
-#define continue_warn_if(condition, format, ...)				if(condition) { warning_printf	(format, __VA_ARGS__); continue; }
-#define continue_info_if(condition, format, ...)				if(condition) { info_printf		(format, __VA_ARGS__); continue; }
+#define continue_error_if(condition, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); continue;		}
+#define continue_warn_if(condition, format, ...)				if(condition) { warning_printf	(format, __VA_ARGS__); continue;		}
+#define continue_info_if(condition, format, ...)				if(condition) { info_printf		(format, __VA_ARGS__); continue;		}
 
-#define retval_error_if(retVal, condition, format, ...)			if(condition) { error_printf(format, __VA_ARGS__); return retVal; }
-#define retval_warn_if(retVal, condition, format, ...)			if(condition) { error_printf(format, __VA_ARGS__); return retVal; }
-#define retval_info_if(retVal, condition, format, ...)			if(condition) { error_printf(format, __VA_ARGS__); return retVal; }
+#define retval_error_if(retVal, condition, format, ...)			if(condition) { error_printf	(format, __VA_ARGS__); return retVal;	}
+#define retval_warn_if(retVal, condition, format, ...)			if(condition) { error_printf	(format, __VA_ARGS__); return retVal;	}
+#define retval_info_if(retVal, condition, format, ...)			if(condition) { error_printf	(format, __VA_ARGS__); return retVal;	}
 
-#define retnul_error_if(condition, format, ...)					retval_error_if(0, condition, format, __VA_ARGS__)
-#define retnul_warn_if(condition, format, ...)					retval_warn_if (0, condition, format, __VA_ARGS__)
-#define retnul_info_if(condition, format, ...)					retval_info_if (0, condition, format, __VA_ARGS__)
+#define retnul_error_if(condition, format, ...)					retval_error_if	(0, condition, format, __VA_ARGS__)
+#define retnul_warn_if(condition, format, ...)					retval_warn_if	(0, condition, format, __VA_ARGS__)
+#define retnul_info_if(condition, format, ...)					retval_info_if	(0, condition, format, __VA_ARGS__)
 
-#define reterr_error_if(condition, format, ...)					retval_error_if(-1, condition, format, __VA_ARGS__)
-#define reterr_warn_if(condition, format, ...)					retval_warn_if (-1, condition, format, __VA_ARGS__)
-#define reterr_info_if(condition, format, ...)					retval_info_if (-1, condition, format, __VA_ARGS__)
+#define reterr_error_if(condition, format, ...)					retval_error_if	(-1, condition, format, __VA_ARGS__)
+#define reterr_warn_if(condition, format, ...)					retval_warn_if	(-1, condition, format, __VA_ARGS__)
+#define reterr_info_if(condition, format, ...)					retval_info_if	(-1, condition, format, __VA_ARGS__)
 
-#define retwarn_error_if(condition, format, ...)				retval_error_if(1, condition, format, __VA_ARGS__)
-#define retwarn_warn_if(condition, format, ...)					retval_warn_if (1, condition, format, __VA_ARGS__)
-#define retwarn_info_if(condition, format, ...)					retval_info_if (1, condition, format, __VA_ARGS__)
+#define retwarn_error_if(condition, format, ...)				retval_error_if	(1, condition, format, __VA_ARGS__)
+#define retwarn_warn_if(condition, format, ...)					retval_warn_if	(1, condition, format, __VA_ARGS__)
+#define retwarn_info_if(condition, format, ...)					retval_info_if	(1, condition, format, __VA_ARGS__)
 
 #define re_if													ret_error_if
 #define rw_if													ret_warn_if
@@ -101,6 +101,10 @@ namespace ftw
 
 #define rve_if													retval_error_if
 
+#define rne_if													retnul_error_if
+#define rnw_if													retnul_warn_if 
+#define rni_if													retnul_info_if
+
 #define ree_if													reterr_error_if
 #define rew_if													reterr_warn_if 
 #define rei_if													reterr_info_if 
@@ -108,9 +112,5 @@ namespace ftw
 #define rwe_if													retwarn_error_if
 #define rww_if													retwarn_warn_if 
 #define rwi_if													retwarn_info_if 
-
-#define rie_if													retwarn_error_if
-#define riw_if													retwarn_warn_if 
-#define rii_if													retwarn_info_if		
 
 #endif // FTW_LOG_H_892734908273498273498237

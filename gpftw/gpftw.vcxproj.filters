@@ -66,6 +66,12 @@
     <ClInclude Include="ftw_bitmap_target.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ftw_memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_auto_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ftw_ascii_display.cpp">

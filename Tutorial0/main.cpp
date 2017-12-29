@@ -5,6 +5,7 @@
 #include "ftw_frameinfo.h"
 #include "ftw_timer.h"
 #include "ftw_bitmap_target.h"
+#include "ftw_memory.h"
 
 #include <windows.h>    // for interacting with Windows
 
@@ -12,6 +13,10 @@ static constexpr	const uint32_t																	BMP_SCREEN_WIDTH							= 512;
 static constexpr	const uint32_t																	BMP_SCREEN_HEIGHT							= uint32_t(::BMP_SCREEN_WIDTH * (9.0 / 16.0));
 static constexpr	const uint32_t																	ASCII_SCREEN_WIDTH							= 132	;
 static constexpr	const uint32_t																	ASCII_SCREEN_HEIGHT							= 50	;
+
+struct STriangleMesh {
+
+};
 
 struct SInput {
 						uint8_t																			KeyboardPrevious	[256]					= {};

@@ -16,12 +16,13 @@ namespace ftw
 		// Constructors
 		inline constexpr											grid_view					()																			= default;
 		inline														grid_view					(_tElement* dataElements, uint32_t gridWidth, uint32_t gridHeight)			: Data(dataElements), Width(gridWidth), Height(gridHeight)	{
-			if(0 == dataElements && 0 != Width && 0 != Height)	// Crash if we received invalid parameters in order to prevent further malfunctioning.
-				throw(::std::exception("Invalid parameters."));
+			throw_if(0 == dataElements && 0 != Width && 0 != Height, ::std::exception(""), "Invalid parameters.");	// Crash if we received invalid parameters in order to prevent further malfunctioning.
 		}
+
 		// Operators
-							::ftw::array_view<_tElement>			operator[]					(uint32_t row)																{ if(0 == Data) throw(::std::exception("Uninitialized array pointer.")); if(row >= Height) throw(::std::exception("Invalid row.")); return ::ftw::array_view<_tElement			>(&Data[row*Width], Width); }
-							::ftw::array_view<const _tElement>		operator[]					(uint32_t row)														const	{ if(0 == Data) throw(::std::exception("Uninitialized array pointer.")); if(row >= Height) throw(::std::exception("Invalid row.")); return ::ftw::array_view<const _tElement	>(&Data[row*Width], Width); }
+							::ftw::array_view<_tElement>			operator[]					(uint32_t row)																{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Height, ::std::exception(""), "Invalid row."); return ::ftw::array_view<_tElement			>(&Data[row*Width], Width); }
+							::ftw::array_view<const _tElement>		operator[]					(uint32_t row)														const	{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Height, ::std::exception(""), "Invalid row."); return ::ftw::array_view<const _tElement	>(&Data[row*Width], Width); }
+
 		// Methods
 		inline constexpr	const _tElement*						begin						()																	const	{ return Data;						}
 		inline constexpr	const _tElement*						end							()																	const	{ return Data + size();				}

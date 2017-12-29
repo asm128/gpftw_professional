@@ -20,9 +20,6 @@ namespace ftw
 	template<typename _tNumber>	
 	static inline constexpr	_tNumber				clamp				(const _tNumber _value, const _tNumber _min, const _tNumber _max)			noexcept	{ return ::ftw::min(_max, ::ftw::max(_min, _value));	}
 
-	template<typename _tValue>	
-	static inline constexpr	bool					in_range			(const _tValue& value, const _tValue& minValue, const _tValue& maxValue)				{ return value < maxValue && value > minValue; }
-
 	struct					SPairSinCos				{ double Sin, Cos; };	
 
 	static inline			SPairSinCos				getSinCos			(double theta)																noexcept	{ return {sin(theta), cos(theta)};						}

@@ -172,6 +172,7 @@
     <ClInclude Include="ftw_ascii_color.h" />
     <ClInclude Include="ftw_ascii_display.h" />
     <ClInclude Include="ftw_ascii_target.h" />
+    <ClInclude Include="ftw_auto_handler.h" />
     <ClInclude Include="ftw_bitmap_target.h" />
     <ClInclude Include="ftw_color.h" />
     <ClInclude Include="ftw_coord.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="ftw_grid_view.h" />
     <ClInclude Include="ftw_log.h" />
     <ClInclude Include="ftw_math.h" />
+    <ClInclude Include="ftw_memory.h" />
     <ClInclude Include="ftw_platform.h" />
     <ClInclude Include="ftw_timer.h" />
     <ClInclude Include="ftw_typeint.h" />
