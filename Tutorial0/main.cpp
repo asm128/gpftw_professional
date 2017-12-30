@@ -207,7 +207,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 		void																						updateMainWindow							(::SApplication& applicationInstance)											{ 
 	::MSG																									msg											= {};
 	while(::PeekMessage(&msg, applicationInstance.MainWindow.PlatformDetail.WindowHandle, 0, 0, PM_REMOVE)) {
-		::TranslateMessage(&msg);
+		::TranslateMessage	(&msg);
 		::DispatchMessage	(&msg);
 		if(msg.message == WM_QUIT) {
 			applicationInstance.MainWindow.PlatformDetail.WindowHandle											= 0;
