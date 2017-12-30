@@ -28,7 +28,7 @@ namespace cho
 		base_debug_print(customDynamicString, (int)stringLength);
 		base_debug_print("\n", 1);
 		if(2 >= severity)
-			_cho_print_system_errors(prefix, prefixLength);
+			::cho::_cho_print_system_errors(prefix, prefixLength);
 	}
 }
 
@@ -165,6 +165,7 @@ namespace cho
 			success_printf("%s: Success (0x%X).", #nwo_call, errCall);																												\
 		}																																											\
 	} while(0)
+
 // Propagable retval_error error-warning call.
 #	define cho_pewcall(nwo_call, ...) do {																																			\
 		if(::cho::error_t errCall = (nwo_call)) { 																																	\

@@ -17,7 +17,7 @@ struct SApplication {
 						::cho::STimer																	Timer										= {};
 						::cho::SFrameInfo																FrameInfo									= {};
 						::cho::SASCIITarget																ASCIIRenderTarget							= {};
-						::cho::SPalette																	Palette										= 
+						::cho::SPalette																	ASCIIPalette								= 
 		{	(uint32_t)::cho::ASCII_COLOR_INDEX_0		
 		,	(uint32_t)::cho::ASCII_COLOR_INDEX_1 	
 		,	(uint32_t)::cho::ASCII_COLOR_INDEX_2 	

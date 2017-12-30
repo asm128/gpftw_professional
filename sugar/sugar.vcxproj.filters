@@ -28,36 +28,21 @@
     <Filter Include="runtime">
       <UniqueIdentifier>{238a39fb-d947-415e-980b-c1ef977cee58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pointer">
+      <UniqueIdentifier>{3fc2a0de-914a-4be2-8f9d-37c7abc16dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="display">
+      <UniqueIdentifier>{a42367d1-7d77-4311-a11e-61e84f0b4af7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="time">
+      <UniqueIdentifier>{525b3a0d-4d27-420f-bffd-801c1051b894}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cho_ascii_display.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_auto_handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_display.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cho_eval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cho_frameinfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cho_input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_ptr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_size.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_sync.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cho_error.h">
@@ -108,8 +93,32 @@
     <ClInclude Include="cho_color.h">
       <Filter>raster</Filter>
     </ClInclude>
+    <ClInclude Include="cho_ptr.h">
+      <Filter>pointer</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_ascii_display.h">
+      <Filter>display</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_display.h">
+      <Filter>display</Filter>
+    </ClInclude>
     <ClInclude Include="cho_debug.h">
-      <Filter>Header Files</Filter>
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_size.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_timer.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_frameinfo.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_sync.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_auto_handler.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -120,10 +129,10 @@
       <Filter>raster</Filter>
     </ClCompile>
     <ClCompile Include="cho_ascii_display.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>display</Filter>
     </ClCompile>
     <ClCompile Include="cho_timer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>time</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
