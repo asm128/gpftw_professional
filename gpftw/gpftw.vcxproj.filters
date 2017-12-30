@@ -72,6 +72,12 @@
     <ClInclude Include="ftw_auto_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ftw_app_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_runtime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ftw_ascii_display.cpp">

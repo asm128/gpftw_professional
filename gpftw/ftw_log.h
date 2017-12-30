@@ -32,12 +32,12 @@ namespace ftw
 	}
 }
 
-#define debug_printf(severity, severityStr, format, ...)																															\
-	do { 																																											\
-		static constexpr const char												prefixFormat	[]					= ":%u:" severityStr ":" __FILE__ "(%u): ";						\
-		static char																prefixString	[512]				= {}; 															\
-		static const int 														prefixLength						= ::sprintf_s(prefixString, prefixFormat, severity, __LINE__);	\
-		::ftw::_ftw_debug_printf(severity, prefixString, prefixLength == -1 ? 0 : prefixLength, format, __VA_ARGS__);													\
+#define debug_printf(severity, severityStr, format, ...)																																	\
+	do { 																																													\
+		static constexpr const char												prefixFormat	[]							= ":%u:" severityStr ":" __FILE__ "(%u){" __FUNCTION__ "}:";	\
+		static char																prefixString	[sizeof(prefixFormat) + 8]	= {}; 															\
+		static const int 														prefixLength								= ::sprintf_s(prefixString, prefixFormat, severity, __LINE__);	\
+		::ftw::_ftw_debug_printf(severity, prefixString, prefixLength == -1 ? 0 : prefixLength, format, __VA_ARGS__);																		\
 	} while(0)
 
 #if !defined FTW_USE_DEBUG_BREAK_ON_ERROR_LOG
@@ -72,8 +72,8 @@ namespace ftw
 #define continue_info_if(condition, format, ...)				if(condition) { info_printf		(format, __VA_ARGS__); continue;		}
 
 #define retval_error_if(retVal, condition, format, ...)			if(condition) { error_printf	(format, __VA_ARGS__); return retVal;	}
-#define retval_warn_if(retVal, condition, format, ...)			if(condition) { error_printf	(format, __VA_ARGS__); return retVal;	}
-#define retval_info_if(retVal, condition, format, ...)			if(condition) { error_printf	(format, __VA_ARGS__); return retVal;	}
+#define retval_warn_if(retVal, condition, format, ...)			if(condition) { warning_printf	(format, __VA_ARGS__); return retVal;	}
+#define retval_info_if(retVal, condition, format, ...)			if(condition) { info_printf		(format, __VA_ARGS__); return retVal;	}
 
 #define retnul_error_if(condition, format, ...)					retval_error_if	(0, condition, format, __VA_ARGS__)
 #define retnul_warn_if(condition, format, ...)					retval_warn_if	(0, condition, format, __VA_ARGS__)

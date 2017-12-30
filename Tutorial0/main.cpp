@@ -6,8 +6,7 @@
 #include "ftw_timer.h"
 #include "ftw_bitmap_target.h"
 #include "ftw_array.h"
-
-#include <windows.h>    // for interacting with Windows
+#include "ftw_app_impl.h"
 
 static constexpr	const uint32_t																	BMP_SCREEN_WIDTH							= 512;
 static constexpr	const uint32_t																	BMP_SCREEN_HEIGHT							= uint32_t(::BMP_SCREEN_WIDTH * (9.0 / 16.0));
@@ -23,12 +22,6 @@ struct SInput {
 						uint8_t																			KeyboardCurrent		[256]					= {};
 };
 
-struct SRuntimeValues {
-						::HINSTANCE																		hInstance									= {}; 
-						::HINSTANCE																		hPrevInstance								= {}; 
-						::LPSTR																			lpCmdLine									= {}; 
-						::INT																			nShowCmd									= {}; 
-};
 
 struct SDisplayPlatformDetail {
 						::HWND																			WindowHandle								= {};
@@ -49,7 +42,7 @@ struct SDisplay {
 struct SApplication {
 						::SDisplay																		MainWindow									= {};
 						::ftw::array_pod<::ftw::SColorBGRA>												BitmapOffsceen								= {};
-						::SRuntimeValues																RuntimeValues								= {};
+						::ftw::SRuntimeValues															RuntimeValues								= {};
 						::SInput																		SystemInput									= {};
 						::ftw::STimer																	Timer										= {};
 						::ftw::SFrameInfo																FrameInfo									= {};
@@ -74,10 +67,17 @@ struct SApplication {
 		,	(uint32_t)::ftw::ASCII_COLOR_INDEX_15	
 		};
 
-																										SApplication								(SRuntimeValues& runtimeValues)													: RuntimeValues(runtimeValues) {}
+																										SApplication								(::ftw::SRuntimeValues& runtimeValues)											: RuntimeValues(runtimeValues) {}
 };
-	
-static	::SApplication																				* g_ApplicationInstance						= 0;
+
+					::ftw::error_t																	setup										(::SApplication& applicationInstance);
+					::ftw::error_t																	cleanup										(::SApplication& applicationInstance);
+					::ftw::error_t																	update										(::SApplication& applicationInstance);
+					::ftw::error_t																	draw										(::SApplication& applicationInstance);
+
+FTW_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
+
+static				::SApplication																	* g_ApplicationInstance						= 0;
 
 struct SOffscreenPlatformDetail {
 	uint32_t																							BitmapInfoSize								= 0;
@@ -115,19 +115,9 @@ struct SOffscreenPlatformDetail {
 	offscreenDetail.IntermediateDeviceContext															= ::CreateCompatibleDC(hdc);    // <- note, we're creating, so it needs to be destroyed
 	char																									* ppvBits									= 0;
 	offscreenDetail.IntermediateBitmap																	= ::CreateDIBSection(offscreenDetail.IntermediateDeviceContext, offscreenDetail.BitmapInfo, DIB_RGB_COLORS, (void**) &ppvBits, NULL, 0);
-	if(0 == ::SetDIBits(NULL, offscreenDetail.IntermediateBitmap, 0, height, offscreenDetail.BitmapInfo->bmiColors, offscreenDetail.BitmapInfo, DIB_RGB_COLORS)) {
-		OutputDebugString("Cannot copy bits into dib section.\n");
-		return -1;
-	}
+	reterr_error_if(0 == ::SetDIBits(NULL, offscreenDetail.IntermediateBitmap, 0, height, offscreenDetail.BitmapInfo->bmiColors, offscreenDetail.BitmapInfo, DIB_RGB_COLORS), "Cannot copy bits into dib section.\n");
 	::HBITMAP																								hBmpOld										= (::HBITMAP)::SelectObject(offscreenDetail.IntermediateDeviceContext, offscreenDetail.IntermediateBitmap);    // <- altering state
-	if(FALSE == ::BitBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, SRCCOPY)) {
-		char																									buffer[256]									= {};
-		::sprintf_s(buffer, "error blitting bitmap: 0x%x.\n", ::GetLastError());
-		OutputDebugString(buffer);
-		::va_list																								arguments									= {};
-		::FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, 0, ::GetLastError(), 0, buffer, 256, &arguments);
-		OutputDebugString(buffer);
-	}
+	error_if(FALSE == ::BitBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, SRCCOPY), "Not sure why would this happen but probably due to mismanagement I've had it failing when I acquired the device too much and never released it.");
 
 	::SelectObject(hdc, hBmpOld);	// put the old bitmap back in the DC (restore state)
 	return 0;
@@ -138,29 +128,24 @@ struct SOffscreenPlatformDetail {
 	uint32_t																								linearScreenSize							= applicationInstance.MainWindow.Size.x * applicationInstance.MainWindow.Size.y;
 	if(bmpOffscreen.size() < linearScreenSize) {
 		bmpOffscreen.resize(linearScreenSize);
-		applicationInstance.BitmapRenderTarget.Colors														= {&bmpOffscreen[0], applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y};
+		//applicationInstance.BitmapRenderTarget.Colors														= {&bmpOffscreen[0], applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y};
 	}
-	if(applicationInstance.MainWindow.Resized) {
-		if(bmpOffscreen.size() < linearScreenSize)
-			bmpOffscreen.resize(linearScreenSize);
+	if(applicationInstance.MainWindow.Resized) 
 		applicationInstance.BitmapRenderTarget.Colors														= {&bmpOffscreen[0], applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y};
-	}
 }
 
-		void																						presentTarget								(::SApplication& applicationInstance)											{ 
+		::ftw::error_t																				presentTarget								(::SApplication& applicationInstance)											{ 
 	::HWND																									windowHandle								= applicationInstance.MainWindow.PlatformDetail.WindowHandle;
-	if(0 == windowHandle)
-		return;
+	retwarn_warn_if(0 == windowHandle, "presentTarget called without a valid window handle set for the main window.");
 	::HDC																									dc											= ::GetDC(windowHandle);
 	::ftw::array_pod<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	::drawBuffer(dc, applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y, &bmpOffscreen[0]);
 	::ReleaseDC(windowHandle, dc);
+	return 0;
 }
 
 static	::RECT																						minClientRect								= {100, 100, 100 + 320, 100 + 200};
 
-		void																						update										(::SApplication& applicationInstance);
-		void																						draw										(::SApplication& applicationInstance);
 		LRESULT WINAPI																				mainWndProc									(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)							{
 	::SApplication																							& applicationInstance						= *g_ApplicationInstance;
 	static	const int																						adjustedMinRect								= ::AdjustWindowRectEx(&minClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
@@ -174,7 +159,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 		return 0;
 	case WM_SIZE			: 
 		if(lParam) {
-			::ftw::SCoord2<int32_t>																				newMetrics									= ::ftw::SCoord2<WORD>{LOWORD(lParam), HIWORD(lParam)}.Cast<int32_t>();
+			::ftw::SCoord2<int32_t>																					newMetrics									= ::ftw::SCoord2<WORD>{LOWORD(lParam), HIWORD(lParam)}.Cast<int32_t>();
 			if(newMetrics != applicationInstance.MainWindow.Size.Cast<int32_t>()) {
 				applicationInstance.MainWindow.Size																	= newMetrics.Cast<uint32_t>();
 				applicationInstance.MainWindow.Resized																= true;
@@ -233,20 +218,21 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 }
 
 // --- Cleanup application resources.
-		void																						cleanup										(::SApplication& applicationInstance)											{ 
-	SDisplayPlatformDetail																					& displayDetail								= applicationInstance.MainWindow.PlatformDetail;
+					::ftw::error_t																	cleanup										(::SApplication& applicationInstance)											{ 
+	::SDisplayPlatformDetail																				& displayDetail								= applicationInstance.MainWindow.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		::DestroyWindow(displayDetail.WindowHandle);
 		::updateMainWindow(applicationInstance);
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
-	::ftw::asciiDisplayDestroy	();
-	::ftw::asciiTargetDestroy	(applicationInstance.ASCIIRenderTarget);
+	error_if(errored(::ftw::asciiDisplayDestroy	()), "Failed to close ASCII display!");
+	error_if(errored(::ftw::asciiTargetDestroy	(applicationInstance.ASCIIRenderTarget)), "No known reasons for this to fail. It may mean a mismamagement of the target array pointers!");
 	g_ApplicationInstance																				= 0;
+	return 0;
 }
 
 // --- Initialize console.
-		void																						setup										(::SApplication& applicationInstance)											{ 
+					::ftw::error_t																	setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance																				= &applicationInstance;
 	::ftw::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT);
 	::ftw::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height());
@@ -268,24 +254,27 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 		);
 	::ShowWindow	(displayDetail.WindowHandle, SW_SHOW);
 	::UpdateWindow	(displayDetail.WindowHandle);
+	return 0;
 }
 
-		void																						update										(::SApplication& applicationInstance)											{ 
-	::ftw::asciiDisplayPresent(applicationInstance.ASCIIRenderTarget);
-	::ftw::asciiTargetClear(applicationInstance.ASCIIRenderTarget);
+					::ftw::error_t																	update										(::SApplication& applicationInstance)											{ 
+	error_if(errored(::ftw::asciiDisplayPresent	(applicationInstance.ASCIIRenderTarget)), "Could this fail if the console isn't properly initialized?");
+	error_if(errored(::ftw::asciiTargetClear	(applicationInstance.ASCIIRenderTarget)), "This shouldn't fail either unless memory corruption happened.");
 	applicationInstance.Timer		.Frame();
 	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
-	::updateMainWindow	(applicationInstance);
 	::updateOffscreen	(applicationInstance);
-	::presentTarget		(applicationInstance);
+	::updateMainWindow	(applicationInstance);
+	retval_info_if(1, 0 == applicationInstance.MainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
+	error_if(errored(::presentTarget(applicationInstance)), "Unknown error.");
 	char																									buffer		[256]							= {};
 	const ::SDisplay																						& mainWindow								= applicationInstance.MainWindow;
 	sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.Timer.LastTimeSeconds);
 	::HWND																									windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
+	return 0;
 }
 
-		void																						draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+					::ftw::error_t																	draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	const ::SDisplay																						& mainWindow								= applicationInstance.MainWindow;
 	::memset(&applicationInstance.BitmapRenderTarget.Colors[0][0], 0, sizeof(::ftw::SColorBGRA) * applicationInstance.BitmapRenderTarget.Colors.size());
 	::ftw::array_pod<::ftw::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
@@ -305,45 +294,5 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	::ftw::drawLine			(bmpTarget, ::ftw::SColorRGBA(applicationInstance.Palette[::ftw::ASCII_COLOR_MAGENTA	]), ::ftw::SLine2D<int32_t>{geometry2.A, geometry2.B});
 	::ftw::drawLine			(bmpTarget, ::ftw::SColorRGBA(applicationInstance.Palette[::ftw::ASCII_COLOR_WHITE		]), ::ftw::SLine2D<int32_t>{geometry2.B, geometry2.C});
 	::ftw::drawLine			(bmpTarget, ::ftw::SColorRGBA(applicationInstance.Palette[::ftw::ASCII_COLOR_LIGHTGREY	]), ::ftw::SLine2D<int32_t>{geometry2.C, geometry2.A});
-}
-
-		int																							rtMain										(::SRuntimeValues& runtimeValues)													{
-	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);
-	::SApplication																							* applicationInstance						= new ::SApplication(runtimeValues);		// Create a new instance of our application.
-	if(0 == applicationInstance)
-		return -1;	// return error because we couldn't allocate the main instance of our application.
-
-	::setup(*applicationInstance);	// Call setup()
-
-	while(true) {	// Execute code between braces while the condition inside () evaluates to true.
-		::update	(*applicationInstance);		// Update frame.
-		::draw		(*applicationInstance);		// Render frame.
-		if(::GetAsyncKeyState(VK_ESCAPE))		// Check for escape key pressed.
-			break;								// Exit while() loop.
-	}
-
-	::cleanup(*applicationInstance);
-	delete(applicationInstance);	// Destroy the applcation instance and release its memory.
 	return 0;
-}
-
-		int																							main										()																					{
-	::SRuntimeValues																						runtimeValues								= {GetModuleHandle(NULL), 0, 0, SW_SHOW};
-	return ::ftw::failed(::rtMain(runtimeValues)) ? EXIT_FAILURE : EXIT_SUCCESS;	// just redirect to our generic main() function.		
-}
-
-		int	WINAPI																					WinMain										
-	(	_In_		::HINSTANCE		hInstance
-	,	_In_opt_	::HINSTANCE		hPrevInstance
-	,	_In_		::LPSTR			lpCmdLine
-	,	_In_		::INT			nShowCmd
-	)
-{
-	::SRuntimeValues																						runtimeValues								= 
-		{	hInstance
-		,	hPrevInstance
-		,	lpCmdLine
-		,	nShowCmd
-		};
-	return ::ftw::failed(::rtMain(runtimeValues)) ? EXIT_FAILURE : EXIT_SUCCESS;	// just redirect to our generic main() function.
 }

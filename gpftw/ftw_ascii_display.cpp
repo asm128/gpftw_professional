@@ -147,10 +147,7 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 }
 
 					::ftw::error_t						ftw::asciiDisplayDestroy						()																										{ 
-	if(false == g_ConsoleInfo.Created) {
-		 OutputDebugString(TEXT("Redundant destruction of system console."));
-		 return 1;
-	}
+	retwarn_warn_if(false == g_ConsoleInfo.Created, "Redundant destruction of system console.");
 	::SetConsoleCtrlHandler(::handlerConsoleRoutine, FALSE);
 	const ::HANDLE												hConsoleOut										= ::GetStdHandle( STD_OUTPUT_HANDLE );
 	::SetCurrentConsoleFontEx		(hConsoleOut, FALSE, &g_ConsoleInfo.InfoFontOriginal	);
@@ -167,7 +164,7 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 }
 
 					::ftw::error_t						ftw::asciiDisplayCreate							(uint32_t frontBufferWidth, uint32_t frontBufferHeight)													{
-	bool														createdConsole = (FALSE == ::AllocConsole()) ? false : true;
+	bool														createdConsole										= (FALSE == ::AllocConsole()) ? false : true;
 	if(createdConsole)
 		::AttachConsole(::GetCurrentProcessId());
 
@@ -189,9 +186,9 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 		stream													= 0; ::freopen_s(&stream, "CONIN$", "r+", stdin);
 	}
 
-	SetConsoleTitle("ASCII Console FTW");
+	SetConsoleTitle(TEXT("ASCII Console FTW"));
 	::SetConsoleCtrlHandler(::handlerConsoleRoutine, TRUE);
-	const HANDLE												hConsoleOut										= ::GetStdHandle( STD_OUTPUT_HANDLE );
+	const HANDLE												hConsoleOut										= ::GetStdHandle(STD_OUTPUT_HANDLE);
 	::GetCurrentConsoleFontEx		( hConsoleOut, TRUE	, &g_ConsoleInfo.InfoFontOriginal			);
 	::GetConsoleScreenBufferInfoEx	( hConsoleOut		, &g_ConsoleInfo.InfoScreenBufferOriginal	);
 	g_ConsoleInfo.InfoFontCurrent							= g_ConsoleInfo.InfoFontOriginal			;

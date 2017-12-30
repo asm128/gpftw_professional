@@ -167,6 +167,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ftw_app_impl.h" />
     <ClInclude Include="ftw_array.h" />
     <ClInclude Include="ftw_array_view.h" />
     <ClInclude Include="ftw_ascii_color.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="ftw_math.h" />
     <ClInclude Include="ftw_memory.h" />
     <ClInclude Include="ftw_platform.h" />
+    <ClInclude Include="ftw_runtime.h" />
     <ClInclude Include="ftw_timer.h" />
     <ClInclude Include="ftw_typeint.h" />
     <ClInclude Include="ftw_error.h" />
