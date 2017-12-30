@@ -1,11 +1,11 @@
-#include "ftw_typeint.h"
+#include "cho_typeint.h"
 
 #include <cmath>
 
 #ifndef FTW_MATH_H_0237409283740982740928374
 #define FTW_MATH_H_0237409283740982740928374
 
-namespace ftw
+namespace cho
 {
 #pragma pack(push, 1)	// You can read about pragma pack() here: https://www.google.com/search?q=pragma+pack
 	static					const double			math_pi				= 3.1415926535897932384626433832795;	// Pi
@@ -18,7 +18,7 @@ namespace ftw
 	static inline constexpr	double					sqrt_safe			(_tNumber _valueSquared)													noexcept	{ return _valueSquared ? sqrt(_valueSquared) : 0;		}
 	
 	template<typename _tNumber>	
-	static inline constexpr	_tNumber				clamp				(const _tNumber _value, const _tNumber _min, const _tNumber _max)			noexcept	{ return ::ftw::min(_max, ::ftw::max(_min, _value));	}
+	static inline constexpr	_tNumber				clamp				(const _tNumber _value, const _tNumber _min, const _tNumber _max)			noexcept	{ return ::cho::min(_max, ::cho::max(_min, _value));	}
 
 	struct					SPairSinCos				{ double Sin, Cos; };	
 

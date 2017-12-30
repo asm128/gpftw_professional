@@ -1,8 +1,8 @@
 /// Copyright 2010-2017 - asm128
-#include "ftw_eval.h"
+#include "cho_eval.h"
 #include <malloc.h>
-//#include "ftw_safe.h"
-#include "ftw_auto_handler.h"
+//#include "cho_safe.h"
+#include "cho_auto_handler.h"
 
 #ifndef FTW_MEMORY_H__92836409283642038462309846
 #define FTW_MEMORY_H__92836409283642038462309846
@@ -23,24 +23,24 @@
 #define calc_align_address_32(address)		calc_align_address(32, address)	// (0x20 - (0x1F & (uintptr_t)address) & 0x1F)
 #define calc_align_address_64(address)		calc_align_address(64, address)	// (0x40 - (0x3F & (uintptr_t)address) & 0x3F)
 
-namespace ftw
+namespace cho
 {
 #if defined(FTW_WINDOWS)
-	static inline void*																			ftw_malloc					(size_t size)													{ return _aligned_malloc(size, NWOL_MALLOC_CUSTOM_ALIGN);	}
-	static inline void																			ftw_free					(void* ptr)														{ _aligned_free(ptr);										}
+	static inline void*																			cho_malloc					(size_t size)													{ return _aligned_malloc(size, NWOL_MALLOC_CUSTOM_ALIGN);	}
+	static inline void																			cho_free					(void* ptr)														{ _aligned_free(ptr);										}
 #elif defined(FTW_LINUX) || defined(FTW_ANDROID)
-	static inline void*																			ftw_malloc					(size_t size)													{ return ::memalign(NWOL_MALLOC_CUSTOM_ALIGN, size);		}
-	static inline void																			ftw_free					(void* ptr)														{ ::free(ptr);												}
+	static inline void*																			cho_malloc					(size_t size)													{ return ::memalign(NWOL_MALLOC_CUSTOM_ALIGN, size);		}
+	static inline void																			cho_free					(void* ptr)														{ ::free(ptr);												}
 #endif
 
 	template<typename _typePtr>
-	static inline void																			safe_ftw_free				(_typePtr &p)													{ 
+	static inline void																			safe_cho_free				(_typePtr &p)													{ 
 		_typePtr																						_pepe						= p; 
 		p																							= 0; 
 		_aligned_free(_pepe);
 	}
 
-	struct auto_ftw_free : public ::ftw::auto_handler<void*, 0>					{ using TWrapper::auto_handler; inline ~auto_ftw_free() { close(); } inline void close() { safe_ftw_free(Handle); } };
+	struct auto_cho_free : public ::cho::auto_handler<void*, 0>					{ using TWrapper::auto_handler; inline ~auto_cho_free() { close(); } inline void close() { safe_cho_free(Handle); } };
 
 #define GREF_PAGE_SIZE_MAX (4096)
 	template<typename _tBase>	static inline constexpr		uint32_t							get_page_size				()													noexcept	{ return (uint32_t)(sizeof(_tBase) <= GREF_PAGE_SIZE_MAX) ? GREF_PAGE_SIZE_MAX/sizeof(_tBase) : 1; };

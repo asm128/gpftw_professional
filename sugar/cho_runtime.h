@@ -1,4 +1,4 @@
-#include "ftw_platform.h"
+#include "cho_platform.h"
 #if defined(FTW_WINDOWS)
 #	include <minwindef.h>
 #endif
@@ -6,7 +6,7 @@
 #ifndef FTW_RUNTIME_H_28903749028374
 #define FTW_RUNTIME_H_28903749028374
 
-namespace ftw 
+namespace cho 
 {
 	struct SRuntimeValues {
 #if defined(FTW_WINDOWS)

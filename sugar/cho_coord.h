@@ -1,9 +1,9 @@
-#include "ftw_math.h"
+#include "cho_math.h"
 
 #ifndef FTW_COORD_H_928374982364923322
 #define FTW_COORD_H_928374982364923322
 
-namespace ftw 
+namespace cho 
 {
 #pragma pack(push, 1)	// You can read about pragma pack() here: https://www.google.com/search?q=pragma+pack
 	template<typename _tBase>
@@ -36,7 +36,7 @@ namespace ftw
 		template<typename _t>
 		constexpr inline										SCoord2<_t>				Cast					()																	const	noexcept	{ return {(_t)x, (_t)y};																								}
 		inline													TCoord2&				Scale					(double scalar)																noexcept	{ return *this *= scalar;																								}
-		inline													TCoord2&				Normalize				()																						{ const _tBase sqLen = LengthSquared(); return (sqLen) ? *this /= ::ftw::sqrt_safe(sqLen) : *this;						}
+		inline													TCoord2&				Normalize				()																						{ const _tBase sqLen = LengthSquared(); return (sqLen) ? *this /= ::cho::sqrt_safe(sqLen) : *this;						}
 		constexpr												double					Dot						(const TCoord2& other)												const	noexcept	{ return x * other.x + y * other.y;																						}
 		constexpr												_tBase					LengthSquared			()																	const	noexcept	{ return x * x + y * y;																									}
 		constexpr												double					Length					()																	const				{ const _tBase sqLen = LengthSquared(); return sqLen ? ::sqrt(sqLen) : 0;												}
@@ -46,7 +46,7 @@ namespace ftw
 			y																				+= vectorToScaleAndAdd.y * scale;
 		}
 																TCoord2&				Rotate					(double theta)																			{
-			const ::ftw::SPairSinCos															pairSinCos				= ::ftw::getSinCos(theta);
+			const ::cho::SPairSinCos															pairSinCos				= ::cho::getSinCos(theta);
 			const double																		px						= x * pairSinCos.Cos - y * pairSinCos.Sin; 
 
 			y																				= (_tBase)(x * pairSinCos.Sin + y * pairSinCos.Cos);
@@ -72,7 +72,7 @@ namespace ftw
 	template<typename _tElement>	static inline constexpr	_tElement				rise					(const SLine2D<_tElement>& line)											noexcept	{ return line.B.y - line.A.y;		}
 	template<typename _tElement>	static inline constexpr	_tElement				run						(const SLine2D<_tElement>& line)											noexcept	{ return line.B.x - line.A.x;		}
 	template<typename _tElement>	static inline constexpr	_tElement				slope					(const SLine2D<_tElement>& line)											noexcept	{ return rise(line) / run(line);	}
-	template<typename _tElement>	static inline constexpr	_tElement				orient2d				(const ::ftw::SLine2D<_tElement>& segment, const ::ftw::SCoord2<_tElement>& point)	{ return (segment.B.x - segment.A.x) * (point.y - segment.A.y) - (segment.B.y - segment.A.y) * (point.x - segment.A.x); }
+	template<typename _tElement>	static inline constexpr	_tElement				orient2d				(const ::cho::SLine2D<_tElement>& segment, const ::cho::SCoord2<_tElement>& point)	{ return (segment.B.x - segment.A.x) * (point.y - segment.A.y) - (segment.B.y - segment.A.y) * (point.x - segment.A.x); }
 
 	// ---- Collision
 	template<typename _tElement>	static					bool					raySegmentIntersect		(SCoord2<_tElement> r_d, SCoord2<_tElement> r_p, SCoord2<_tElement> s_d, SCoord2<_tElement> s_p)								{
@@ -88,7 +88,7 @@ namespace ftw
 	}
 
 	// Returns the volume of a sphere. This is used to calculate how to recurse into the bounding volume tree. For a bounding sphere it is a simple calculation.
-	template<typename _tElement>	static					double					sphereSize				(const SSphere2D<_tElement> &sphere)										noexcept	{ return 1.3333333333333333 * ::ftw::math_pi * sphere.Radius * sphere.Radius * sphere.Radius; }
+	template<typename _tElement>	static					double					sphereSize				(const SSphere2D<_tElement> &sphere)										noexcept	{ return 1.3333333333333333 * ::cho::math_pi * sphere.Radius * sphere.Radius * sphere.Radius; }
 }
 
 #endif // FTW_COORD_H_928374982364923322

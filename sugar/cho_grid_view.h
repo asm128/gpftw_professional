@@ -1,9 +1,9 @@
-#include "ftw_array_view.h"		// for ftw::array_view<>
+#include "cho_array_view.h"		// for cho::array_view<>
 
 #ifndef FTW_GRID_VIEW_H_3423423
 #define FTW_GRID_VIEW_H_3423423
 
-namespace ftw
+namespace cho
 {
 #pragma pack(push, 1)
 	template <typename _tElement>
@@ -21,8 +21,8 @@ namespace ftw
 		}
 
 		// Operators
-							::ftw::array_view<_tElement>			operator[]					(uint32_t row)																{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Height, ::std::exception(""), "Invalid row."); return ::ftw::array_view<_tElement			>(&Data[row*Width], Width); }
-							::ftw::array_view<const _tElement>		operator[]					(uint32_t row)														const	{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Height, ::std::exception(""), "Invalid row."); return ::ftw::array_view<const _tElement	>(&Data[row*Width], Width); }
+							::cho::array_view<_tElement>			operator[]					(uint32_t row)																{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Height, ::std::exception(""), "Invalid row."); return ::cho::array_view<_tElement			>(&Data[row*Width], Width); }
+							::cho::array_view<const _tElement>		operator[]					(uint32_t row)														const	{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Height, ::std::exception(""), "Invalid row."); return ::cho::array_view<const _tElement	>(&Data[row*Width], Width); }
 
 		// Methods
 		inline constexpr	const _tElement*						begin						()																	const	{ return Data;						}

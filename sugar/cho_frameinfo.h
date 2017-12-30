@@ -3,7 +3,7 @@
 #ifndef FTW_FRAMEINFO_H_928374654
 #define FTW_FRAMEINFO_H_928374654
 
-namespace ftw
+namespace cho
 {
 	struct SFrameSeconds {
 				double															Total												;

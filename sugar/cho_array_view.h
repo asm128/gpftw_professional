@@ -1,12 +1,12 @@
-#include "ftw_log.h"
-#include "ftw_eval.h"
+#include "cho_log.h"
+#include "cho_eval.h"
 
 #include <exception>	// for ::std::exception
 
 #ifndef FTW_ARRAY_VIEW_H_2398472395543
 #define FTW_ARRAY_VIEW_H_2398472395543
 
-namespace ftw
+namespace cho
 {
 	template <typename _tElement>
 	class array_view {
@@ -25,7 +25,7 @@ namespace ftw
 		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount])									noexcept	: Data(_dataElements), Count(_elementCount)										{}
 
 		template <size_t _elementCount>
-		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)			noexcept	: Data(_dataElements), Count(::ftw::min(_elementCount, elementCount))			{}
+		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)			noexcept	: Data(_dataElements), Count(::cho::min(_elementCount, elementCount))			{}
 
 		// Operators
 							_tElement&				operator[]					(uint32_t index)																		{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(index >= Count, ::std::exception(""), "Invalid index."); return Data[index]; }

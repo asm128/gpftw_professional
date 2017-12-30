@@ -1,10 +1,11 @@
-#include "ftw_platform.h"
+#include "cho_platform.h"
+
 #include <cstdint>
 
 #ifndef FTW_TYPEINT_H_29873490827342
 #define FTW_TYPEINT_H_29873490827342
 
-namespace ftw
+namespace cho
 {
 	typedef signed char						schar_t	, sbyte_t	;
 	typedef char							char_t	, byte_t	;

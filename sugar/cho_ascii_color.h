@@ -1,9 +1,9 @@
-#include "ftw_typeint.h"	// for uint16_t and uint32_t 
+#include "cho_typeint.h"	// for uint16_t and uint32_t 
 
 #ifndef FTW_ASCII_COLOR_H_230487298374
 #define FTW_ASCII_COLOR_H_230487298374
 
-namespace ftw
+namespace cho
 {
 	// This type is used to represent the palette array of the ASCII console. Having : uint16_t here makes ASCII_COLOR_INDEX to have the same memory footprint as an unsigned short.
 	enum ASCII_COLOR_INDEX : uint32_t	

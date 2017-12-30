@@ -30,82 +30,97 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ftw_eval.h">
+    <ClInclude Include="cho_ascii_display.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_ascii_display.h">
+    <ClInclude Include="cho_auto_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_frameinfo.h">
+    <ClInclude Include="cho_display.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_timer.h">
+    <ClInclude Include="cho_eval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_auto_handler.h">
+    <ClInclude Include="cho_frameinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_error.h">
+    <ClInclude Include="cho_input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_size.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_sync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_error.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_log.h">
+    <ClInclude Include="cho_log.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_platform.h">
+    <ClInclude Include="cho_memory.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_typeint.h">
+    <ClInclude Include="cho_platform.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_array.h">
+    <ClInclude Include="cho_typeint.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_array.h">
       <Filter>container</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_array_view.h">
+    <ClInclude Include="cho_array_view.h">
       <Filter>container</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_grid_view.h">
+    <ClInclude Include="cho_grid_view.h">
       <Filter>container</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_ascii_target.h">
-      <Filter>raster</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_bitmap_target.h">
-      <Filter>raster</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_color.h">
-      <Filter>raster</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_coord.h">
+    <ClInclude Include="cho_coord.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_math.h">
+    <ClInclude Include="cho_math.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_ascii_color.h">
+    <ClInclude Include="cho_app_impl.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_runtime.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_ascii_color.h">
       <Filter>raster</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_memory.h">
-      <Filter>core</Filter>
+    <ClInclude Include="cho_ascii_target.h">
+      <Filter>raster</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_runtime.h">
-      <Filter>runtime</Filter>
+    <ClInclude Include="cho_bitmap_target.h">
+      <Filter>raster</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_app_impl.h">
-      <Filter>runtime</Filter>
+    <ClInclude Include="cho_color.h">
+      <Filter>raster</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ftw_ascii_display.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="cho_log.cpp">
+      <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="ftw_timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ftw_ascii_target.cpp">
+    <ClCompile Include="cho_ascii_target.cpp">
       <Filter>raster</Filter>
     </ClCompile>
-    <ClCompile Include="ftw_log.cpp">
-      <Filter>core</Filter>
+    <ClCompile Include="cho_ascii_display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cho_timer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -11,4 +11,6 @@
 #	define WIN32_LEAN_AND_MEAN
 #endif 
 
+#define FTW_MTSUPPORT
+
 #endif // FTW_PLATFORM_H_9028734982734

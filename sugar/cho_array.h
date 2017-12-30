@@ -1,10 +1,10 @@
-#include "ftw_array_view.h"
-#include "ftw_memory.h"
+#include "cho_array_view.h"
+#include "cho_memory.h"
 
 #ifndef FTW_ARRAY_H_29837498237498237429837
 #define FTW_ARRAY_H_29837498237498237429837
 
-namespace ftw 
+namespace cho 
 {
 	// Base for arrays that keeps track of its actual size.
 	template<typename _tBase>
@@ -20,8 +20,8 @@ namespace ftw
 							array_base<_tBase>&			operator =									(const array_base<_tBase>&		other)													= delete;
 							array_base<_tBase>&			operator =									(const array_base<_tBase>&&	other)														= delete;
 		// This helper method is used to prevent redundancies. It returns a safe integer of the same or a higher value than the one passed as argument.
-		inline constexpr	uint32_t					calc_reserve_size							(const uint32_t newSize)											const	noexcept	{ return ::ftw::max(newSize, newSize + ::ftw::max(newSize >> 1, 4U));						}
-		inline constexpr	uint32_t					calc_malloc_size							(const uint32_t newSize)											const	noexcept	{ return ::ftw::max(newSize*(uint32_t)sizeof(_tBase), Count*(uint32_t)sizeof(_tBase));	}
+		inline constexpr	uint32_t					calc_reserve_size							(const uint32_t newSize)											const	noexcept	{ return ::cho::max(newSize, newSize + ::cho::max(newSize >> 1, 4U));						}
+		inline constexpr	uint32_t					calc_malloc_size							(const uint32_t newSize)											const	noexcept	{ return ::cho::max(newSize*(uint32_t)sizeof(_tBase), Count*(uint32_t)sizeof(_tBase));	}
 	}; // array_base
 
 	// This class is optimized to contain POD instances and won't work for C++ objects that require calling constructors/destructors.
@@ -37,7 +37,7 @@ namespace ftw
 		using				_TVectorBase::				calc_malloc_size							;
 		using				_TVectorBase::				operator[]									;
 
-		inline											~array_pod									()																						{ safe_ftw_free(Data);		}
+		inline											~array_pod									()																						{ safe_cho_free(Data);		}
 		inline constexpr								array_pod									()																			noexcept	= default;
 		inline											array_pod									(uint32_t initialSize)																	{ resize(initialSize);		}
 		inline											array_pod									(array_pod<_tPOD>&& other)													noexcept	{
@@ -55,8 +55,8 @@ namespace ftw
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
 				else {
-					::ftw::auto_ftw_free								safeguard;
-					Data											= (_tPOD*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+					::cho::auto_cho_free								safeguard;
+					Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 						 throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize)
 					else throw_if(0 == other.Data	, "", "%s", "other.Data is null!")
 					else {
@@ -77,8 +77,8 @@ namespace ftw
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
 				else {
-					::ftw::auto_ftw_free								safeguard;
-					Data											= (_tPOD*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+					::cho::auto_cho_free								safeguard;
+					Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 						 throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize) 
 					else throw_if(0 == other.Data	, "", "%s", "other.Data is null!") 
 					else {
@@ -126,7 +126,7 @@ namespace ftw
 			const int32_t										newSize										= resize(requestedSize); 
 			ree_if(newSize != requestedSize, "Failed to resize array for appending.");
 
-			for(uint32_t i = 0, maxCount = ::ftw::min(chainLength, newSize - startIndex); i < maxCount; ++i)
+			for(uint32_t i = 0, maxCount = ::cho::min(chainLength, newSize - startIndex); i < maxCount; ++i)
 				Data[startIndex + i]							= chainToAppend[i];
 			return startIndex;
 		}
@@ -137,7 +137,7 @@ namespace ftw
 			int32_t												newCount									= resize(newSize);
 			ree_if(newCount != (int32_t)newSize, "Failed to resize array. Requested size: %u. Current size: %u (%u).", newCount, Count, Size);
 			for( int32_t i = oldCount; i < newCount; ++i )
-				::ftw::podcpy(&Data[i], &newValue);
+				::cho::podcpy(&Data[i], &newValue);
 			return newCount;			
 		}
 
@@ -149,13 +149,13 @@ namespace ftw
 				uint32_t											reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				::ftw::auto_ftw_free								safeguard;
-				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+				::cho::auto_cho_free								safeguard;
+				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, (uint32_t)Size);
 
 				_TArrayView											safe_data									= {newData, reserveSize};
 				if(oldData) {
-					for(uint32_t i = 0, count = ::ftw::min(newSize, oldCount); i<count; ++i)
+					for(uint32_t i = 0, count = ::cho::min(newSize, oldCount); i<count; ++i)
 						safe_data[i]									= operator[](i);
 				}
 				Size											= (uint32_t)reserveSize;
@@ -163,7 +163,7 @@ namespace ftw
 				Data											= newData;
 				safeguard.Handle								= 0;
 				if(oldData)
-					::ftw::ftw_free(oldData);
+					::cho::cho_free(oldData);
 			}
 			else
 				Count											= newSize;
@@ -180,21 +180,21 @@ namespace ftw
 				uint32_t											reserveSize									= calc_reserve_size(Count + 1);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				::ftw::auto_ftw_free								safeguard;
-				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+				::cho::auto_cho_free								safeguard;
+				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
 
 				_TArrayView											viewSafe									= {newData, Count+1};
-				for(uint32_t i = 0, maxCount = ::ftw::min(index, Count); i < maxCount; ++i)
+				for(uint32_t i = 0, maxCount = ::cho::min(index, Count); i < maxCount; ++i)
 					viewSafe[i]										= oldData[i];
 				viewSafe[index]									= newValue;
-				for(uint32_t i = index, maxCount = ::ftw::min(index + 1, Count); i < maxCount; ++i) 
+				for(uint32_t i = index, maxCount = ::cho::min(index + 1, Count); i < maxCount; ++i) 
 					viewSafe[i + 1]									= oldData[i];
 				Data											= newData;
 				safeguard.Handle								= 0;
 			}	
 			else {
-				for(int32_t i = (int32_t)::ftw::min(index, Count - 1), maxCount = (int32_t)index; i >= maxCount; --i) 
+				for(int32_t i = (int32_t)::cho::min(index, Count - 1), maxCount = (int32_t)index; i >= maxCount; --i) 
 					Data[i + 1]										= Data[i];
 
 				Data[index]										= newValue;
@@ -211,19 +211,19 @@ namespace ftw
 				uint32_t											newSize										= calc_reserve_size(Count + chainLength);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				::ftw::auto_ftw_free								safeguard;
-				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+				::cho::auto_cho_free								safeguard;
+				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
-				::ftw::array_view<_tPOD>							viewSafe									= {newData, newSize};
-				for(uint32_t i = 0					, maxCount = ::ftw::min(index, Count)				; i <	maxCount; ++i)	viewSafe[i			]	= oldData[i];
-				for(uint32_t i = 0					, maxCount = ::ftw::min(chainLength, newSize-index); i <	maxCount; ++i)	viewSafe[i + index	]	= chainToInsert[i];
-				for(uint32_t i = index + chainLength, maxCount = ::ftw::min(index + 1, Count)			; i <	maxCount; ++i)	viewSafe[i + 1		]	= oldData[i];
+				::cho::array_view<_tPOD>							viewSafe									= {newData, newSize};
+				for(uint32_t i = 0					, maxCount = ::cho::min(index, Count)				; i <	maxCount; ++i)	viewSafe[i			]	= oldData[i];
+				for(uint32_t i = 0					, maxCount = ::cho::min(chainLength, newSize-index); i <	maxCount; ++i)	viewSafe[i + index	]	= chainToInsert[i];
+				for(uint32_t i = index + chainLength, maxCount = ::cho::min(index + 1, Count)			; i <	maxCount; ++i)	viewSafe[i + 1		]	= oldData[i];
 				Data											= newData;
 				safeguard.Handle								= 0;
 			}	
 			else {	// no need to reallocate and copy, just shift rightmost elements and insert in-place
-				for(int32_t  i = (int32_t)::ftw::min(index, Count - 1), maxCount = (int32_t)index	; i >=	maxCount; --i)	Data[i + chainLength]	= Data[i];
-				for(uint32_t i = 0, maxCount = ::ftw::min(chainLength, Count - index)				; i <	maxCount; ++i)	Data[i + index		]	= chainToInsert[i];
+				for(int32_t  i = (int32_t)::cho::min(index, Count - 1), maxCount = (int32_t)index	; i >=	maxCount; --i)	Data[i + chainLength]	= Data[i];
+				for(uint32_t i = 0, maxCount = ::cho::min(chainLength, Count - index)				; i <	maxCount; ++i)	Data[i + index		]	= chainToInsert[i];
 			}
 			return Count += chainLength;
 		}
@@ -242,12 +242,12 @@ namespace ftw
 		// Returns the index of the argument if found or -1 if not.
 		inline				int32_t						find										(const _tPOD& valueToLookFor)										const				{
 			for(uint32_t i = 0; i < Count; ++i) 
-				if(0 == ::ftw::podcmp(&Data[i], &valueToLookFor))
+				if(0 == ::cho::podcmp(&Data[i], &valueToLookFor))
 					return i;
 			return -1;
 		}
 
-		inline				::ftw::error_t				read										(const byte_t* input, uint32_t* inout_bytesRead)										{
+		inline				::cho::error_t				read										(const byte_t* input, uint32_t* inout_bytesRead)										{
 			uint32_t											elementsToRead								= 0;
 			if(input) {
 				uint32_t											elementsToRead								= *(uint32_t*)input;
@@ -260,7 +260,7 @@ namespace ftw
 				return 0;
 			}
 
-			::ftw::array_view<_tPOD>							newStorage									= {(_tPOD*)::ftw::ftw_malloc(sizeof(_tPOD) * elementsToRead), elementsToRead};
+			::cho::array_view<_tPOD>							newStorage									= {(_tPOD*)::cho::cho_malloc(sizeof(_tPOD) * elementsToRead), elementsToRead};
 			ree_if(0 == newStorage.begin(), "Failed to allocate array for storing read elements.");
 			if(0 == input) {
 				for(uint32_t i = 0; i < Count; ++i) 
@@ -268,7 +268,7 @@ namespace ftw
 			}
 			else {
 				for(uint32_t i = 0; i < Count; ++i) {
-					::ftw::podcpy(&newStorage[i], input);
+					::cho::podcpy(&newStorage[i], input);
 					input											+= sizeof(_tPOD);
 					*inout_bytesRead								+= sizeof(_tPOD);
 				}
@@ -277,11 +277,11 @@ namespace ftw
 			Size											= elementsToRead;
 			_tPOD											* old											= Data;
 			Data											= newStorage.begin();
-			::ftw::safe_ftw_free(old);
+			::cho::safe_cho_free(old);
 			return 0;
 		}
 
-		inline				::ftw::error_t				write										(byte_t* input, uint32_t* inout_bytesWritten)						const				{
+		inline				::cho::error_t				write										(byte_t* input, uint32_t* inout_bytesWritten)						const				{
 			if(0 == input) {
 				inout_bytesWritten							+= sizeof(uint32_t) + sizeof(_tPOD) * Count;	// Just return the size required to store this.
 				return 0;
@@ -291,9 +291,9 @@ namespace ftw
 			input											+= sizeof(uint32_t);
 			*inout_bytesWritten								+= sizeof(uint32_t);
 
-			::ftw::array_view<_tPOD>							newStorage									= {input, Count};
+			::cho::array_view<_tPOD>							newStorage									= {input, Count};
 			for(uint32_t i = 0; i < Count; ++i) {
-				::ftw::podcpy(&newStorage[i], &Data[i]);
+				::cho::podcpy(&newStorage[i], &Data[i]);
 				input											+= sizeof(_tPOD);
 				*inout_bytesRead								+= sizeof(_tPOD);
 			}
@@ -316,7 +316,7 @@ namespace ftw
 		using											_TVectorBase::calc_malloc_size;
 		using											_TVectorBase::operator[];
 
-		inline											~array_obj									()																						{ for(uint32_t i = 0; i < Count; ++i) Data[i].~_tObj(); safe_ftw_free(Data); }	// dtor
+		inline											~array_obj									()																						{ for(uint32_t i = 0; i < Count; ++i) Data[i].~_tObj(); safe_cho_free(Data); }	// dtor
 		inline constexpr								array_obj									()																						= default;
 		inline											array_obj									(const uint32_t newSize)																{ throw_if(((int32_t)newSize) != resize(newSize), "", "%s", "Failed to resize array."); }
 		inline											array_obj									(array_obj<_tObj>&& other)													noexcept	{
@@ -334,8 +334,8 @@ namespace ftw
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				throw_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
 				else {
-					::ftw::auto_ftw_free								safeguard;
-					_tObj												* newData									= (_tObj*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+					::cho::auto_cho_free								safeguard;
+					_tObj												* newData									= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 						 throw_if(0 == newData		, "", "Failed to resize array. Requested size: %u. Current size: %u.", (uint32_t)newSize, (uint32_t)Size)
 					else throw_if(0 == other.Data	, "", "%s", "other.Data is null!")
 					else {
@@ -386,16 +386,16 @@ namespace ftw
 				uint32_t											reserveSize								= calc_reserve_size(Count+1);
 				uint32_t											mallocSize								= calc_malloc_size(reserveSize);
 				ree_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				::ftw::auto_ftw_free								safeguard;
-				_tObj												* newData								= (_tObj*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+				::cho::auto_cho_free								safeguard;
+				_tObj												* newData								= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(0 == newData, "Failed to allocate for inserting new element into array! current size: %u. new size: %u.", Size, mallocSize);
-				::ftw::array_view<_tObj>							viewSafe								= {newData, Count+1};
-				for(uint32_t i = 0, maxCount = ::ftw::min(index + 1, Count); i < maxCount; ++i) {
+				::cho::array_view<_tObj>							viewSafe								= {newData, Count+1};
+				for(uint32_t i = 0, maxCount = ::cho::min(index + 1, Count); i < maxCount; ++i) {
 					new (&viewSafe[i]) _tObj(oldData[i]);
 					oldData[i].~_tObj();
 				}
 				new (&viewSafe[index]) _tObj(newValue);
-				for(uint32_t i = index, maxCount = ::ftw::min(index + 1, Count); i < maxCount; ++i) {
+				for(uint32_t i = index, maxCount = ::cho::min(index + 1, Count); i < maxCount; ++i) {
 					new (&viewSafe[i + 1]) _tObj(oldData[i]);
 					oldData[i].~_tObj();
 				}
@@ -404,7 +404,7 @@ namespace ftw
 				safeguard.Handle								= 0;
 			}	
 			else {
-				for(int32_t i = (int32_t)::ftw::min(index, Count - 1), maxCount = (int32_t)index; i >= maxCount; --i) {
+				for(int32_t i = (int32_t)::cho::min(index, Count - 1), maxCount = (int32_t)index; i >= maxCount; --i) {
 					new (&Data[i + 1]) _tObj(Data[i]);
 					Data[i].~_tObj();
 				}
@@ -421,11 +421,11 @@ namespace ftw
 				uint32_t											reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
 				ree_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				::ftw::auto_ftw_free								safeguard;
-				_tObj												* newData									= (_tObj*)(safeguard.Handle = ::ftw::ftw_malloc(mallocSize));
+				::cho::auto_cho_free								safeguard;
+				_tObj												* newData									= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, Size)
 				if(oldData) {
-					for(uint32_t i = 0, copyCount = ::ftw::min(oldCount, newSize); i < copyCount; ++i)
+					for(uint32_t i = 0, copyCount = ::cho::min(oldCount, newSize); i < copyCount; ++i)
 						new (&newData[i]) _tObj(oldData[i]);
 					for(uint32_t i = 0; i < oldCount; ++i)
 						oldData[i].~_tObj();
@@ -435,7 +435,7 @@ namespace ftw
 				Count											= (uint32_t)newSize;
 				safeguard.Handle								= 0;
 				if(oldData) 
-					::ftw::ftw_free(oldData);
+					::cho::cho_free(oldData);
 			}
 			else {
 				for(int32_t i = ((int32_t)oldCount) - 1, newCount = (int32_t)newSize; i >= newCount; --i)	// we need to cast to int32_t because otherwise --i	will underflow to UINT_MAX and loop forever.

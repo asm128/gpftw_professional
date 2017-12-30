@@ -1,13 +1,13 @@
-#include <cstdint>	// for int64_t
+#include "cho_typeint.h"	// for int64_t
 
-#ifndef GPFTW_TIMER_H_2983740982374092837492384
-#define GPFTW_TIMER_H_2983740982374092837492384
+#ifndef FTW_TIMER_H_29837409823740928987652132
+#define FTW_TIMER_H_29837409823740928987652132
 
-namespace ftw	// 
+namespace cho	// 
 {
 	struct STimer {
-		double						LastTimeSeconds;		// This variable is set by Frame() or Reset() and holds the time difference in seconds between a Frame() call and the next.
-		uint64_t					LastTimeMicroseconds;	// This variable is set by Frame() or Reset() and holds the time difference in seconds between a Frame() call and the next.
+		double						LastTimeSeconds					= 0;	// This variable is set by Frame() or Reset() and holds the time difference in seconds between a Frame() call and the next.
+		uint64_t					LastTimeMicroseconds			= 0;	// This variable is set by Frame() or Reset() and holds the time difference in seconds between a Frame() call and the next.
 		
 									STimer							()						{ Reset(); }		// STimer constructor. This function/method executes when we create an instance of STimer without us requiring to call the function directly. It's used to set the initial values of the struct.
 		// --
@@ -23,4 +23,4 @@ namespace ftw	//
 	};
 }
 
-#endif // GPFTW_TIMER_H_2983740982374092837492384
+#endif // FTW_TIMER_H_29837409823740928987652132

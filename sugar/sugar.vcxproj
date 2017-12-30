@@ -22,8 +22,9 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{92362907-D84D-4409-B8BC-96F1F766BD9C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>gpftw</RootNamespace>
+    <RootNamespace>sugar</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>sugar</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -167,33 +168,38 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ftw_app_impl.h" />
-    <ClInclude Include="ftw_array.h" />
-    <ClInclude Include="ftw_array_view.h" />
-    <ClInclude Include="ftw_ascii_color.h" />
-    <ClInclude Include="ftw_ascii_display.h" />
-    <ClInclude Include="ftw_ascii_target.h" />
-    <ClInclude Include="ftw_auto_handler.h" />
-    <ClInclude Include="ftw_bitmap_target.h" />
-    <ClInclude Include="ftw_color.h" />
-    <ClInclude Include="ftw_coord.h" />
-    <ClInclude Include="ftw_eval.h" />
-    <ClInclude Include="ftw_frameinfo.h" />
-    <ClInclude Include="ftw_grid_view.h" />
-    <ClInclude Include="ftw_log.h" />
-    <ClInclude Include="ftw_math.h" />
-    <ClInclude Include="ftw_memory.h" />
-    <ClInclude Include="ftw_platform.h" />
-    <ClInclude Include="ftw_runtime.h" />
-    <ClInclude Include="ftw_timer.h" />
-    <ClInclude Include="ftw_typeint.h" />
-    <ClInclude Include="ftw_error.h" />
+    <ClInclude Include="cho_app_impl.h" />
+    <ClInclude Include="cho_array.h" />
+    <ClInclude Include="cho_array_view.h" />
+    <ClInclude Include="cho_ascii_color.h" />
+    <ClInclude Include="cho_ascii_display.h" />
+    <ClInclude Include="cho_ascii_target.h" />
+    <ClInclude Include="cho_auto_handler.h" />
+    <ClInclude Include="cho_bitmap_target.h" />
+    <ClInclude Include="cho_color.h" />
+    <ClInclude Include="cho_coord.h" />
+    <ClInclude Include="cho_display.h" />
+    <ClInclude Include="cho_eval.h" />
+    <ClInclude Include="cho_frameinfo.h" />
+    <ClInclude Include="cho_grid_view.h" />
+    <ClInclude Include="cho_input.h" />
+    <ClInclude Include="cho_log.h" />
+    <ClInclude Include="cho_math.h" />
+    <ClInclude Include="cho_memory.h" />
+    <ClInclude Include="cho_platform.h" />
+    <ClInclude Include="cho_ptr.h" />
+    <ClInclude Include="cho_runtime.h" />
+    <ClInclude Include="cho_size.h" />
+    <ClInclude Include="cho_sync.h" />
+    <ClInclude Include="cho_timer.h" />
+    <ClInclude Include="cho_typeint.h" />
+    <ClInclude Include="cho_error.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ftw_ascii_display.cpp" />
-    <ClCompile Include="ftw_ascii_target.cpp" />
-    <ClCompile Include="ftw_log.cpp" />
-    <ClCompile Include="ftw_timer.cpp" />
+    <ClCompile Include="cho_ascii_display.cpp" />
+    <ClCompile Include="cho_ascii_target.cpp" />
+    <ClCompile Include="cho_log.cpp" />
+    <ClCompile Include="cho_timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

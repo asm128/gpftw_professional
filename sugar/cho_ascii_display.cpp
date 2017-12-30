@@ -1,11 +1,11 @@
-#include "ftw_ascii_display.h"
+#include "cho_ascii_display.h"
 
 #include <cstdio>
 #include <Windows.h>
 
 #include <vector>
 
-					::ftw::error_t						ftw::asciiDisplayTitleSet						(const ::ftw::array_view<const char>& title)															{ return (0 == SetConsoleTitle(title.begin() ? title.begin() : "")) ? -1 : 0; }
+					::cho::error_t						cho::asciiDisplayTitleSet						(const ::cho::array_view<const char>& title)															{ return (0 == SetConsoleTitle(title.begin() ? title.begin() : "")) ? -1 : 0; }
 
 struct SWindowsConsoleInfo {
 						::CONSOLE_FONT_INFOEX				InfoFontOriginal								= {sizeof(::CONSOLE_FONT_INFOEX)};
@@ -19,35 +19,37 @@ struct SWindowsConsoleInfo {
 static				::std::vector<uint8_t >				g_bufferClearCharacter							= {};
 static				::std::vector<uint16_t>				g_bufferClearColors								= {};
 static				::SWindowsConsoleInfo				g_ConsoleInfo									= {};
-static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							= 
-	{ ::ftw::ASCII_COLOR_INDEX_0	
-	, ::ftw::ASCII_COLOR_INDEX_1	
-	, ::ftw::ASCII_COLOR_INDEX_2	
-	, ::ftw::ASCII_COLOR_INDEX_3	
-	, ::ftw::ASCII_COLOR_INDEX_4	
-	, ::ftw::ASCII_COLOR_INDEX_5	
-	, ::ftw::ASCII_COLOR_INDEX_6	
-	, ::ftw::ASCII_COLOR_INDEX_7	
-	, ::ftw::ASCII_COLOR_INDEX_8	
-	, ::ftw::ASCII_COLOR_INDEX_9	
-	, ::ftw::ASCII_COLOR_INDEX_10	
-	, ::ftw::ASCII_COLOR_INDEX_11	
-	, ::ftw::ASCII_COLOR_INDEX_12	
-	, ::ftw::ASCII_COLOR_INDEX_13	
-	, ::ftw::ASCII_COLOR_INDEX_14	
-	, ::ftw::ASCII_COLOR_INDEX_15	
+static constexpr	const ::cho::SColorRGBA				g_DefaultPalette	[]							= 
+	{ ::cho::ASCII_COLOR_INDEX_0	
+	, ::cho::ASCII_COLOR_INDEX_1	
+	, ::cho::ASCII_COLOR_INDEX_2	
+	, ::cho::ASCII_COLOR_INDEX_3	
+	, ::cho::ASCII_COLOR_INDEX_4	
+	, ::cho::ASCII_COLOR_INDEX_5	
+	, ::cho::ASCII_COLOR_INDEX_6	
+	, ::cho::ASCII_COLOR_INDEX_7	
+	, ::cho::ASCII_COLOR_INDEX_8	
+	, ::cho::ASCII_COLOR_INDEX_9	
+	, ::cho::ASCII_COLOR_INDEX_10	
+	, ::cho::ASCII_COLOR_INDEX_11	
+	, ::cho::ASCII_COLOR_INDEX_12	
+	, ::cho::ASCII_COLOR_INDEX_13	
+	, ::cho::ASCII_COLOR_INDEX_14	
+	, ::cho::ASCII_COLOR_INDEX_15	
 	};
 
-//					::ftw::error_t						ftw::asciiDisplayInfo							(::ftw::SASCIIDisplayInfo& displayInfo)																	{ 
+//					::cho::error_t						cho::asciiDisplayInfo							(::cho::SASCIIDisplayInfo& displayInfo)																	{ 
 //	::CONSOLE_SCREEN_BUFFER_INFOEX								& csbiInfo										= g_ConsoleInfo.InfoScreenBufferCurrent;
-//	displayInfo.DisplaySizeMax								= {65535U / 2, 65535U / 2};
+//	displayInfo.DisplaySizeMax								= {0x7FFF, 0x7FFF};
 //	displayInfo.DisplaySizeCurrent							= {(uint32_t)csbiInfo.dwSize.X, (uint32_t)csbiInfo.dwSize.Y};
 //	displayInfo.ColorWidth									= 24;
 //	displayInfo.PaletteSize									= 16;
 //	return 0; 
 //}
 
-					::ftw::error_t						initWindowsConsoleProperties					(int width, int height, const ::ftw::SColorRGBA* palette)												{
+					::cho::error_t						initWindowsConsoleProperties					(int width, int height, const ::cho::SColorRGBA* palette)												{
+	reterr_error_if(0 == palette, "Invalid parameter.");
+	reterr_error_if(0 == width * height, "Invalid console size.");
 	const ::HANDLE												handleConsoleOut								= ::GetStdHandle(STD_OUTPUT_HANDLE);	// Get console output handle
 
 	::CONSOLE_SCREEN_BUFFER_INFOEX								& csbiInfo										= g_ConsoleInfo.InfoScreenBufferCurrent;
@@ -62,39 +64,33 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 	for(uint32_t iColor = 0; iColor < 16; ++iColor)
 		csbiInfo.ColorTable[iColor]								= palette[iColor];
 
-	csbiInfo.wAttributes									= ::ftw::ASCII_COLOR_WHITE;
+	csbiInfo.wAttributes									= ::cho::ASCII_COLOR_WHITE;
 	
 	uint32_t													newClearSize									= width * height;
 	if(newClearSize > g_bufferClearCharacter.size()) {
 		g_bufferClearCharacter	.resize(newClearSize);
 		g_bufferClearColors		.resize(newClearSize);
 	}
-	if(FALSE == ::SetConsoleScreenBufferInfoEx(handleConsoleOut, &csbiInfo)) {
-		OutputDebugString(TEXT("Failed to set console properties."));
-		return -1;
-	}
+	reterr_error_if(FALSE == ::SetConsoleScreenBufferInfoEx(handleConsoleOut, &csbiInfo), "Failed to set console properties.");
 	return 0;
 }
 
-					::ftw::error_t						ftw::asciiDisplayResize							(uint32_t width, uint32_t height)																		{ return ::initWindowsConsoleProperties(width, height, (const ::ftw::SColorRGBA*)g_ConsoleInfo.InfoScreenBufferCurrent.ColorTable); }
-					::ftw::error_t						ftw::asciiDisplayPaletteReset					()																										{ return ::initWindowsConsoleProperties(g_ConsoleInfo.InfoScreenBufferCurrent.dwSize.X, g_ConsoleInfo.InfoScreenBufferCurrent.dwSize.Y, g_DefaultPalette); }
-					::ftw::error_t						ftw::asciiDisplayPaletteSet						(const ::ftw::array_view<::ftw::SColorRGBA>& palette)													{
-	if(palette.size() < 16) {
-		OutputDebugString(TEXT("Palette too small. 16 colors are required for the console palette to be valid."));
-		return -1;
-	}
+					::cho::error_t						cho::asciiDisplayResize							(uint32_t width, uint32_t height)																		{ return ::initWindowsConsoleProperties(width, height, (const ::cho::SColorRGBA*)g_ConsoleInfo.InfoScreenBufferCurrent.ColorTable); }
+					::cho::error_t						cho::asciiDisplayPaletteReset					()																										{ return ::initWindowsConsoleProperties(g_ConsoleInfo.InfoScreenBufferCurrent.dwSize.X, g_ConsoleInfo.InfoScreenBufferCurrent.dwSize.Y, g_DefaultPalette); }
+					::cho::error_t						cho::asciiDisplayPaletteSet						(const ::cho::array_view<::cho::SColorRGBA>& palette)													{
+	reterr_error_if(palette.size() < 16, "Palette too small. 16 colors are required for the console palette to be valid.");
 	return ::initWindowsConsoleProperties(g_ConsoleInfo.InfoScreenBufferCurrent.dwSize.X, g_ConsoleInfo.InfoScreenBufferCurrent.dwSize.Y, palette.begin());
 }
 
-					::ftw::error_t						ftw::asciiDisplaySize							(::ftw::SCoord2<uint32_t>& size)																		{
+					::cho::error_t						cho::asciiDisplaySize							(::cho::SCoord2<uint32_t>& size)																		{
 	const ::CONSOLE_SCREEN_BUFFER_INFOEX						& csbiInfo										= g_ConsoleInfo.InfoScreenBufferCurrent;
 	size													= {(uint32_t)csbiInfo.dwSize.X, (uint32_t)csbiInfo.dwSize.Y};
 	return 0;
 }
 
-					::ftw::error_t						ftw::asciiDisplayClear							(uint8_t character, uint16_t colorRef)																	{
-	ree_if(false == ::g_ConsoleInfo.Created, "Cannot clear console if the console wasn't created!");
-	ree_if(0 == ::g_bufferClearCharacter.size(), "Cannot clear zero-sized console!");
+					::cho::error_t						cho::asciiDisplayClear							(uint8_t character, uint16_t colorRef)																	{
+	reterr_error_if(false == ::g_ConsoleInfo.Created, "Cannot clear console if the console wasn't created!");
+	reterr_error_if(0 == ::g_bufferClearCharacter.size(), "Cannot clear zero-sized console!");
 	::memset(&g_bufferClearCharacter[0], character, g_bufferClearCharacter.size());
 	const uint16_t												colors[4]										= {colorRef, colorRef, colorRef, colorRef};
 	if(g_bufferClearColors[0] != colorRef) {
@@ -117,20 +113,20 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 	::COORD														offset											= {0, 0};
 	::DWORD														dummy											= 0;
 	const ::HANDLE												handleConsoleOut								= ::GetStdHandle(STD_OUTPUT_HANDLE);	// Get console output handle
-	ree_if(0 == ::WriteConsoleOutputCharacterA	(handleConsoleOut, (const char*)	g_bufferClearCharacter	.data(), ::ftw::max(0U, ::ftw::min((uint32_t)g_bufferClearCharacter	.size(), (uint32_t)sizeFrontBuffer)), offset, &dummy ), "How did this happen?");
-	ree_if(0 == ::WriteConsoleOutputAttribute	(handleConsoleOut,					g_bufferClearColors		.data(), ::ftw::max(0U, ::ftw::min((uint32_t)g_bufferClearColors		.size(), (uint32_t)sizeFrontBuffer)), offset, &dummy ), "How did this happen?");
+	reterr_error_if(0 == ::WriteConsoleOutputCharacterA	(handleConsoleOut, (const char*)	g_bufferClearCharacter	.data(), ::cho::max(0U, ::cho::min((uint32_t)g_bufferClearCharacter	.size(), (uint32_t)sizeFrontBuffer)), offset, &dummy ), "How did this happen?");
+	reterr_error_if(0 == ::WriteConsoleOutputAttribute	(handleConsoleOut,					g_bufferClearColors		.data(), ::cho::max(0U, ::cho::min((uint32_t)g_bufferClearColors	.size(), (uint32_t)sizeFrontBuffer)), offset, &dummy ), "How did this happen?");
 	return 0;
 }
 
-					::ftw::error_t						ftw::asciiDisplayPresent						(const ::ftw::array_view<const uint8_t>& characters, const ::ftw::array_view<const uint16_t>& colors)	{ 
+					::cho::error_t						cho::asciiDisplayPresent						(const ::cho::array_view<const uint8_t>& characters, const ::cho::array_view<const uint16_t>& colors)	{ 
 	ree_if(false == ::g_ConsoleInfo.Created, "Cannot present console if the console wasn't created!");
 	const ::HANDLE												handleConsoleOut								= ::GetStdHandle(STD_OUTPUT_HANDLE);	// Get console output handle	
 	const ::CONSOLE_SCREEN_BUFFER_INFOEX						& csbiInfo										= g_ConsoleInfo.InfoScreenBufferCurrent;
 	uint32_t													sizeFrontBuffer									= csbiInfo.dwSize.X * csbiInfo.dwSize.Y;
 	::COORD														offset											= {0, 0};
 	::DWORD														dummy											= 0;
-	uint32_t													lengthWriteCharacters							= ::ftw::max(0U, ::ftw::min(characters	.size(), (uint32_t)sizeFrontBuffer));
-	uint32_t													lengthWriteColors								= ::ftw::max(0U, ::ftw::min(colors		.size(), (uint32_t)sizeFrontBuffer));
+	uint32_t													lengthWriteCharacters							= ::cho::max(0U, ::cho::min(characters	.size(), (uint32_t)sizeFrontBuffer));
+	uint32_t													lengthWriteColors								= ::cho::max(0U, ::cho::min(colors		.size(), (uint32_t)sizeFrontBuffer));
 	::WriteConsoleOutputCharacterA	(handleConsoleOut, (const char*)	characters	.begin(), lengthWriteCharacters	, offset, &dummy );
 	::WriteConsoleOutputAttribute	(handleConsoleOut,					colors		.begin(), lengthWriteColors		, offset, &dummy );
 	return 0; 
@@ -146,7 +142,7 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 	}
 }
 
-					::ftw::error_t						ftw::asciiDisplayDestroy						()																										{ 
+					::cho::error_t						cho::asciiDisplayDestroy						()																										{ 
 	retwarn_warn_if(false == g_ConsoleInfo.Created, "Redundant destruction of system console.");
 	::SetConsoleCtrlHandler(::handlerConsoleRoutine, FALSE);
 	const ::HANDLE												hConsoleOut										= ::GetStdHandle( STD_OUTPUT_HANDLE );
@@ -163,7 +159,7 @@ static constexpr	const ::ftw::SColorRGBA				g_DefaultPalette	[]							=
 	return 0; 
 }
 
-					::ftw::error_t						ftw::asciiDisplayCreate							(uint32_t frontBufferWidth, uint32_t frontBufferHeight)													{
+					::cho::error_t						cho::asciiDisplayCreate							(uint32_t frontBufferWidth, uint32_t frontBufferHeight)													{
 	bool														createdConsole										= (FALSE == ::AllocConsole()) ? false : true;
 	if(createdConsole)
 		::AttachConsole(::GetCurrentProcessId());

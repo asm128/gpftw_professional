@@ -1,11 +1,10 @@
-#include "ftw_error.h"
+#include "cho_error.h"
+#include "cho_size.h"
 
 #if defined(FTW_WINDOWS)
 #	include <crtdbg.h>
 #	include <Windows.h>
 #endif
-
-#include <exception>
 
 #ifndef FTW_LOG_H_8927349654687654365
 #define FTW_LOG_H_8927349654687654365
@@ -16,28 +15,28 @@
 #	define base_debug_print(text, charCount)						printf("%s", text); charCount
 #endif 
 
-namespace ftw
+namespace cho
 {
-	void															_ftw_print_system_errors			(const char* prefix, uint32_t prefixLen);
+	void															_cho_print_system_errors			(const char* prefix, uint32_t prefixLen);
 
 	template<const size_t _sizePrefix, typename... TArgs>		
-	void															_ftw_debug_printf					(int severity, const char (&prefix)[_sizePrefix], uint32_t prefixLength, const char* format, const TArgs... args)			{
+	void															_cho_debug_printf					(int severity, const char (&prefix)[_sizePrefix], uint32_t prefixLength, const char* format, const TArgs... args)			{
 		base_debug_print(prefix, prefixLength);
 		char																customDynamicString	[8192]			= {0};
 		const size_t														stringLength						= sprintf_s(customDynamicString, format, args...);
 		base_debug_print(customDynamicString, (int)stringLength);
 		base_debug_print("\n", 1);
-		if(2 <= severity)
-			_ftw_print_system_errors(prefix, prefixLength);
+		if(2 >= severity)
+			_cho_print_system_errors(prefix, prefixLength);
 	}
 }
 
-#define debug_printf(severity, severityStr, format, ...)																																\
-	do { 																																												\
-		static constexpr const char											prefixFormat	[]							= ":%u:" severityStr ":" __FILE__ "(%u){" __FUNCTION__ "}:";	\
-		static char															prefixString	[sizeof(prefixFormat) + 8]	= {}; 															\
-		static const int 													prefixLength								= ::sprintf_s(prefixString, prefixFormat, severity, __LINE__);	\
-		::ftw::_ftw_debug_printf(severity, prefixString, prefixLength == -1 ? 0 : prefixLength, format, __VA_ARGS__);																	\
+#define debug_printf(severity, severityStr, format, ...)																																	\
+	do { 																																													\
+		static constexpr const char											prefixFormat	[]								= ":%u:" severityStr ":" __FILE__ "(%u){" __FUNCTION__ "}:";	\
+		static char															prefixString	[::cho::size(prefixFormat) + 8]	= {}; 															\
+		static const int 													prefixLength									= ::sprintf_s(prefixString, prefixFormat, severity, __LINE__);	\
+		::cho::_cho_debug_printf(severity, prefixString, prefixLength == -1 ? 0 : prefixLength, format, __VA_ARGS__);																		\
 	} while(0)
 
 #if !defined FTW_USE_DEBUG_BREAK_ON_ERROR_LOG
@@ -113,8 +112,8 @@ namespace ftw
 
 #if defined (FTW_ERROR_PRINTF_ENABLED)
 // Non-propagable retval_error call.
-#	define ftw_rve_ecall(retVal, nwo_call, format, ...) do {																														\
-		::ftw::error_t errCall = (nwo_call);  																																		\
+#	define cho_rve_ecall(retVal, nwo_call, format, ...) do {																														\
+		::cho::error_t errCall = (nwo_call);  																																		\
 		if(errCall < 0) {																																							\
 			debug_printf(0, "error", "%s: 0x%X.", #nwo_call, errCall);																												\
 			error_printf(format, __VA_ARGS__); 																																		\
@@ -126,8 +125,8 @@ namespace ftw
 	} while(0)
 
 // Non-propagable retval_error error-warning call.
-#	define ftw_rve_ewcall(retVal, nwo_call, format, ...) do {																														\
-		if(::ftw::error_t errCall = (nwo_call)) { 																																	\
+#	define cho_rve_ewcall(retVal, nwo_call, format, ...) do {																														\
+		if(::cho::error_t errCall = (nwo_call)) { 																																	\
 			if(errCall < 0) {																																						\
 				debug_printf(0, "error", "%s: 0x%X.", #nwo_call, errCall);																											\
 				error_printf(format, __VA_ARGS__); 																																	\
@@ -143,10 +142,10 @@ namespace ftw
 	} while(0)
 
 //
-#	define ftw_rv_hrcall(retVal, hr_call) do {																																		\
+#	define cho_rv_hrcall(retVal, hr_call) do {																																		\
 		::HRESULT errCall_ = (hr_call);  																																			\
 		if FAILED(errCall_) {																																						\
-			debug_printf(0, "error", "%s: (0x%X) : '%s'.", #hr_call, errCall_, ::ftw::getWindowsErrorAsString(errCall_).c_str());													\
+			debug_printf(0, "error", "%s: (0x%X) : '%s'.", #hr_call, errCall_, ::cho::getWindowsErrorAsString(errCall_).c_str());													\
 			return retVal; 																																							\
 		}																																											\
 		else {																																										\
@@ -155,10 +154,10 @@ namespace ftw
 	} while(0)
 
 //
-#	define ftw_rve_hrcall(retVal, hr_call, format, ...) do {																														\
+#	define cho_rve_hrcall(retVal, hr_call, format, ...) do {																														\
 		::HRESULT errCall_ = (hr_call);  																																			\
 		if FAILED(errCall_) {																																						\
-			debug_printf(0, "error", "%s: (0x%X) : '%s' - " format, #hr_call, errCall_, ::ftw::getWindowsErrorAsString(errCall_).c_str(), __VA_ARGS__);								\
+			debug_printf(0, "error", "%s: (0x%X) : '%s' - " format, #hr_call, errCall_, ::cho::getWindowsErrorAsString(errCall_).c_str(), __VA_ARGS__);								\
 			return retVal; 																																							\
 		}																																											\
 		else {																																										\
@@ -168,8 +167,8 @@ namespace ftw
 
 // --------------------------------------------------------------------
 // Propagable retval_error call.
-#	define ftw_pecall(nwo_call, ...) do {																																			\
-		::ftw::error_t errCall = (nwo_call);  																																		\
+#	define cho_pecall(nwo_call, ...) do {																																			\
+		::cho::error_t errCall = (nwo_call);  																																		\
 		if(errCall < 0) {																																							\
 			debug_printf(0, "error", "%s: 0x%X", #nwo_call, errCall);																												\
 			error_printf(__VA_ARGS__); 																																				\
@@ -180,8 +179,8 @@ namespace ftw
 		}																																											\
 	} while(0)
 // Propagable retval_error error-warning call.
-#	define ftw_pewcall(nwo_call, ...) do {																																			\
-		if(::ftw::error_t errCall = (nwo_call)) { 																																	\
+#	define cho_pewcall(nwo_call, ...) do {																																			\
+		if(::cho::error_t errCall = (nwo_call)) { 																																	\
 			if(errCall < 0) {																																						\
 				debug_printf(0, "error", "%s: 0x%X", #nwo_call, errCall);																											\
 				error_printf(__VA_ARGS__); 																																			\
@@ -197,25 +196,25 @@ namespace ftw
 	} while(0)
 
 #else
-#	define ftw_rve_ecall(retVal, nwo_call, ...) do {																																\
-		if(::ftw::failed(nwo_call))  																																				\
+#	define cho_rve_ecall(retVal, nwo_call, ...) do {																																\
+		if(::cho::failed(nwo_call))  																																				\
 			return retval; 																																							\
 	} while(0)
 
-#	define ftw_pecall(retVal, nwo_call, ...)  do {																																	\
-		::ftw::error_t _ftw_errCall = ::ftw::succeeded(nwo_call);																													\
-		if(::ftw::failed(_ftw_errCall)) 																																			\
+#	define cho_pecall(retVal, nwo_call, ...)  do {																																	\
+		::cho::error_t _cho_errCall = ::cho::succeeded(nwo_call);																													\
+		if(::cho::failed(_cho_errCall)) 																																			\
 			return retval; 																																							\
 	} while(0)
 
-#	define ftw_rve_ewcall											ftw_rve_ecall	// Non-propagable retval_error error-warning call.
-#	define ftw_pewcall												ftw_pecall			// Propagable retval_error error-warning call.
+#	define cho_rve_ewcall											cho_rve_ecall	// Non-propagable retval_error error-warning call.
+#	define cho_pewcall												cho_pecall			// Propagable retval_error error-warning call.
 #endif
 
-#define ftw_necall(ftwl_call, ...)								ftw_rve_ecall (-1, ftwl_call, __VA_ARGS__)	// Non-propagable error call.
-#define ftw_newcall(ftwl_call, ...)								ftw_rve_ewcall(-1, ftwl_call, __VA_ARGS__)	// Non-propagable error-warning call.
-#define ftw_hrcall(hr_call)										ftw_rv_hrcall (-1, hr_call)					// HRESULT call.
-#define ftw_hrecall(hr_call, ...)								ftw_rve_hrcall(-1, hr_call, __VA_ARGS__)	// HRESULT call.
+#define cho_necall(chol_call, ...)								cho_rve_ecall (-1, chol_call, __VA_ARGS__)	// Non-propagable error call.
+#define cho_newcall(chol_call, ...)								cho_rve_ewcall(-1, chol_call, __VA_ARGS__)	// Non-propagable error-warning call.
+#define cho_hrcall(hr_call)										cho_rv_hrcall (-1, hr_call)					// HRESULT call.
+#define cho_hrecall(hr_call, ...)								cho_rve_hrcall(-1, hr_call, __VA_ARGS__)	// HRESULT call.
 
 #define e_if													error_if
 #define w_if													warn_if

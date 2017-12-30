@@ -1,10 +1,10 @@
 /// Copyright 2009-2017 - asm128
-#include "ftw_math.h"
+#include "cho_math.h"
 
 #ifndef FTW_COLOR_H_29734982734
 #define FTW_COLOR_H_29734982734
 
-namespace ftw
+namespace cho
 {
 #pragma pack( push, 1 )
 	// Stores RGBA color channels
@@ -21,10 +21,10 @@ namespace ftw
 		inline constexpr	bool			operator ==		(uint32_t other)										const	noexcept	{ return other == *((const uint32_t*)this);																																							}
 		inline constexpr	bool			operator ==		(const SColorRGBA& other)								const	noexcept	{ return b == other.b && g == other.g && r == other.r && a == other.a;																																}
 		inline constexpr	bool			operator !=		(const SColorRGBA& other)								const	noexcept	{ return b != other.b || g != other.g || r != other.r || a != other.a;																																}
-		inline constexpr	SColorRGBA		operator *		(const SColorRGBA& color)								const	noexcept	{ return SColorRGBA((uint8_t)::ftw::clamp(b * (uint16_t)color.b, 0, 255)	, (uint8_t)::ftw::clamp(g * (uint16_t)color.g, 0, 255)	, (uint8_t)::ftw::clamp(r * (uint16_t)color.r, 0, 255)	, a);	}
-		inline constexpr	SColorRGBA		operator +		(const SColorRGBA& color)								const	noexcept	{ return SColorRGBA((uint8_t)::ftw::clamp(b + (uint16_t)color.b, 0, 255)	, (uint8_t)::ftw::clamp(g + (uint16_t)color.g, 0, 255)	, (uint8_t)::ftw::clamp(r + (uint16_t)color.r, 0, 255)	, a);	}
-		inline constexpr	SColorRGBA		operator *		(double scalar)											const	noexcept	{ return SColorRGBA((uint8_t)::ftw::clamp(b * scalar, 0.0 , 255.0)			, (uint8_t)::ftw::clamp(g * scalar, 0.0 , 255.0 )		, (uint8_t)::ftw::clamp(r * scalar, 0.0,  255.0 )		, a);	}
-		inline constexpr	SColorRGBA		operator /		(double scalar)											const				{ return SColorRGBA((uint8_t)::ftw::clamp(b / scalar, 0.0 , 255.0)			, (uint8_t)::ftw::clamp(g / scalar, 0.0 , 255.0 )		, (uint8_t)::ftw::clamp(r / scalar, 0.0,  255.0 )		, a);	}
+		inline constexpr	SColorRGBA		operator *		(const SColorRGBA& color)								const	noexcept	{ return SColorRGBA((uint8_t)::cho::clamp(b * (uint16_t)color.b, 0, 255)	, (uint8_t)::cho::clamp(g * (uint16_t)color.g, 0, 255)	, (uint8_t)::cho::clamp(r * (uint16_t)color.r, 0, 255)	, a);	}
+		inline constexpr	SColorRGBA		operator +		(const SColorRGBA& color)								const	noexcept	{ return SColorRGBA((uint8_t)::cho::clamp(b + (uint16_t)color.b, 0, 255)	, (uint8_t)::cho::clamp(g + (uint16_t)color.g, 0, 255)	, (uint8_t)::cho::clamp(r + (uint16_t)color.r, 0, 255)	, a);	}
+		inline constexpr	SColorRGBA		operator *		(double scalar)											const	noexcept	{ return SColorRGBA((uint8_t)::cho::clamp(b * scalar, 0.0 , 255.0)			, (uint8_t)::cho::clamp(g * scalar, 0.0 , 255.0 )		, (uint8_t)::cho::clamp(r * scalar, 0.0,  255.0 )		, a);	}
+		inline constexpr	SColorRGBA		operator /		(double scalar)											const				{ return SColorRGBA((uint8_t)::cho::clamp(b / scalar, 0.0 , 255.0)			, (uint8_t)::cho::clamp(g / scalar, 0.0 , 255.0 )		, (uint8_t)::cho::clamp(r / scalar, 0.0,  255.0 )		, a);	}
 	};	// struct
 
 	// Stores BGRA color channels
@@ -43,12 +43,12 @@ namespace ftw
 		inline constexpr	bool			operator ==		(uint32_t other)										const	noexcept	{ return other == *((const uint32_t*)this);																																							}
 		inline constexpr	bool			operator ==		(const SColorBGRA& other)								const	noexcept	{ return b == other.b && g == other.g && r == other.r && a == other.a;																																}
 		inline constexpr	bool			operator !=		(const SColorBGRA& other)								const	noexcept	{ return b != other.b || g != other.g || r != other.r || a != other.a;																																}
-		inline constexpr	SColorBGRA		operator *		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::ftw::clamp(r * (uint16_t)color.r, 0, 255)	, (uint8_t)::ftw::clamp(g * (uint16_t)color.g, 0, 255)	,(uint8_t)::ftw::clamp(b * (uint16_t)color.b, 0, 255), a);		}
-		inline constexpr	SColorBGRA		operator +		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::ftw::clamp(r + (uint16_t)color.r, 0, 255)	, (uint8_t)::ftw::clamp(g + (uint16_t)color.g, 0, 255)	,(uint8_t)::ftw::clamp(b + (uint16_t)color.b, 0, 255), a);		}
-		inline constexpr	SColorBGRA		operator *		(float scalar)											const	noexcept	{ return SColorBGRA((uint8_t)::ftw::clamp(r * scalar, 0.0f, 255.0f)		, (uint8_t)::ftw::clamp(g * scalar, 0.0f, 255.0f)		,(uint8_t)::ftw::clamp(b * scalar, 0.0f, 255.0f),	a);			}
-		inline constexpr	SColorBGRA		operator /		(float scalar)											const				{ return SColorBGRA((uint8_t)::ftw::clamp(r / scalar, 0.0f, 255.0f)		, (uint8_t)::ftw::clamp(g / scalar, 0.0f, 255.0f)		,(uint8_t)::ftw::clamp(b / scalar, 0.0f, 255.0f),	a);			}
-		inline constexpr	SColorBGRA		operator *		(double scalar)											const	noexcept	{ return SColorBGRA((uint8_t)::ftw::clamp(r * scalar, 0.0,  255.0 )		, (uint8_t)::ftw::clamp(g * scalar, 0.0 , 255.0 )		,(uint8_t)::ftw::clamp(b * scalar, 0.0, 255.0),	a);			}
-		inline constexpr	SColorBGRA		operator /		(double scalar)											const				{ return SColorBGRA((uint8_t)::ftw::clamp(r / scalar, 0.0,  255.0 )		, (uint8_t)::ftw::clamp(g / scalar, 0.0 , 255.0 )		,(uint8_t)::ftw::clamp(b / scalar, 0.0, 255.0),	a);			}
+		inline constexpr	SColorBGRA		operator *		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::cho::clamp(r * (uint16_t)color.r, 0, 255)	, (uint8_t)::cho::clamp(g * (uint16_t)color.g, 0, 255)	,(uint8_t)::cho::clamp(b * (uint16_t)color.b, 0, 255), a);		}
+		inline constexpr	SColorBGRA		operator +		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::cho::clamp(r + (uint16_t)color.r, 0, 255)	, (uint8_t)::cho::clamp(g + (uint16_t)color.g, 0, 255)	,(uint8_t)::cho::clamp(b + (uint16_t)color.b, 0, 255), a);		}
+		inline constexpr	SColorBGRA		operator *		(float scalar)											const	noexcept	{ return SColorBGRA((uint8_t)::cho::clamp(r * scalar, 0.0f, 255.0f)		, (uint8_t)::cho::clamp(g * scalar, 0.0f, 255.0f)		,(uint8_t)::cho::clamp(b * scalar, 0.0f, 255.0f),	a);			}
+		inline constexpr	SColorBGRA		operator /		(float scalar)											const				{ return SColorBGRA((uint8_t)::cho::clamp(r / scalar, 0.0f, 255.0f)		, (uint8_t)::cho::clamp(g / scalar, 0.0f, 255.0f)		,(uint8_t)::cho::clamp(b / scalar, 0.0f, 255.0f),	a);			}
+		inline constexpr	SColorBGRA		operator *		(double scalar)											const	noexcept	{ return SColorBGRA((uint8_t)::cho::clamp(r * scalar, 0.0,  255.0 )		, (uint8_t)::cho::clamp(g * scalar, 0.0 , 255.0 )		,(uint8_t)::cho::clamp(b * scalar, 0.0, 255.0),	a);			}
+		inline constexpr	SColorBGRA		operator /		(double scalar)											const				{ return SColorBGRA((uint8_t)::cho::clamp(r / scalar, 0.0,  255.0 )		, (uint8_t)::cho::clamp(g / scalar, 0.0 , 255.0 )		,(uint8_t)::cho::clamp(b / scalar, 0.0, 255.0),	a);			}
 	};	// struct
 
 	typedef					uint16_t		SColor16;
@@ -74,14 +74,14 @@ namespace ftw
 		inline constexpr	bool			operator !=		(const SColorBGRA& other)								const	noexcept	{ return r != other.r || g != other.g || b != other.b;																																				}
 		inline constexpr	bool			operator !=		(const SColorBGR& other)								const	noexcept	{ return r != other.r || g != other.g || b != other.b;																																				}
 		inline constexpr	bool			operator !=		(const SColor16& other)									const	noexcept	{ return operator != (SColorBGR(other));																																							}
-		inline constexpr	SColorBGR		operator *		(float scalar)											const	noexcept	{ return SColorBGR((uint8_t)::ftw::clamp(r * scalar, 0.0f, 255.0f),	(uint8_t)::ftw::clamp(g * scalar, 0.0f, 255.0f),	(uint8_t)::ftw::clamp(b * scalar, 0.0f, 255.0f));						}
-		inline constexpr	SColorBGR		operator /		(float scalar)											const				{ return SColorBGR((uint8_t)::ftw::clamp(r / scalar, 0.0f, 255.0f),	(uint8_t)::ftw::clamp(g / scalar, 0.0f, 255.0f),	(uint8_t)::ftw::clamp(b / scalar, 0.0f, 255.0f));						}
-		inline constexpr	SColorBGR		operator *		(double scalar)											const	noexcept	{ return SColorBGR((uint8_t)::ftw::clamp(r * scalar, 0.0,  255.0), 	(uint8_t)::ftw::clamp(g * scalar, 0.0,  255.0),	(uint8_t)::ftw::clamp(b * scalar, 0.0,  255.0));						}
-		inline constexpr	SColorBGR		operator /		(double scalar)											const				{ return SColorBGR((uint8_t)::ftw::clamp(r / scalar, 0.0,  255.0), 	(uint8_t)::ftw::clamp(g / scalar, 0.0,  255.0),	(uint8_t)::ftw::clamp(b / scalar, 0.0,  255.0));						}
-		inline constexpr	SColorBGR		operator *		(const SColorBGR& color)								const	noexcept	{ return SColorBGR((uint8_t)::ftw::clamp(r * (uint16_t)color.r, 0, 255), (uint8_t)::ftw::clamp(g * (uint16_t)color.g, 0, 255), (uint8_t)::ftw::clamp(b * (uint16_t)color.b, 0, 255));			}
-		inline constexpr	SColorBGR		operator +		(const SColorBGR& color)								const	noexcept	{ return SColorBGR((uint8_t)::ftw::clamp(r + (uint16_t)color.r, 0, 255), (uint8_t)::ftw::clamp(g + (uint16_t)color.g, 0, 255), (uint8_t)::ftw::clamp(b + (uint16_t)color.b, 0, 255));			}
-		inline constexpr	SColorBGRA		operator *		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::ftw::clamp(r * (uint16_t)color.r, 0, 255), (uint8_t)::ftw::clamp(g * (uint16_t)color.g, 0, 255), (uint8_t)::ftw::clamp(b * (uint16_t)color.b, 0, 255), color.a);	}
-		inline constexpr	SColorBGRA		operator +		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::ftw::clamp(r + (uint16_t)color.r, 0, 255), (uint8_t)::ftw::clamp(g + (uint16_t)color.g, 0, 255), (uint8_t)::ftw::clamp(b + (uint16_t)color.b, 0, 255), color.a);	}
+		inline constexpr	SColorBGR		operator *		(float scalar)											const	noexcept	{ return SColorBGR((uint8_t)::cho::clamp(r * scalar, 0.0f, 255.0f),	(uint8_t)::cho::clamp(g * scalar, 0.0f, 255.0f),	(uint8_t)::cho::clamp(b * scalar, 0.0f, 255.0f));						}
+		inline constexpr	SColorBGR		operator /		(float scalar)											const				{ return SColorBGR((uint8_t)::cho::clamp(r / scalar, 0.0f, 255.0f),	(uint8_t)::cho::clamp(g / scalar, 0.0f, 255.0f),	(uint8_t)::cho::clamp(b / scalar, 0.0f, 255.0f));						}
+		inline constexpr	SColorBGR		operator *		(double scalar)											const	noexcept	{ return SColorBGR((uint8_t)::cho::clamp(r * scalar, 0.0,  255.0), 	(uint8_t)::cho::clamp(g * scalar, 0.0,  255.0),	(uint8_t)::cho::clamp(b * scalar, 0.0,  255.0));						}
+		inline constexpr	SColorBGR		operator /		(double scalar)											const				{ return SColorBGR((uint8_t)::cho::clamp(r / scalar, 0.0,  255.0), 	(uint8_t)::cho::clamp(g / scalar, 0.0,  255.0),	(uint8_t)::cho::clamp(b / scalar, 0.0,  255.0));						}
+		inline constexpr	SColorBGR		operator *		(const SColorBGR& color)								const	noexcept	{ return SColorBGR((uint8_t)::cho::clamp(r * (uint16_t)color.r, 0, 255), (uint8_t)::cho::clamp(g * (uint16_t)color.g, 0, 255), (uint8_t)::cho::clamp(b * (uint16_t)color.b, 0, 255));			}
+		inline constexpr	SColorBGR		operator +		(const SColorBGR& color)								const	noexcept	{ return SColorBGR((uint8_t)::cho::clamp(r + (uint16_t)color.r, 0, 255), (uint8_t)::cho::clamp(g + (uint16_t)color.g, 0, 255), (uint8_t)::cho::clamp(b + (uint16_t)color.b, 0, 255));			}
+		inline constexpr	SColorBGRA		operator *		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::cho::clamp(r * (uint16_t)color.r, 0, 255), (uint8_t)::cho::clamp(g * (uint16_t)color.g, 0, 255), (uint8_t)::cho::clamp(b * (uint16_t)color.b, 0, 255), color.a);	}
+		inline constexpr	SColorBGRA		operator +		(const SColorBGRA& color)								const	noexcept	{ return SColorBGRA((uint8_t)::cho::clamp(r + (uint16_t)color.r, 0, 255), (uint8_t)::cho::clamp(g + (uint16_t)color.g, 0, 255), (uint8_t)::cho::clamp(b + (uint16_t)color.b, 0, 255), color.a);	}
 	};	// struct
 
 	// Stores RGBA floating point color channels
@@ -117,46 +117,46 @@ namespace ftw
 		inline				SColorFloat		operator +		(const SColorBGRA& color)								const	noexcept	{ return SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																				}
 		inline				SColorFloat		operator *		(const SColorBGR& color)								const	noexcept	{ return SColorFloat{r * (color.r * (1/255.0f)), g * (color.g * (1/255.0f)), b * (color.b * (1/255.0f)), a}.Clamp();																				}
 		inline				SColorFloat		operator +		(const SColorBGR& color)								const	noexcept	{ return SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																				}
-		inline constexpr	SColorFloat		operator *		(const SColorFloat& color)								const	noexcept	{ return SColorFloat{::ftw::clamp(r * color.r, 0.0f, 1.0f),	::ftw::clamp(g * color.g, 0.0f, 1.0f),	::ftw::clamp(b * color.b, 0.0f, 1.0f)};													}
-		inline constexpr	SColorFloat		operator +		(const SColorFloat& color)								const	noexcept	{ return SColorFloat{::ftw::clamp(r + color.r, 0.0f, 1.0f),	::ftw::clamp(g + color.g, 0.0f, 1.0f),	::ftw::clamp(b + color.b, 0.0f, 1.0f)};													}
-		inline constexpr	SColorFloat		operator *		(double scalar)											const	noexcept	{ return SColorFloat{(float)::ftw::clamp(r * scalar, 0.0, 1.0), (float)::ftw::clamp(g * scalar, 0.0, 1.0), (float)::ftw::clamp(b * scalar, 0.0, 1.0)};											}
-		inline constexpr	SColorFloat		operator /		(double scalar)											const				{ return SColorFloat{(float)::ftw::clamp(r / scalar, 0.0, 1.0), (float)::ftw::clamp(g / scalar, 0.0, 1.0), (float)::ftw::clamp(b / scalar, 0.0, 1.0)};											}
+		inline constexpr	SColorFloat		operator *		(const SColorFloat& color)								const	noexcept	{ return SColorFloat{::cho::clamp(r * color.r, 0.0f, 1.0f),	::cho::clamp(g * color.g, 0.0f, 1.0f),	::cho::clamp(b * color.b, 0.0f, 1.0f)};													}
+		inline constexpr	SColorFloat		operator +		(const SColorFloat& color)								const	noexcept	{ return SColorFloat{::cho::clamp(r + color.r, 0.0f, 1.0f),	::cho::clamp(g + color.g, 0.0f, 1.0f),	::cho::clamp(b + color.b, 0.0f, 1.0f)};													}
+		inline constexpr	SColorFloat		operator *		(double scalar)											const	noexcept	{ return SColorFloat{(float)::cho::clamp(r * scalar, 0.0, 1.0), (float)::cho::clamp(g * scalar, 0.0, 1.0), (float)::cho::clamp(b * scalar, 0.0, 1.0)};											}
+		inline constexpr	SColorFloat		operator /		(double scalar)											const				{ return SColorFloat{(float)::cho::clamp(r / scalar, 0.0, 1.0), (float)::cho::clamp(g / scalar, 0.0, 1.0), (float)::cho::clamp(b / scalar, 0.0, 1.0)};											}
 		inline				SColorFloat&	operator *=		(float scalar)													noexcept	{ r = r * scalar;					g = g * scalar;					b = b * scalar;					return Clamp();																					}
 		inline				SColorFloat&	operator /=		(float scalar)																{ r = r / scalar;					g = g / scalar;					b = b / scalar;					return Clamp();																					}
-		inline constexpr	SColorFloat		operator *		(float scalar)											const	noexcept	{ return ::ftw::SColorFloat(::ftw::clamp(r * scalar, 0.0f, 1.0f),	::ftw::clamp(g * scalar, 0.0f, 1.0f),	::ftw::clamp(b * scalar, 0.0f, 1.0f));													}
-		inline constexpr	SColorFloat		operator /		(float scalar)											const				{ return ::ftw::SColorFloat(::ftw::clamp(r / scalar, 0.0f, 1.0f),	::ftw::clamp(g / scalar, 0.0f, 1.0f),	::ftw::clamp(b / scalar, 0.0f, 1.0f));													}
+		inline constexpr	SColorFloat		operator *		(float scalar)											const	noexcept	{ return ::cho::SColorFloat(::cho::clamp(r * scalar, 0.0f, 1.0f),	::cho::clamp(g * scalar, 0.0f, 1.0f),	::cho::clamp(b * scalar, 0.0f, 1.0f));													}
+		inline constexpr	SColorFloat		operator /		(float scalar)											const				{ return ::cho::SColorFloat(::cho::clamp(r / scalar, 0.0f, 1.0f),	::cho::clamp(g / scalar, 0.0f, 1.0f),	::cho::clamp(b / scalar, 0.0f, 1.0f));													}
 
-		inline				SColorFloat&	Clamp			()																noexcept	{ r = ::ftw::clamp(r, 0.0f, 1.0f); g = ::ftw::clamp(g, 0.0f, 1.0f); b = ::ftw::clamp(b, 0.0f, 1.0f); return *this;																				}
+		inline				SColorFloat&	Clamp			()																noexcept	{ r = ::cho::clamp(r, 0.0f, 1.0f); g = ::cho::clamp(g, 0.0f, 1.0f); b = ::cho::clamp(b, 0.0f, 1.0f); return *this;																				}
 	};	// struct
 #pragma pack( pop )
 
-	static constexpr	const ::ftw::SColorFloat	BLACK			= {0.0f, 0.0f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	WHITE			= {1.0f, 1.0f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	RED				= {1.0f, 0.0f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	GREEN			= {0.0f, 1.0f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	BLUE			= {0.0f, 0.0f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	YELLOW			= {1.0f, 1.0f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	MAGENTA			= {1.0f, 0.0f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	CYAN			= {0.0f, 1.0f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	ORANGE			= {1.0f, 0.647f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	BROWN			= 0xFF964B00;	
-	static constexpr	const ::ftw::SColorFloat	GRAY			= {0.5f, 0.5f, 0.5f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKGRAY		= {0.25f, 0.25f, 0.25f, 1.0f				};
-	static constexpr	const ::ftw::SColorFloat	DARKRED			= {0.5f, 0.0f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKGREEN		= {0.0f, 0.5f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKBLUE		= {0.0f, 0.0f, 0.5f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKYELLOW		= {0.5f, 0.5f, 0.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKMAGENTA		= {0.5f, 0.0f, 0.5f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKCYAN		= {0.0f, 0.5f, 0.5f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	DARKORANGE		= {1.0f, 0.5490196078431373f, 0.0f, 1.0f	};
-	static constexpr	const ::ftw::SColorFloat	LIGHTGRAY		= {0.75f, 0.75f, 0.75f, 1.0f				};
-	static constexpr	const ::ftw::SColorFloat	LIGHTRED		= {1.0f, 0.25f, 0.25f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	LIGHTGREEN		= {0.25f, 1.0f, 0.25f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	LIGHTBLUE		= {0.25f, 0.25f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	LIGHTYELLOW		= {1.0f, 1.0f, 0.25f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	LIGHTMAGENTA	= {1.0f, 0.25f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	LIGHTCYAN		= {0.25f, 1.0f, 1.0f, 1.0f					};
-	static constexpr	const ::ftw::SColorFloat	LIGHTORANGE		= {1.0f, 0.780f, 0.25f, 1.0f				};
+	static constexpr	const ::cho::SColorFloat	BLACK			= {0.0f, 0.0f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	WHITE			= {1.0f, 1.0f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	RED				= {1.0f, 0.0f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	GREEN			= {0.0f, 1.0f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	BLUE			= {0.0f, 0.0f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	YELLOW			= {1.0f, 1.0f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	MAGENTA			= {1.0f, 0.0f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	CYAN			= {0.0f, 1.0f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	ORANGE			= {1.0f, 0.647f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	BROWN			= 0xFF964B00;	
+	static constexpr	const ::cho::SColorFloat	GRAY			= {0.5f, 0.5f, 0.5f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKGRAY		= {0.25f, 0.25f, 0.25f, 1.0f				};
+	static constexpr	const ::cho::SColorFloat	DARKRED			= {0.5f, 0.0f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKGREEN		= {0.0f, 0.5f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKBLUE		= {0.0f, 0.0f, 0.5f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKYELLOW		= {0.5f, 0.5f, 0.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKMAGENTA		= {0.5f, 0.0f, 0.5f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKCYAN		= {0.0f, 0.5f, 0.5f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	DARKORANGE		= {1.0f, 0.5490196078431373f, 0.0f, 1.0f	};
+	static constexpr	const ::cho::SColorFloat	LIGHTGRAY		= {0.75f, 0.75f, 0.75f, 1.0f				};
+	static constexpr	const ::cho::SColorFloat	LIGHTRED		= {1.0f, 0.25f, 0.25f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	LIGHTGREEN		= {0.25f, 1.0f, 0.25f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	LIGHTBLUE		= {0.25f, 0.25f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	LIGHTYELLOW		= {1.0f, 1.0f, 0.25f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	LIGHTMAGENTA	= {1.0f, 0.25f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	LIGHTCYAN		= {0.25f, 1.0f, 1.0f, 1.0f					};
+	static constexpr	const ::cho::SColorFloat	LIGHTORANGE		= {1.0f, 0.780f, 0.25f, 1.0f				};
 
 } // namespace
 
