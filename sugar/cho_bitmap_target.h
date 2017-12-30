@@ -50,7 +50,7 @@ namespace cho
 
 	// Bresenham's line algorithm
 	template<typename _tCoord, typename _tTarget>
-	static					void											drawLine									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SLine2D<_tCoord>& line)				{
+	static					::cho::error_t									drawLine									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SLine2D<_tCoord>& line)				{
 		float																		x1											= (float)line.A.x
 			,																		y1											= (float)line.A.y
 			,																		x2											= (float)line.B.x
@@ -88,8 +88,8 @@ namespace cho
 				error																+= dx;
 			}
 		}
+		return 0;
 	}
-
 } // namespace
 
 #endif // BITMAP_TARGET_H_98237498023745654654

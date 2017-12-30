@@ -1,12 +1,7 @@
 // Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
 //		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
-#include "cho_ascii_display.h"
-#include "cho_frameinfo.h"
-#include "cho_timer.h"
+#include "application.h"
 #include "cho_bitmap_target.h"
-#include "cho_array.h"
-#include "cho_input.h"
-#include "cho_display.h"
 #include "cho_app_impl.h"
 
 static constexpr	const uint32_t																	BMP_SCREEN_WIDTH							= 512;
@@ -14,61 +9,25 @@ static constexpr	const uint32_t																	BMP_SCREEN_HEIGHT							= uint32
 static constexpr	const uint32_t																	ASCII_SCREEN_WIDTH							= 132	;
 static constexpr	const uint32_t																	ASCII_SCREEN_HEIGHT							= 50	;
 
-struct SApplication {
-						::cho::SDisplay																	MainWindow									= {};
-						::cho::array_pod<::cho::SColorBGRA>												BitmapOffsceen								= {};
-						::cho::SRuntimeValues															RuntimeValues								= {};
-						::cho::SInput																	SystemInput									= {};
-						::cho::STimer																	Timer										= {};
-						::cho::SFrameInfo																FrameInfo									= {};
-						::cho::SASCIITarget																ASCIIRenderTarget							= {};
-						::cho::SPalette																	Palette										= 
-		{	(uint32_t)::cho::ASCII_COLOR_INDEX_0		
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_1 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_2 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_3 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_4 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_5 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_6 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_7 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_8 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_9 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_10	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_11	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_12	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_13	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_14	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_15	
-		};
-
-																										SApplication								(::cho::SRuntimeValues& runtimeValues)											: RuntimeValues(runtimeValues) {}
-};
-
-					::cho::error_t																	setup										(::SApplication& applicationInstance);
-					::cho::error_t																	cleanup										(::SApplication& applicationInstance);
-					::cho::error_t																	update										(::SApplication& applicationInstance);
-					::cho::error_t																	draw										(::SApplication& applicationInstance);
-
 CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
 
 static				::SApplication																	* g_ApplicationInstance						= 0;
 
-struct SOffscreenPlatformDetail {
-	uint32_t																							BitmapInfoSize								= 0;
-	::BITMAPINFO																						* BitmapInfo								= 0;
-	::HDC																								IntermediateDeviceContext					= 0;    // <- note, we're creating, so it needs to be destroyed
-	::HBITMAP																							IntermediateBitmap							= 0;
-
-																										~SOffscreenPlatformDetail					()																				{
-		if(BitmapInfo					) ::free			(BitmapInfo					); 
-		if(IntermediateBitmap			) ::DeleteObject	(IntermediateBitmap			); 
-		if(IntermediateDeviceContext	) ::DeleteDC		(IntermediateDeviceContext	); 
-	}
-};
-	
 		::cho::error_t																				drawBuffer									(::HDC hdc, int width, int height, ::cho::SColorBGRA *colorArray)				{
+	struct SOffscreenPlatformDetail {
+		uint32_t																								BitmapInfoSize								= 0;
+		::BITMAPINFO																							* BitmapInfo								= 0;
+		::HDC																									IntermediateDeviceContext					= 0;    // <- note, we're creating, so it needs to be destroyed
+		::HBITMAP																								IntermediateBitmap							= 0;
+
+																												~SOffscreenPlatformDetail					()																				{
+			if(BitmapInfo					) ::free			(BitmapInfo					); 
+			if(IntermediateBitmap			) ::DeleteObject	(IntermediateBitmap			); 
+			if(IntermediateDeviceContext	) ::DeleteDC		(IntermediateDeviceContext	); 
+		}
+	}																										offscreenDetail								= {};
+
 	const uint32_t																							bytesToCopy									= sizeof(::RGBQUAD) * width * height;
-	::SOffscreenPlatformDetail																				offscreenDetail								= {};
 	offscreenDetail.BitmapInfoSize																		= sizeof(::BITMAPINFO) + bytesToCopy;
 	offscreenDetail.BitmapInfo																			= (::BITMAPINFO*)::malloc(offscreenDetail.BitmapInfoSize);
 	for(uint32_t iPixel = 0, pixelCount = width * height; iPixel < pixelCount; ++iPixel)
@@ -109,7 +68,7 @@ struct SOffscreenPlatformDetail {
 	retwarn_warn_if(0 == windowHandle, "presentTarget called without a valid window handle set for the main window.");
 	::HDC																									dc											= ::GetDC(windowHandle);
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
-	::drawBuffer(dc, applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y, &bmpOffscreen[0]);
+	error_if(errored(::drawBuffer(dc, applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y, &bmpOffscreen[0])), "Not sure why this would happen");
 	::ReleaseDC(windowHandle, dc);
 	return 0;
 }
@@ -135,8 +94,8 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 				applicationInstance.MainWindow.Resized																= true;
 				applicationInstance.MainWindow.Repaint																= true; 
 				::updateOffscreen	(applicationInstance);
-				::draw				(applicationInstance);
-				::presentTarget		(applicationInstance);
+				error_if(errored(::draw					(applicationInstance)), "Not sure why these would fail");
+				error_if(errored(::presentTarget		(applicationInstance)), "Not sure why these would fail");
 			}
 		}
 		if( wParam == SIZE_MINIMIZED ) {
@@ -197,7 +156,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	error_if(errored(::cho::asciiTargetDestroy	(applicationInstance.ASCIIRenderTarget)), "No known reasons for this to fail. It may mean a mismamagement of the target array pointers!");
 
 	g_ApplicationInstance																				= 0;
-	error_printf("Error message test. Press F5 if the debugger breaks execution at this point.");
+	//error_printf("Error message test. Press F5 if the debugger breaks execution at this point.");
 	return 0;
 }
 
@@ -256,13 +215,13 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	geometry2.C																							+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	::cho::SBitmapTargetBGRA																				bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());
-	::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_BLUE		]), geometry0);
-	::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_BLUE		]), {geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}});
-	::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_GREEN		]), geometry1);
-	::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_RED		]), {geometry1.Radius - 1, geometry1.Center});
-	::cho::drawTriangle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_YELLOW		]), geometry2);
-	::cho::drawLine			(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_MAGENTA	]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B});
-	::cho::drawLine			(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C});
-	::cho::drawLine			(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A});
+	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_BLUE		]), geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_BLUE		]), {geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_RED		]), {geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawTriangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_YELLOW		]), geometry2)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_MAGENTA	]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 	return 0;
 }
