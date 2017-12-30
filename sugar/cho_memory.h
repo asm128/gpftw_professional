@@ -4,8 +4,8 @@
 //#include "cho_safe.h"
 #include "cho_auto_handler.h"
 
-#ifndef FTW_MEMORY_H__92836409283642038462309846
-#define FTW_MEMORY_H__92836409283642038462309846
+#ifndef CHO_MEMORY_H__92836409283642038462309846
+#define CHO_MEMORY_H__92836409283642038462309846
 
 #define GREF_CUSTOM_ALIGN					16
 #define NWOL_MALLOC_CUSTOM_ALIGN			16
@@ -25,10 +25,10 @@
 
 namespace cho
 {
-#if defined(FTW_WINDOWS)
+#if defined(CHO_WINDOWS)
 	static inline void*																			cho_malloc					(size_t size)													{ return _aligned_malloc(size, NWOL_MALLOC_CUSTOM_ALIGN);	}
 	static inline void																			cho_free					(void* ptr)														{ _aligned_free(ptr);										}
-#elif defined(FTW_LINUX) || defined(FTW_ANDROID)
+#elif defined(CHO_LINUX) || defined(CHO_ANDROID)
 	static inline void*																			cho_malloc					(size_t size)													{ return ::memalign(NWOL_MALLOC_CUSTOM_ALIGN, size);		}
 	static inline void																			cho_free					(void* ptr)														{ ::free(ptr);												}
 #endif

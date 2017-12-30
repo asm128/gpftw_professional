@@ -1,8 +1,8 @@
 #include "cho_grid_view.h"		// for grid_view<>
 #include "cho_ascii_target.h"	// for SASCIITarget
 
-#ifndef FTW_ASCII_DISPLAY_H_34234234
-#define FTW_ASCII_DISPLAY_H_34234234
+#ifndef CHO_ASCII_DISPLAY_H_34234234
+#define CHO_ASCII_DISPLAY_H_34234234
 
 namespace cho
 {
@@ -27,4 +27,4 @@ namespace cho
 	}
 }
 
-#endif // FTW_ASCII_DISPLAY_H_34234234
+#endif // CHO_ASCII_DISPLAY_H_34234234

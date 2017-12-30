@@ -1,21 +1,21 @@
 #include "cho_coord.h"
 
-#if defined(FTW_WINDOWS)
+#if defined(CHO_WINDOWS)
 #	include <windows.h>
 #endif 
 
-#ifndef FTW_DISPLAY_H_293874928374
-#define FTW_DISPLAY_H_293874928374
+#ifndef CHO_DISPLAY_H_293874928374
+#define CHO_DISPLAY_H_293874928374
 
 namespace cho 
 {
 	struct SDisplayPlatformDetail {
-	#if defined(FTW_WINDOWS)
+#if defined(CHO_WINDOWS)
 							::HWND																			WindowHandle								= {};
 							::WNDCLASSEX																	WindowClass									= {};
 
-		static constexpr	const char																		WindowClassName	[256]						= "FTWL_WINDOW";
-	#endif
+		static constexpr	const char																		WindowClassName	[256]						= "SUGAR_WINDOW";
+#endif
 	};
 
 	struct SDisplay {
@@ -37,4 +37,4 @@ namespace cho
 	};
 } // namespace
 
-#endif // FTW_DISPLAY_H_293874928374
+#endif // CHO_DISPLAY_H_293874928374

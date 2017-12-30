@@ -1,7 +1,7 @@
 #include "cho_runtime.h"
 #include "cho_ptr.h"
 
-#define FTW_DEFINE_APPLICATION_ENTRY_POINT(_mainClass)																																													\
+#define CHO_DEFINE_APPLICATION_ENTRY_POINT(_mainClass)																																													\
 		::cho::error_t																				rtMain										(::cho::SRuntimeValues& runtimeValues)												{	\
 	_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);																																										\
 	::cho::ptr_obj<_mainClass>																				applicationInstance							= {};																			\

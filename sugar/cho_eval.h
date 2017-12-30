@@ -1,9 +1,9 @@
 #include "cho_platform.h"
 
-#ifndef FTW_EVAL_H_2983742983047239874
-#define FTW_EVAL_H_2983742983047239874
+#ifndef CHO_EVAL_H_2983742983047239874
+#define CHO_EVAL_H_2983742983047239874
 
-#if defined(FTW_WINDOWS) 
+#if defined(CHO_WINDOWS) 
 #	if defined(min)
 #		undef min
 #	endif
@@ -30,4 +30,4 @@ namespace cho
 #define is_zero(your_int)					( 0 == (your_int))				// returns true if the parameter is equal to zero
 } // namespace
 
-#endif // FTW_EVAL_H_2983742983047239874
+#endif // CHO_EVAL_H_2983742983047239874

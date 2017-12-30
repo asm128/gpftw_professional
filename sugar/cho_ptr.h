@@ -1,8 +1,8 @@
 #include "cho_sync.h"
 #include "cho_log.h"
 
-#ifndef FTW_PTR_H_0297349827348923
-#define FTW_PTR_H_0297349827348923
+#ifndef CHO_PTR_H_0297349827348923
+#define CHO_PTR_H_0297349827348923
 
 namespace cho 
 {
@@ -139,5 +139,5 @@ namespace cho
 	};
 } // namespace
 
-#endif // FTW_PTR_H_0297349827348923
+#endif // CHO_PTR_H_0297349827348923
 

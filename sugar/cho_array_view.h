@@ -3,8 +3,8 @@
 
 #include <exception>	// for ::std::exception
 
-#ifndef FTW_ARRAY_VIEW_H_2398472395543
-#define FTW_ARRAY_VIEW_H_2398472395543
+#ifndef CHO_ARRAY_VIEW_H_2398472395543
+#define CHO_ARRAY_VIEW_H_2398472395543
 
 namespace cho
 {
@@ -42,4 +42,4 @@ namespace cho
 	};
 }
 
-#endif FTW_ARRAY_VIEW_H_2398472395543
+#endif CHO_ARRAY_VIEW_H_2398472395543

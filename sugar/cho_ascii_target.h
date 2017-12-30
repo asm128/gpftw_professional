@@ -5,8 +5,8 @@
 #include "cho_color.h"
 #include <vector>
 
-#ifndef FTW_ASCII_TARGET_H_29874982734
-#define FTW_ASCII_TARGET_H_29874982734
+#ifndef CHO_ASCII_TARGET_H_29874982734
+#define CHO_ASCII_TARGET_H_29874982734
 
 namespace cho
 {
@@ -120,4 +120,4 @@ namespace cho
 	}
 }
 
-#endif // FTW_ASCII_TARGET_H_29874982734
+#endif // CHO_ASCII_TARGET_H_29874982734

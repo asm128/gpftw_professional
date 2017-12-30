@@ -1,7 +1,7 @@
 #include "cho_math.h"
 
-#ifndef FTW_COORD_H_928374982364923322
-#define FTW_COORD_H_928374982364923322
+#ifndef CHO_COORD_H_928374982364923322
+#define CHO_COORD_H_928374982364923322
 
 namespace cho 
 {
@@ -83,7 +83,7 @@ namespace cho
 
 	template<typename _tElement>	static					bool					sphereOverlaps			(const SSphere2D<_tElement> &sphereA, const SSphere2D<_tElement> &sphereB)	noexcept	{
 		const double																		distanceSquared			= (sphereA.Center - sphereB.Center).LengthSquared();
-		const double																		radiiSum				= (sphereA.Radius + sphereB.Radius);
+		const double																		radiiSum				= sphereA.Radius + sphereB.Radius;
 		return distanceSquared < (radiiSum * radiiSum);	// check squared distance against squared radius
 	}
 
@@ -91,4 +91,4 @@ namespace cho
 	template<typename _tElement>	static					double					sphereSize				(const SSphere2D<_tElement> &sphere)										noexcept	{ return 1.3333333333333333 * ::cho::math_pi * sphere.Radius * sphere.Radius * sphere.Radius; }
 }
 
-#endif // FTW_COORD_H_928374982364923322
+#endif // CHO_COORD_H_928374982364923322

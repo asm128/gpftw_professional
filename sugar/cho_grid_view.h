@@ -1,7 +1,7 @@
 #include "cho_array_view.h"		// for cho::array_view<>
 
-#ifndef FTW_GRID_VIEW_H_3423423
-#define FTW_GRID_VIEW_H_3423423
+#ifndef CHO_GRID_VIEW_H_3423423
+#define CHO_GRID_VIEW_H_3423423
 
 namespace cho
 {
@@ -38,4 +38,4 @@ namespace cho
 #pragma pack(pop)
 }
 
-#endif // FTW_GRID_VIEW_H_3423423
+#endif // CHO_GRID_VIEW_H_3423423

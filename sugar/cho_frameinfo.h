@@ -1,7 +1,7 @@
 #include <cstdint>
 
-#ifndef FTW_FRAMEINFO_H_928374654
-#define FTW_FRAMEINFO_H_928374654
+#ifndef CHO_FRAMEINFO_H_928374654
+#define CHO_FRAMEINFO_H_928374654
 
 namespace cho
 {
@@ -47,4 +47,4 @@ namespace cho
 	};
 } // namespace
 
-#endif // FTW_FRAMEINFO_H_928374654
+#endif // CHO_FRAMEINFO_H_928374654

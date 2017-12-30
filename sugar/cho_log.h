@@ -1,15 +1,15 @@
 #include "cho_error.h"
 #include "cho_size.h"
 
-#if defined(FTW_WINDOWS)
+#if defined(CHO_WINDOWS)
 #	include <crtdbg.h>
 #	include <Windows.h>
 #endif
 
-#ifndef FTW_LOG_H_8927349654687654365
-#define FTW_LOG_H_8927349654687654365
+#ifndef CHO_LOG_H_8927349654687654365
+#define CHO_LOG_H_8927349654687654365
 
-#if defined FTW_WINDOWS
+#if defined CHO_WINDOWS
 #	define base_debug_print(text, charCount)						OutputDebugStringA(text); charCount
 #else
 #	define base_debug_print(text, charCount)						printf("%s", text); charCount
@@ -39,39 +39,39 @@ namespace cho
 		::cho::_cho_debug_printf(severity, prefixString, prefixLength == -1 ? 0 : prefixLength, format, __VA_ARGS__);																		\
 	} while(0)
 
-#if !defined FTW_USE_DEBUG_BREAK_ON_ERROR_LOG
-#	define FTW_USE_DEBUG_BREAK_ON_ERROR_LOG
+#if !defined CHO_USE_DEBUG_BREAK_ON_ERROR_LOG
+#	define CHO_USE_DEBUG_BREAK_ON_ERROR_LOG
 #endif 
 
-#if !defined FTW_USE_DEBUG_BREAK_ON_ERROR_LOG
-#	define FTW_CRT_DEBUG_BREAK 
+#if !defined CHO_USE_DEBUG_BREAK_ON_ERROR_LOG
+#	define CHO_CRT_DEBUG_BREAK 
 #else 
-#	define FTW_CRT_DEBUG_BREAK _CrtDbgBreak
+#	define CHO_CRT_DEBUG_BREAK _CrtDbgBreak
 #endif 
 
-#define FTW_ERROR_PRINTF_ENABLED
-#define FTW_WARNING_PRINTF_ENABLED
-#define FTW_INFO_PRINTF_ENABLED		
+#define CHO_ERROR_PRINTF_ENABLED
+#define CHO_WARNING_PRINTF_ENABLED
+#define CHO_INFO_PRINTF_ENABLED		
 
-#if defined (FTW_ERROR_PRINTF_ENABLED)
-#	define error_printf(format, ...)								do { debug_printf(1, "error"	, format, __VA_ARGS__); FTW_CRT_DEBUG_BREAK(); } while(0)
+#if defined (CHO_ERROR_PRINTF_ENABLED)
+#	define error_printf(format, ...)								do { debug_printf(1, "error"	, format, __VA_ARGS__); CHO_CRT_DEBUG_BREAK(); } while(0)
 #else
-#	define error_printf(format, ...)								do { __VA_ARGS__; FTW_CRT_DEBUG_BREAK(); } while(0)
+#	define error_printf(format, ...)								do { __VA_ARGS__; CHO_CRT_DEBUG_BREAK(); } while(0)
 #endif	
 
-#if defined (FTW_WARNING_PRINTF_ENABLED)
+#if defined (CHO_WARNING_PRINTF_ENABLED)
 #	define warning_printf(format, ...)								debug_printf(2, "warning"	, format, __VA_ARGS__)
 #else
 #	define warning_printf(format, ...)								do { __VA_ARGS__; } while(0)
 #endif	
 
-#if defined (FTW_INFO_PRINTF_ENABLED)
+#if defined (CHO_INFO_PRINTF_ENABLED)
 #	define info_printf(format, ...)									debug_printf(3, "info"		, format, __VA_ARGS__)
 #else
 #	define info_printf(format, ...)									do { __VA_ARGS__; } while(0)
 #endif	
 
-#if defined (FTW_SUCCESS_PRINTF_ENABLED)
+#if defined (CHO_SUCCESS_PRINTF_ENABLED)
 #	define success_printf(format, ...)								debug_printf(4, "info"		, format, __VA_ARGS__)
 #else
 #	define success_printf(format, ...)								do { __VA_ARGS__; } while(0)
@@ -110,7 +110,7 @@ namespace cho
 #define retwarn_warn_if(condition, format, ...)					retval_warn_if	(1, condition, format, __VA_ARGS__)
 #define retwarn_info_if(condition, format, ...)					retval_info_if	(1, condition, format, __VA_ARGS__)
 
-#if defined (FTW_ERROR_PRINTF_ENABLED)
+#if defined (CHO_ERROR_PRINTF_ENABLED)
 // Non-propagable retval_error call.
 #	define cho_rve_ecall(retVal, nwo_call, format, ...) do {																														\
 		::cho::error_t errCall = (nwo_call);  																																		\
@@ -246,4 +246,4 @@ namespace cho
 #define rww_if													retwarn_warn_if 
 #define rwi_if													retwarn_info_if 
 
-#endif // FTW_LOG_H_8927349654687654365
+#endif // CHO_LOG_H_8927349654687654365

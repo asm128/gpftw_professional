@@ -2,15 +2,15 @@
 
 #include <cstdint>
 
-#ifndef FTW_TYPEINT_H_29873490827342
-#define FTW_TYPEINT_H_29873490827342
+#ifndef CHO_TYPEINT_H_29873490827342
+#define CHO_TYPEINT_H_29873490827342
 
 namespace cho
 {
 	typedef signed char						schar_t	, sbyte_t	;
 	typedef char							char_t	, byte_t	;
 	typedef unsigned char					uchar_t	, ubyte_t	;
-#if defined FTW_WINDOWS
+#if defined CHO_WINDOWS
 #	define	REFCOUNT_T						long
 	typedef volatile REFCOUNT_T				refcount_t			;
 #else
@@ -19,4 +19,4 @@ namespace cho
 #endif
 }
 
-#endif // FTW_TYPEINT_H_29873490827342
+#endif // CHO_TYPEINT_H_29873490827342

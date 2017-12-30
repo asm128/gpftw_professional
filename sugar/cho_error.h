@@ -1,7 +1,7 @@
 #include "cho_typeint.h"
 
-#ifndef FTW_ERROR_H_91823749823
-#define FTW_ERROR_H_91823749823
+#ifndef CHO_ERROR_H_91823749823
+#define CHO_ERROR_H_91823749823
 
 namespace cho 
 {
@@ -18,6 +18,6 @@ namespace cho
 #	define						not_errored(errVal)							(::cho::succeeded(errVal)) 
 #endif
 
-#define FTW_CRASH()			{ uint64_t * _tasdas = 0; for(uint32_t i = 0; i < 0xFFFFFFFF; ++i) _tasdas[i] = 0xFFFFFFFF00000000ULL; }	// No throw? Just crash.
+#define CHO_CRASH()			{ uint64_t * _tasdas = 0; for(uint32_t i = 0; i < 0xFFFFFFFF; ++i) _tasdas[i] = 0xFFFFFFFF00000000ULL; }	// No throw? Just crash.
 
-#endif // FTW_ERROR_H_91823749823
+#endif // CHO_ERROR_H_91823749823

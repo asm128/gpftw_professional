@@ -1,7 +1,7 @@
 #include "cho_typeint.h"
 
-#ifndef FTW_INPUT_H_2890374982734
-#define FTW_INPUT_H_2890374982734
+#ifndef CHO_INPUT_H_2890374982734
+#define CHO_INPUT_H_2890374982734
 
 namespace cho
 {
@@ -11,4 +11,4 @@ namespace cho
 	};
 } // namespace
 
-#endif // FTW_INPUT_H_2890374982734
+#endif // CHO_INPUT_H_2890374982734

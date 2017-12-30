@@ -1,8 +1,8 @@
 /// Copyright 2009-2017 - asm128
 #include "cho_math.h"
 
-#ifndef FTW_COLOR_H_29734982734
-#define FTW_COLOR_H_29734982734
+#ifndef CHO_COLOR_H_29734982734
+#define CHO_COLOR_H_29734982734
 
 namespace cho
 {
@@ -161,4 +161,4 @@ namespace cho
 } // namespace
 
 
-#endif // FTW_COLOR_H_29734982734
+#endif // CHO_COLOR_H_29734982734

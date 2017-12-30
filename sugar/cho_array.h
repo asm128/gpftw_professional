@@ -1,8 +1,8 @@
 #include "cho_array_view.h"
 #include "cho_memory.h"
 
-#ifndef FTW_ARRAY_H_29837498237498237429837
-#define FTW_ARRAY_H_29837498237498237429837
+#ifndef CHO_ARRAY_H_29837498237498237429837
+#define CHO_ARRAY_H_29837498237498237429837
 
 namespace cho 
 {
@@ -471,4 +471,4 @@ namespace cho
 	}; // array_obj
 }
 
-#endif // FTW_ARRAY_H_29837498237498237429837
+#endif // CHO_ARRAY_H_29837498237498237429837

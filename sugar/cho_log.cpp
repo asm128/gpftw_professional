@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 static	::cho::error_t												getSystemErrorAsString						(const uint64_t lastError, char* buffer, uint32_t bufferSize)			{	// Get the error message, if any.
-#if defined FTW_WINDOWS
+#if defined CHO_WINDOWS
 	if(nullptr == buffer)
 		return -1;
 	if(0 == lastError) 

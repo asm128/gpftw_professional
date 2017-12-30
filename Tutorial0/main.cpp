@@ -1,6 +1,5 @@
 // Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
 //		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
-//
 #include "cho_ascii_display.h"
 #include "cho_frameinfo.h"
 #include "cho_timer.h"
@@ -23,7 +22,6 @@ struct SApplication {
 						::cho::STimer																	Timer										= {};
 						::cho::SFrameInfo																FrameInfo									= {};
 						::cho::SASCIITarget																ASCIIRenderTarget							= {};
-						::cho::SBitmapTargetBGRA														BitmapRenderTarget							= {};
 						::cho::SPalette																	Palette										= 
 		{	(uint32_t)::cho::ASCII_COLOR_INDEX_0		
 		,	(uint32_t)::cho::ASCII_COLOR_INDEX_1 	
@@ -51,7 +49,7 @@ struct SApplication {
 					::cho::error_t																	update										(::SApplication& applicationInstance);
 					::cho::error_t																	draw										(::SApplication& applicationInstance);
 
-FTW_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
+CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
 
 static				::SApplication																	* g_ApplicationInstance						= 0;
 
@@ -102,12 +100,8 @@ struct SOffscreenPlatformDetail {
 		void																						updateOffscreen								(::SApplication& applicationInstance)											{ 
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	uint32_t																								linearScreenSize							= applicationInstance.MainWindow.Size.x * applicationInstance.MainWindow.Size.y;
-	if(bmpOffscreen.size() < linearScreenSize) {
+	if(bmpOffscreen.size() < linearScreenSize)
 		bmpOffscreen.resize(linearScreenSize);
-		//applicationInstance.BitmapRenderTarget.Colors														= {&bmpOffscreen[0], applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y};
-	}
-	if(applicationInstance.MainWindow.Resized) 
-		applicationInstance.BitmapRenderTarget.Colors														= {&bmpOffscreen[0], applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y};
 }
 
 		::cho::error_t																				presentTarget								(::SApplication& applicationInstance)											{ 
@@ -223,7 +217,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	applicationInstance.MainWindow.Size																	= {::BMP_SCREEN_WIDTH, ::BMP_SCREEN_HEIGHT};
 	::RECT																									finalClientRect								= {100, 100, 100 + (LONG)mainWindow.Size.x, 100 + (LONG)mainWindow.Size.y};
 	::AdjustWindowRectEx(&finalClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
-	mainWindow.PlatformDetail.WindowHandle																= ::CreateWindowEx(0, displayDetail.WindowClassName, TEXT("Window FTW"), WS_OVERLAPPEDWINDOW
+	mainWindow.PlatformDetail.WindowHandle																= ::CreateWindowEx(0, displayDetail.WindowClassName, TEXT("Window Sugar"), WS_OVERLAPPEDWINDOW
 		, finalClientRect.left
 		, finalClientRect.top
 		, finalClientRect.right		- finalClientRect.left
@@ -254,7 +248,6 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 
 					::cho::error_t																	draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	const ::cho::SDisplay																					& mainWindow								= applicationInstance.MainWindow;
-	::memset(&applicationInstance.BitmapRenderTarget.Colors[0][0], 0, sizeof(::cho::SColorBGRA) * applicationInstance.BitmapRenderTarget.Colors.size());
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	::cho::SCoord2		<int32_t>																			screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
 	::cho::SRectangle2D<int32_t>																			geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
@@ -264,6 +257,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	geometry2.B																							+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	geometry2.C																							+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	::cho::SBitmapTargetBGRA																				bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
+	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());
 	::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_BLUE		]), geometry0);
 	::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_BLUE		]), {geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}});
 	::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.Palette[::cho::ASCII_COLOR_GREEN		]), geometry1);

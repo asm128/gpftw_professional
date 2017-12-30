@@ -1,11 +1,11 @@
 #include "cho_typeint.h"
 
-#ifndef FTW_SYNC_H_023749082374
-#define FTW_SYNC_H_023749082374
+#ifndef CHO_SYNC_H_023749082374
+#define CHO_SYNC_H_023749082374
 
 namespace cho
 {
-#if defined(FTW_ANDROID) || defined(FTW_LINUX)
+#if defined(CHO_ANDROID) || defined(CHO_LINUX)
 /// <Atomic Builtins> http://gcc.gnu.org/onlinedocs/gcc-4.4.3/gcc/Atomic-Builtins.html#Atomic-Builtins
 #	include <mutex>
 #	define sync_increment(nCount)							(__sync_add_and_fetch(&nCount, 1))
@@ -17,7 +17,7 @@ namespace cho
 #	define ENTER_SHARED_SECTION(Name)						(Name).lock()
 #	define LEAVE_SHARED_SECTION(Name)						(Name).unlock()
 #	define DELETE_SHARED_SECTION(Name)						(0)
-#elif defined(FTW_WINDOWS)  
+#elif defined(CHO_WINDOWS)  
 #	define WIN32_LEAN_AND_MEAN
 #	include <Windows.h>
 #	if (defined( _WIN64 ) || defined( WIN64 )) 
@@ -48,7 +48,7 @@ namespace cho
 #	define DELETE_SHARED_SECTION(Name)						(0)			
 #endif
 
-#if defined(FTW_MTSUPPORT)
+#if defined(CHO_MTSUPPORT)
 #	define DECLARE_CRITICAL_SECTION							DECLARE_SHARED_SECTION
 #	define INIT_CRITICAL_SECTION							INIT_SHARED_SECTION
 #	define ENTER_CRITICAL_SECTION							ENTER_SHARED_SECTION
@@ -86,4 +86,4 @@ namespace cho
 #endif
 }
 
-#endif // FTW_SYNC_H_023749082374
+#endif // CHO_SYNC_H_023749082374

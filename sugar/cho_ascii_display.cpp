@@ -182,7 +182,7 @@ static constexpr	const ::cho::SColorRGBA				g_DefaultPalette	[]							=
 		stream													= 0; ::freopen_s(&stream, "CONIN$", "r+", stdin);
 	}
 
-	SetConsoleTitle(TEXT("ASCII Console FTW"));
+	SetConsoleTitle(TEXT("ASCII Console Sugar"));
 	::SetConsoleCtrlHandler(::handlerConsoleRoutine, TRUE);
 	const HANDLE												hConsoleOut										= ::GetStdHandle(STD_OUTPUT_HANDLE);
 	::GetCurrentConsoleFontEx		( hConsoleOut, TRUE	, &g_ConsoleInfo.InfoFontOriginal			);

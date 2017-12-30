@@ -1,7 +1,7 @@
 #include "cho_typeint.h"	// for uint16_t and uint32_t 
 
-#ifndef FTW_ASCII_COLOR_H_230487298374
-#define FTW_ASCII_COLOR_H_230487298374
+#ifndef CHO_ASCII_COLOR_H_230487298374
+#define CHO_ASCII_COLOR_H_230487298374
 
 namespace cho
 {
@@ -56,4 +56,4 @@ namespace cho
 // BLINK	128 
 // #define invert_color_ascii(_col) (((_col & 0xF0)>>4) | ((_col & 0xF)<<4))
 
-#endif // FTW_ASCII_COLOR_H_230487298374
+#endif // CHO_ASCII_COLOR_H_230487298374
