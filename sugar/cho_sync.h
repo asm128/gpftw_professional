@@ -54,11 +54,11 @@ namespace cho
 #	define ENTER_CRITICAL_SECTION							ENTER_SHARED_SECTION
 #	define LEAVE_CRITICAL_SECTION							LEAVE_SHARED_SECTION
 #	define DELETE_CRITICAL_SECTION							DELETE_SHARED_SECTION
-#	if defined(__ANDROID__) || defined(__LINUX__)
+#	if defined(CHO_ANDROID) || defined(CHO_LINUX)
 #		define cho_sync_increment								sync_increment
 #		define cho_sync_decrement								sync_decrement
 #		define cho_sync_exchange								sync_exchange 
-#	elif defined(__WINDOWS__)  
+#	elif defined(CHO_WINDOWS)  
 #		if (defined( _WIN64 ) || defined( WIN64 )) 
 #			define cho_sync_increment(nCount)						( InterlockedIncrement64( &nCount ) )
 #			define cho_sync_decrement(nCount)						( InterlockedDecrement64( &nCount ) )

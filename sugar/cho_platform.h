@@ -14,7 +14,7 @@
 #endif
 
 #if (!defined(CHO_ANDROID)) && defined(ANDROID) 
-#	define CHO__ANDROID
+#	define CHO_ANDROID
 #elif (!defined(CHO_LINUX)) && defined(__linux__)
 #	define CHO_LINUX
 #elif (!defined(CHO_WINDOWS)) && (defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64))

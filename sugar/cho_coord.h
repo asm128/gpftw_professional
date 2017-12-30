@@ -55,17 +55,17 @@ namespace cho
 		}
 	};	// struct SCoord2
 
-#define NWOL_DEFAULT_OPERATOR_NE(_otherType, ...)	\
+#define CHO_DEFAULT_OPERATOR_NE(_otherType, ...)	\
 		inline constexpr									bool						operator!=				(const _otherType		& other)											const	noexcept	{ return !operator==(other);	}	\
 		inline constexpr									bool						operator==				(const _otherType		& other)											const	noexcept	{ return __VA_ARGS__;			}
 
 	// ---- Geometric figures and other coord-related POD structs.
-	template<typename _tElement>	struct SRange			{ _tElement				Offset, Count			; NWOL_DEFAULT_OPERATOR_NE(SRange		<_tElement>,	Offset	== other.Offset	&& Count	== other.Count					); };
-	template<typename _tElement>	struct SLine2D			{ SCoord2<_tElement>	A, B					; NWOL_DEFAULT_OPERATOR_NE(SLine2D		<_tElement>,	A		== other.A		&& B		== other.B						); };
-	template<typename _tElement>	struct STriangle2D		{ SCoord2<_tElement>	A, B, C					; NWOL_DEFAULT_OPERATOR_NE(STriangle2D	<_tElement>,	A		== other.A		&& B		== other.B		&& C == other.C	); };
-	template<typename _tElement>	struct SRectangle2D		{ SCoord2<_tElement>	Offset, Size			; NWOL_DEFAULT_OPERATOR_NE(SRectangle2D	<_tElement>,	Offset	== other.Offset	&& Size		== other.Size					); };
-	template<typename _tElement>	struct SCircle2D		{ double Radius; SCoord2<_tElement> Center		; NWOL_DEFAULT_OPERATOR_NE(SCircle2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius					); };
-	template<typename _tElement>	struct SSphere2D		{ double Radius; SCoord2<_tElement> Center		; NWOL_DEFAULT_OPERATOR_NE(SSphere2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius					); };
+	template<typename _tElement>	struct SRange			{ _tElement				Offset, Count			; CHO_DEFAULT_OPERATOR_NE(SRange		<_tElement>,	Offset	== other.Offset	&& Count	== other.Count					); };
+	template<typename _tElement>	struct SLine2D			{ SCoord2<_tElement>	A, B					; CHO_DEFAULT_OPERATOR_NE(SLine2D		<_tElement>,	A		== other.A		&& B		== other.B						); };
+	template<typename _tElement>	struct STriangle2D		{ SCoord2<_tElement>	A, B, C					; CHO_DEFAULT_OPERATOR_NE(STriangle2D	<_tElement>,	A		== other.A		&& B		== other.B		&& C == other.C	); };
+	template<typename _tElement>	struct SRectangle2D		{ SCoord2<_tElement>	Offset, Size			; CHO_DEFAULT_OPERATOR_NE(SRectangle2D	<_tElement>,	Offset	== other.Offset	&& Size		== other.Size					); };
+	template<typename _tElement>	struct SCircle2D		{ double Radius; SCoord2<_tElement> Center		; CHO_DEFAULT_OPERATOR_NE(SCircle2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius					); };
+	template<typename _tElement>	struct SSphere2D		{ double Radius; SCoord2<_tElement> Center		; CHO_DEFAULT_OPERATOR_NE(SSphere2D	<_tElement>,	Center	== other.Center	&& Radius	== other.Radius					); };
 #pragma pack(pop)
 
 	// ---- Line
