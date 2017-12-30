@@ -16,36 +16,24 @@
     <Filter Include="core">
       <UniqueIdentifier>{ebfd77da-c19b-4df5-a3b4-125d1d2ba72d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="container">
+      <UniqueIdentifier>{ce9a994d-5b8d-457d-9200-120d400350f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="raster">
+      <UniqueIdentifier>{4af1ed5f-f2fd-43d8-946d-c5ff434de73a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{9bd0e143-6322-40a6-8a9a-0169c6344b5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="runtime">
+      <UniqueIdentifier>{238a39fb-d947-415e-980b-c1ef977cee58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ftw_eval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_array.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_array_view.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ftw_ascii_display.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_ascii_target.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_ascii_color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_color.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_grid_view.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_coord.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ftw_frameinfo.h">
@@ -54,19 +42,7 @@
     <ClInclude Include="ftw_timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ftw_bitmap_target.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_memory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ftw_auto_handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_app_impl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ftw_runtime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ftw_error.h">
@@ -81,19 +57,55 @@
     <ClInclude Include="ftw_typeint.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="ftw_array.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_array_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_grid_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_ascii_target.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_bitmap_target.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_color.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_coord.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_math.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_ascii_color.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_memory.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_runtime.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="ftw_app_impl.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ftw_ascii_display.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ftw_ascii_target.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ftw_log.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ftw_timer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ftw_ascii_target.cpp">
+      <Filter>raster</Filter>
+    </ClCompile>
+    <ClCompile Include="ftw_log.cpp">
+      <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
