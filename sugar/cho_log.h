@@ -1,4 +1,5 @@
 #include "cho_error.h"
+#include "cho_debug.h"
 #include "cho_size.h"
 
 #if defined(CHO_WINDOWS)
@@ -39,24 +40,10 @@ namespace cho
 		::cho::_cho_debug_printf(severity, prefixString, prefixLength == -1 ? 0 : prefixLength, format, __VA_ARGS__);																		\
 	} while(0)
 
-#if !defined CHO_USE_DEBUG_BREAK_ON_ERROR_LOG
-#	define CHO_USE_DEBUG_BREAK_ON_ERROR_LOG
-#endif 
-
-#if !defined CHO_USE_DEBUG_BREAK_ON_ERROR_LOG
-#	define CHO_CRT_DEBUG_BREAK 
-#else 
-#	define CHO_CRT_DEBUG_BREAK _CrtDbgBreak
-#endif 
-
-#define CHO_ERROR_PRINTF_ENABLED
-#define CHO_WARNING_PRINTF_ENABLED
-#define CHO_INFO_PRINTF_ENABLED		
-
 #if defined (CHO_ERROR_PRINTF_ENABLED)
-#	define error_printf(format, ...)								do { debug_printf(1, "error"	, format, __VA_ARGS__); CHO_CRT_DEBUG_BREAK(); } while(0)
+#	define error_printf(format, ...)								do { debug_printf(1, "error"	, format, __VA_ARGS__); CHO_PLATFORM_CRT_BREAKPOINT(); } while(0)
 #else
-#	define error_printf(format, ...)								do { __VA_ARGS__; CHO_CRT_DEBUG_BREAK(); } while(0)
+#	define error_printf(format, ...)								do { __VA_ARGS__; CHO_PLATFORM_CRT_BREAKPOINT(); } while(0)
 #endif	
 
 #if defined (CHO_WARNING_PRINTF_ENABLED)

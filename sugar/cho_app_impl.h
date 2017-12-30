@@ -1,3 +1,4 @@
+/// Copyright 2017-2018 - asm128
 #include "cho_runtime.h"
 #include "cho_ptr.h"
 

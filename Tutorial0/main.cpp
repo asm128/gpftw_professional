@@ -134,9 +134,9 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 				applicationInstance.MainWindow.Size																	= newMetrics.Cast<uint32_t>();
 				applicationInstance.MainWindow.Resized																= true;
 				applicationInstance.MainWindow.Repaint																= true; 
-				//::updateOffscreen	(applicationInstance);
-				//::draw				(applicationInstance);
-				//::presentTarget		(applicationInstance);
+				::updateOffscreen	(applicationInstance);
+				::draw				(applicationInstance);
+				::presentTarget		(applicationInstance);
 			}
 		}
 		if( wParam == SIZE_MINIMIZED ) {
@@ -180,11 +180,8 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	while(::PeekMessage(&msg, applicationInstance.MainWindow.PlatformDetail.WindowHandle, 0, 0, PM_REMOVE)) {
 		::TranslateMessage	(&msg);
 		::DispatchMessage	(&msg);
-		if(msg.message == WM_QUIT) {
-			applicationInstance.MainWindow.PlatformDetail.WindowHandle											= 0;
+		if(msg.message == WM_QUIT)
 			break;
-		}
-		break;
 	}
 }
 
@@ -192,12 +189,13 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 					::cho::error_t																	cleanup										(::SApplication& applicationInstance)											{ 
 	::cho::SDisplayPlatformDetail																			& displayDetail								= applicationInstance.MainWindow.PlatformDetail;
 	if(displayDetail.WindowHandle) {
-		::DestroyWindow(displayDetail.WindowHandle);
+		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");
 		::updateMainWindow(applicationInstance);
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
 	error_if(errored(::cho::asciiDisplayDestroy	()), "Failed to close ASCII display!");
 	error_if(errored(::cho::asciiTargetDestroy	(applicationInstance.ASCIIRenderTarget)), "No known reasons for this to fail. It may mean a mismamagement of the target array pointers!");
+
 	g_ApplicationInstance																				= 0;
 	error_printf("Error message test. Press F5 if the debugger breaks execution at this point.");
 	return 0;
@@ -206,8 +204,8 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 // --- Initialize console.
 					::cho::error_t																	setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance																				= &applicationInstance;
-	::cho::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT);
-	::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height());
+	error_if(errored(::cho::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT)			), "This should never happen and usually indicates memory corruption or lack of system resources.");
+	error_if(errored(::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height())	), "Not sure why this would fail at this point.");
 	::cho::SDisplay																							& mainWindow								= applicationInstance.MainWindow;
 	::cho::SDisplayPlatformDetail																			& displayDetail								= mainWindow.PlatformDetail;
 	::initWndClass(applicationInstance.RuntimeValues.hInstance, displayDetail.WindowClassName, displayDetail.WindowClass);

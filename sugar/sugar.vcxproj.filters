@@ -108,6 +108,9 @@
     <ClInclude Include="cho_color.h">
       <Filter>raster</Filter>
     </ClInclude>
+    <ClInclude Include="cho_debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_log.cpp">

@@ -11,23 +11,23 @@ namespace cho
 {
 	struct SDisplayPlatformDetail {
 #if defined(CHO_WINDOWS)
-							::HWND																			WindowHandle								= {};
-							::WNDCLASSEX																	WindowClass									= {};
+							::HWND													WindowHandle								= {};
+							::WNDCLASSEX											WindowClass									= {};
 
-		static constexpr	const char																		WindowClassName	[256]						= "SUGAR_WINDOW";
+		static constexpr	const char												WindowClassName	[256]						= "SUGAR_WINDOW";
 #endif
 	};
 
 	struct SDisplay {
-							::cho::SDisplayPlatformDetail													PlatformDetail								= {};
-							::cho::SCoord2<uint32_t>														Size										= {};
-							bool																			Resized										: 1;
-							bool																			Repaint										: 1;
-							bool																			NoDraw										: 1;
-							bool																			MinOrMaxed									: 1;
-							bool																			Closed										: 1;
+							::cho::SDisplayPlatformDetail							PlatformDetail								= {};
+							::cho::SCoord2<uint32_t>								Size										= {};
+							bool													Resized										: 1;
+							bool													Repaint										: 1;
+							bool													NoDraw										: 1;
+							bool													MinOrMaxed									: 1;
+							bool													Closed										: 1;
 
-																											SDisplay									()
+																					SDisplay									()
 			: Resized		(false)
 			, Repaint		(false)
 			, NoDraw		(false)

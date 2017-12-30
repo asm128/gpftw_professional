@@ -1,3 +1,4 @@
+/// Copyright 2016-2018 - asm128
 #include "cho_platform.h"
 #if defined(CHO_WINDOWS)
 #	include <minwindef.h>
