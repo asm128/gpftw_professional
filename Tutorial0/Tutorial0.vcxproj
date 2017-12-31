@@ -163,7 +163,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="application_main.cpp" />
+    <ClCompile Include="application_setup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />

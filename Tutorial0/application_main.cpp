@@ -4,89 +4,26 @@
 #include "cho_bitmap_target.h"
 #include "cho_app_impl.h"
 
-static constexpr	const uint32_t																	BMP_SCREEN_WIDTH							= 512;
-static constexpr	const uint32_t																	BMP_SCREEN_HEIGHT							= uint32_t(::BMP_SCREEN_WIDTH * (9.0 / 16.0));
 static constexpr	const uint32_t																	ASCII_SCREEN_WIDTH							= 132	;
 static constexpr	const uint32_t																	ASCII_SCREEN_HEIGHT							= 50	;
 
 CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
 
-static				::SApplication																	* g_ApplicationInstance						= 0;
+					::SApplication																	* g_ApplicationInstance						= 0;
 
-		void																						updateOffscreen								(::SApplication& applicationInstance)											{ 
+					void																			updateOffscreen								(::SApplication& applicationInstance)											{ 
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
-	uint32_t																								linearScreenSize							= applicationInstance.MainWindow.Size.x * applicationInstance.MainWindow.Size.y;
+	uint32_t																								linearScreenSize							= applicationInstance.MainDisplay.Size.x * applicationInstance.MainDisplay.Size.y;
 	if(bmpOffscreen.size() < linearScreenSize)
 		bmpOffscreen.resize(linearScreenSize);
 }
 
-static	::RECT																						minClientRect								= {100, 100, 100 + 320, 100 + 200};
-
-		LRESULT WINAPI																				mainWndProc									(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)							{
-	::SApplication																							& applicationInstance						= *g_ApplicationInstance;
-	static	const int																						adjustedMinRect								= ::AdjustWindowRectEx(&minClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
-
-	::cho::SDisplayPlatformDetail																			& displayDetail								= applicationInstance.MainWindow.PlatformDetail;
-	switch(uMsg) {
-	default: break;		
-	case WM_CLOSE			: ::DestroyWindow(hWnd); return 0;
-	case WM_GETMINMAXINFO	:	// Catch this message so to prevent the window from becoming too small.
-		((::MINMAXINFO*)lParam)->ptMinTrackSize																= {minClientRect.right - minClientRect.left, minClientRect.bottom - minClientRect.top}; 
-		return 0;
-	case WM_SIZE			: 
-		if(lParam) {
-			::cho::SCoord2<int32_t>																					newMetrics									= ::cho::SCoord2<WORD>{LOWORD(lParam), HIWORD(lParam)}.Cast<int32_t>();
-			if(newMetrics != applicationInstance.MainWindow.Size.Cast<int32_t>()) {
-				applicationInstance.MainWindow.Size																	= newMetrics.Cast<uint32_t>();
-				applicationInstance.MainWindow.Resized																= true;
-				applicationInstance.MainWindow.Repaint																= true; 
-				::updateOffscreen	(applicationInstance);
-				error_if(errored(::draw							(applicationInstance)), "Not sure why these would fail.");
-				error_if(errored(::cho::displayPresentTarget	(applicationInstance.MainWindow, applicationInstance.BitmapOffsceen)), "Not sure why these would fail.");
-			}
-		}
-		if( wParam == SIZE_MINIMIZED ) {
-			applicationInstance.MainWindow.MinOrMaxed = applicationInstance.MainWindow.NoDraw					= true;
-		}
-		else if( wParam == SIZE_MAXIMIZED ) {
-			applicationInstance.MainWindow.Resized = applicationInstance.MainWindow.MinOrMaxed					= true;
-			applicationInstance.MainWindow.NoDraw																= false;
-		}
-		else if( wParam == SIZE_RESTORED ) {
-			applicationInstance.MainWindow.Resized																= true;
-			applicationInstance.MainWindow.MinOrMaxed															= true;
-			applicationInstance.MainWindow.NoDraw																= false;
-		}
-		else {
-			//State.Resized									= true;	? 
-			applicationInstance.MainWindow.MinOrMaxed = applicationInstance.MainWindow.NoDraw					= false;
-		}
-		break;
-	case WM_PAINT			: break;
-	case WM_DESTROY			: 
-		::PostQuitMessage(0); 
-		displayDetail.WindowHandle																			= 0;
-		applicationInstance.MainWindow.Closed																= true;
-		return 0;
-	}
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
-}
-
-		void																						initWndClass								(::HINSTANCE hInstance, const TCHAR* className, ::WNDCLASSEX& wndClassToInit)	{
-	wndClassToInit																						= {sizeof(::WNDCLASSEX),};
-	wndClassToInit.lpfnWndProc																			= ::mainWndProc;
-	wndClassToInit.hInstance																			= hInstance;
-	wndClassToInit.hCursor																				= LoadCursor(NULL, IDC_ARROW);
-	wndClassToInit.hbrBackground																		= (::HBRUSH)(COLOR_3DFACE + 1);
-	wndClassToInit.lpszClassName																		= className;
-}
-
 // --- Cleanup application resources.
 					::cho::error_t																	cleanup										(::SApplication& applicationInstance)											{ 
-	::cho::SDisplayPlatformDetail																			& displayDetail								= applicationInstance.MainWindow.PlatformDetail;
+	::cho::SDisplayPlatformDetail																			& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");
-		::cho::displayUpdate(applicationInstance.MainWindow);
+		::cho::displayUpdate(applicationInstance.MainDisplay);
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
 	error_if(errored(::cho::asciiDisplayDestroy	()), "Failed to close ASCII display!");
@@ -97,29 +34,14 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	return 0;
 }
 
+					::cho::error_t																	mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance);
+
 // --- Initialize console.
 					::cho::error_t																	setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance																				= &applicationInstance;
-	error_if(errored(::cho::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT)			), "This should never happen and usually indicates memory corruption or lack of system resources.");
-	error_if(errored(::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height())	), "Not sure why this would fail at this point.");
-	::cho::SDisplay																							& mainWindow								= applicationInstance.MainWindow;
-	::cho::SDisplayPlatformDetail																			& displayDetail								= mainWindow.PlatformDetail;
-	::initWndClass(applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance, displayDetail.WindowClassName, displayDetail.WindowClass);
-	::RegisterClassEx(&displayDetail.WindowClass);
-
-	//::std::vector<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
-	applicationInstance.MainWindow.Size																	= {::BMP_SCREEN_WIDTH, ::BMP_SCREEN_HEIGHT};
-	::RECT																									finalClientRect								= {100, 100, 100 + (LONG)mainWindow.Size.x, 100 + (LONG)mainWindow.Size.y};
-	::AdjustWindowRectEx(&finalClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
-	mainWindow.PlatformDetail.WindowHandle																= ::CreateWindowEx(0, displayDetail.WindowClassName, TEXT("Window Sugar"), WS_OVERLAPPEDWINDOW
-		, finalClientRect.left
-		, finalClientRect.top
-		, finalClientRect.right		- finalClientRect.left
-		, finalClientRect.bottom	- finalClientRect.top
-		, 0, 0, displayDetail.WindowClass.hInstance, 0
-		);
-	::ShowWindow	(displayDetail.WindowHandle, SW_SHOW);
-	::UpdateWindow	(displayDetail.WindowHandle);
+	error_if(errored(::cho::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT)						), "This should never happen and usually indicates memory corruption or lack of system resources.");
+	error_if(errored(::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height())				), "Not sure why this would fail at this point.");
+	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	return 0;
 }
 
@@ -129,20 +51,21 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	error_if(errored(::cho::asciiTargetClear	(applicationInstance.ASCIIRenderTarget)), "This shouldn't fail either unless memory corruption happened.");
 	applicationInstance.Timer		.Frame();
 	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
-	::cho::SDisplay																							& mainWindow								= applicationInstance.MainWindow;
+	::cho::SDisplay																							& mainWindow								= applicationInstance.MainDisplay;
 	::cho::displayUpdate(mainWindow);
 	::updateOffscreen	(applicationInstance);
 	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
 	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffsceen)), "Unknown error.");
+
 	char																									buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.Timer.LastTimeSeconds);
+	sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g. ", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.Timer.LastTimeSeconds);
 	::HWND																									windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 	return 0;
 }
 
 					::cho::error_t																	draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	const ::cho::SDisplay																					& mainWindow								= applicationInstance.MainWindow;
+	const ::cho::SDisplay																					& mainWindow								= applicationInstance.MainDisplay;
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	::cho::SCoord2		<int32_t>																			screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
 	::cho::SRectangle2D<int32_t>																			geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};

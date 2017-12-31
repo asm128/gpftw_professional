@@ -31,7 +31,7 @@ namespace cho
 	};
 
 	struct SRuntimeValues {
-		SRuntimeValuesDetail													PlatformDetail						;
+				SRuntimeValuesDetail											PlatformDetail						;
 	};
 }
 
