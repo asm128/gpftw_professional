@@ -2,6 +2,8 @@
 #include "cho_debug.h"
 #include "cho_size.h"
 
+#include <cstdio>
+
 #if defined(CHO_WINDOWS)
 #	include <crtdbg.h>
 #	include <Windows.h>
@@ -99,32 +101,32 @@ namespace cho
 
 #if defined (CHO_ERROR_PRINTF_ENABLED)
 // Non-propagable retval_error call.
-#	define cho_rve_ecall(retVal, nwo_call, format, ...) do {																														\
-		::cho::error_t errCall = (nwo_call);  																																		\
+#	define cho_rve_ecall(retVal, chol_call, format, ...) do {																														\
+		::cho::error_t errCall = (chol_call);  																																		\
 		if(errCall < 0) {																																							\
-			debug_printf(0, "error", "%s: 0x%X.", #nwo_call, errCall);																												\
+			debug_printf(0, "error", "%s: 0x%X.", #chol_call, errCall);																												\
 			error_printf(format, __VA_ARGS__); 																																		\
 			return retVal; 																																							\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #nwo_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
 		}																																											\
 	} while(0)
 
 // Non-propagable retval_error error-warning call.
-#	define cho_rve_ewcall(retVal, nwo_call, format, ...) do {																														\
-		if(::cho::error_t errCall = (nwo_call)) { 																																	\
+#	define cho_rve_ewcall(retVal, chol_call, format, ...) do {																														\
+		if(::cho::error_t errCall = (chol_call)) { 																																	\
 			if(errCall < 0) {																																						\
-				debug_printf(0, "error", "%s: 0x%X.", #nwo_call, errCall);																											\
+				debug_printf(0, "error", "%s: 0x%X.", #chol_call, errCall);																											\
 				error_printf(format, __VA_ARGS__); 																																	\
 				return retval; 																																						\
 			}																																										\
 			else {																																									\
-				warning_printf("%s: 0x%X.", #nwo_call, errCall);																													\
+				warning_printf("%s: 0x%X.", #chol_call, errCall);																													\
 			}																																										\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #nwo_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
 		}																																											\
 	} while(0)
 
@@ -154,43 +156,43 @@ namespace cho
 
 // --------------------------------------------------------------------
 // Propagable retval_error call.
-#	define cho_pecall(nwo_call, ...) do {																																			\
-		::cho::error_t errCall = (nwo_call);  																																		\
+#	define cho_pecall(chol_call, ...) do {																																			\
+		::cho::error_t errCall = (chol_call);  																																		\
 		if(errCall < 0) {																																							\
-			debug_printf(0, "error", "%s: 0x%X", #nwo_call, errCall);																												\
+			debug_printf(0, "error", "%s: 0x%X", #chol_call, errCall);																												\
 			error_printf(__VA_ARGS__); 																																				\
 			return errCall; 																																						\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #nwo_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
 		}																																											\
 	} while(0)
 
 // Propagable retval_error error-warning call.
-#	define cho_pewcall(nwo_call, ...) do {																																			\
-		if(::cho::error_t errCall = (nwo_call)) { 																																	\
+#	define cho_pewcall(chol_call, ...) do {																																			\
+		if(::cho::error_t errCall = (chol_call)) { 																																	\
 			if(errCall < 0) {																																						\
-				debug_printf(0, "error", "%s: 0x%X", #nwo_call, errCall);																											\
+				debug_printf(0, "error", "%s: 0x%X", #chol_call, errCall);																											\
 				error_printf(__VA_ARGS__); 																																			\
 				return errCall; 																																					\
 			}																																										\
 			else {																																									\
-				warning_printf("%s: 0x%X.", #nwo_call, errCall);																													\
+				warning_printf("%s: 0x%X.", #chol_call, errCall);																													\
 			}																																										\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #nwo_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
 		}																																											\
 	} while(0)
 
 #else
-#	define cho_rve_ecall(retVal, nwo_call, ...) do {																																\
-		if(::cho::failed(nwo_call))  																																				\
+#	define cho_rve_ecall(retVal, chol_call, ...) do {																																\
+		if(::cho::failed(chol_call))  																																				\
 			return retval; 																																							\
 	} while(0)
 
-#	define cho_pecall(retVal, nwo_call, ...)  do {																																	\
-		::cho::error_t _cho_errCall = ::cho::succeeded(nwo_call);																													\
+#	define cho_pecall(retVal, chol_call, ...)  do {																																	\
+		::cho::error_t _cho_errCall = ::cho::succeeded(chol_call);																													\
 		if(::cho::failed(_cho_errCall)) 																																			\
 			return retval; 																																							\
 	} while(0)

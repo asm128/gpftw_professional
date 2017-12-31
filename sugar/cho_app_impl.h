@@ -38,7 +38,6 @@
 		break_error_if(errored(updateResult), "update() returned error.");																																								\
 		error_if(::draw(*applicationInstance), "Why would this ever happen?");																																							\
 	}																																																									\
-																																																										\
 	info_printf("Cleaning up application instance...");																																													\
 	::cleanup(*applicationInstance);																																																	\
 	info_printf("Application instance destroyed.");																																														\

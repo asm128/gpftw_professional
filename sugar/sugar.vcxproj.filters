@@ -134,5 +134,8 @@
     <ClCompile Include="cho_timer.cpp">
       <Filter>time</Filter>
     </ClCompile>
+    <ClCompile Include="cho_display.cpp">
+      <Filter>display</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

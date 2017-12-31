@@ -13,64 +13,11 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 static				::SApplication																	* g_ApplicationInstance						= 0;
 
-		::cho::error_t																				drawBuffer									(::HDC hdc, int width, int height, ::cho::SColorBGRA *colorArray)				{
-	struct SOffscreenPlatformDetail {
-		uint32_t																								BitmapInfoSize								= 0;
-		::BITMAPINFO																							* BitmapInfo								= 0;
-		::HDC																									IntermediateDeviceContext					= 0;    // <- note, we're creating, so it needs to be destroyed
-		::HBITMAP																								IntermediateBitmap							= 0;
-
-																												~SOffscreenPlatformDetail					()																				{
-			if(BitmapInfo					) ::free			(BitmapInfo					); 
-			if(IntermediateBitmap			) ::DeleteObject	(IntermediateBitmap			); 
-			if(IntermediateDeviceContext	) ::DeleteDC		(IntermediateDeviceContext	); 
-		}
-	}																										offscreenDetail								= {};
-
-	const uint32_t																							bytesToCopy									= sizeof(::RGBQUAD) * width * height;
-	offscreenDetail.BitmapInfoSize																		= sizeof(::BITMAPINFO) + bytesToCopy;
-	offscreenDetail.BitmapInfo																			= (::BITMAPINFO*)::malloc(offscreenDetail.BitmapInfoSize);
-	for(uint32_t iPixel = 0, pixelCount = width * height; iPixel < pixelCount; ++iPixel)
-		((::RGBQUAD*)offscreenDetail.BitmapInfo->bmiColors)[iPixel]											= {colorArray[iPixel].b, colorArray[iPixel].g, colorArray[iPixel].r, 0xFF};
-
-	offscreenDetail.BitmapInfo->bmiHeader.biSize														= sizeof(::BITMAPINFO);
-	offscreenDetail.BitmapInfo->bmiHeader.biWidth														= width;
-	offscreenDetail.BitmapInfo->bmiHeader.biHeight														= height;
-	offscreenDetail.BitmapInfo->bmiHeader.biPlanes														= 1;
-	offscreenDetail.BitmapInfo->bmiHeader.biBitCount													= 32;
-	offscreenDetail.BitmapInfo->bmiHeader.biCompression													= BI_RGB;
-	offscreenDetail.BitmapInfo->bmiHeader.biSizeImage													= width * height * sizeof(::RGBQUAD);
-	offscreenDetail.BitmapInfo->bmiHeader.biXPelsPerMeter												= 0x0ec4; // Paint and PSP use these values.
-	offscreenDetail.BitmapInfo->bmiHeader.biYPelsPerMeter												= 0x0ec4; // Paint and PSP use these values.
-	offscreenDetail.BitmapInfo->bmiHeader.biClrUsed														= 0; 
-	offscreenDetail.BitmapInfo->bmiHeader.biClrImportant												= 0;
-
-	offscreenDetail.IntermediateDeviceContext															= ::CreateCompatibleDC(hdc);    // <- note, we're creating, so it needs to be destroyed
-	char																									* ppvBits									= 0;
-	offscreenDetail.IntermediateBitmap																	= ::CreateDIBSection(offscreenDetail.IntermediateDeviceContext, offscreenDetail.BitmapInfo, DIB_RGB_COLORS, (void**) &ppvBits, NULL, 0);
-	reterr_error_if(0 == ::SetDIBits(NULL, offscreenDetail.IntermediateBitmap, 0, height, offscreenDetail.BitmapInfo->bmiColors, offscreenDetail.BitmapInfo, DIB_RGB_COLORS), "Cannot copy bits into dib section.");
-	::HBITMAP																								hBmpOld										= (::HBITMAP)::SelectObject(offscreenDetail.IntermediateDeviceContext, offscreenDetail.IntermediateBitmap);    // <- altering state
-	error_if(FALSE == ::BitBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
-
-	::SelectObject(hdc, hBmpOld);	// put the old bitmap back in the DC (restore state)
-	return 0;
-}
-
 		void																						updateOffscreen								(::SApplication& applicationInstance)											{ 
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	uint32_t																								linearScreenSize							= applicationInstance.MainWindow.Size.x * applicationInstance.MainWindow.Size.y;
 	if(bmpOffscreen.size() < linearScreenSize)
 		bmpOffscreen.resize(linearScreenSize);
-}
-
-		::cho::error_t																				presentTarget								(::SApplication& applicationInstance)											{ 
-	::HWND																									windowHandle								= applicationInstance.MainWindow.PlatformDetail.WindowHandle;
-	retwarn_warn_if(0 == windowHandle, "presentTarget called without a valid window handle set for the main window.");
-	::HDC																									dc											= ::GetDC(windowHandle);
-	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
-	error_if(errored(::drawBuffer(dc, applicationInstance.MainWindow.Size.x, applicationInstance.MainWindow.Size.y, &bmpOffscreen[0])), "Not sure why this would happen.");
-	::ReleaseDC(windowHandle, dc);
-	return 0;
 }
 
 static	::RECT																						minClientRect								= {100, 100, 100 + 320, 100 + 200};
@@ -94,8 +41,8 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 				applicationInstance.MainWindow.Resized																= true;
 				applicationInstance.MainWindow.Repaint																= true; 
 				::updateOffscreen	(applicationInstance);
-				error_if(errored(::draw					(applicationInstance)), "Not sure why these would fail.");
-				error_if(errored(::presentTarget		(applicationInstance)), "Not sure why these would fail.");
+				error_if(errored(::draw							(applicationInstance)), "Not sure why these would fail.");
+				error_if(errored(::cho::displayPresentTarget	(applicationInstance.MainWindow, applicationInstance.BitmapOffsceen)), "Not sure why these would fail.");
 			}
 		}
 		if( wParam == SIZE_MINIMIZED ) {
@@ -134,22 +81,12 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	wndClassToInit.lpszClassName																		= className;
 }
 
-		void																						updateMainWindow							(::SApplication& applicationInstance)											{ 
-	::MSG																									msg											= {};
-	while(::PeekMessage(&msg, applicationInstance.MainWindow.PlatformDetail.WindowHandle, 0, 0, PM_REMOVE)) {
-		::TranslateMessage	(&msg);
-		::DispatchMessage	(&msg);
-		if(msg.message == WM_QUIT)
-			break;
-	}
-}
-
 // --- Cleanup application resources.
 					::cho::error_t																	cleanup										(::SApplication& applicationInstance)											{ 
 	::cho::SDisplayPlatformDetail																			& displayDetail								= applicationInstance.MainWindow.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");
-		::updateMainWindow(applicationInstance);
+		::cho::displayUpdate(applicationInstance.MainWindow);
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
 	error_if(errored(::cho::asciiDisplayDestroy	()), "Failed to close ASCII display!");
@@ -191,12 +128,12 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	error_if(errored(::cho::asciiTargetClear	(applicationInstance.ASCIIRenderTarget)), "This shouldn't fail either unless memory corruption happened.");
 	applicationInstance.Timer		.Frame();
 	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
-	::updateMainWindow	(applicationInstance);
+	::cho::SDisplay																							& mainWindow								= applicationInstance.MainWindow;
+	::cho::displayUpdate(mainWindow);
 	::updateOffscreen	(applicationInstance);
-	retval_info_if(1, 0 == applicationInstance.MainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::presentTarget(applicationInstance)), "Unknown error.");
+	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
+	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffsceen)), "Unknown error.");
 	char																									buffer		[256]							= {};
-	const ::cho::SDisplay																					& mainWindow								= applicationInstance.MainWindow;
 	sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.Timer.LastTimeSeconds);
 	::HWND																									windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);

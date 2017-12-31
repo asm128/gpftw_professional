@@ -1,4 +1,6 @@
 #include "cho_coord.h"
+#include "cho_color.h"
+#include "cho_array.h"
 
 #if defined(CHO_WINDOWS)
 #	include <windows.h>
@@ -35,6 +37,9 @@ namespace cho
 			, Closed		(false)
 		{}
 	};
+
+		::cho::error_t																displayPresentTarget						(::cho::SDisplay& displayInstance, const ::cho::array_pod<::cho::SColorBGRA>& targetToPresent);
+		::cho::error_t																displayUpdate								(::cho::SDisplay& applicationInstance);
 } // namespace
 
 #endif // CHO_DISPLAY_H_293874928374

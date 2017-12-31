@@ -199,6 +199,7 @@
   <ItemGroup>
     <ClCompile Include="cho_ascii_display.cpp" />
     <ClCompile Include="cho_ascii_target.cpp" />
+    <ClCompile Include="cho_display.cpp" />
     <ClCompile Include="cho_log.cpp" />
     <ClCompile Include="cho_timer.cpp" />
   </ItemGroup>
