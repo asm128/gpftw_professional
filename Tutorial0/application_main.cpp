@@ -7,11 +7,16 @@
 static constexpr	const uint32_t																	ASCII_SCREEN_WIDTH							= 132	;
 static constexpr	const uint32_t																	ASCII_SCREEN_HEIGHT							= 50	;
 
+					::cho::error_t																	setup										(::SApplication& applicationInstance);
+					::cho::error_t																	cleanup										(::SApplication& applicationInstance);
+					::cho::error_t																	update										(::SApplication& applicationInstance, bool systemRequestedExit);
+					::cho::error_t																	draw										(::SApplication& applicationInstance);
+
 CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
 
 					::SApplication																	* g_ApplicationInstance						= 0;
 
-					void																			updateOffscreen								(::SApplication& applicationInstance)											{ 
+static				void																			updateOffscreen								(::SApplication& applicationInstance)											{ 
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	uint32_t																								linearScreenSize							= applicationInstance.MainDisplay.Size.x * applicationInstance.MainDisplay.Size.y;
 	if(bmpOffscreen.size() < linearScreenSize)
@@ -85,4 +90,40 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 	return 0;
+}
+
+					::cho::error_t																	bmpInfoLoad									(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& output)					{
+	::BITMAPINFOHEADER																						& bminfo									= *(::BITMAPINFOHEADER*)source;
+	cho_necall(output.resize((uint32_t)(bminfo.biWidth * bminfo.biHeight)), "Out of memory?");
+	::RGBQUAD																								* rgbArray									= (RGBQUAD*)(source + sizeof(::BITMAPINFOHEADER));
+	for(uint32_t iCell = 0, cellCount = bminfo.biWidth * bminfo.biHeight; iCell < cellCount; ++iCell)
+		output[iCell]																						= {rgbArray[iCell].rgbBlue, rgbArray[iCell].rgbGreen, rgbArray[iCell].rgbRed, rgbArray[iCell].rgbReserved};
+	// fill the infoheader
+	//bminfo.biSize				= sizeof(BITMAPINFOHEADER);
+	//bminfo.biWidth				= width;
+	//bminfo.biHeight				= height;
+	//bminfo.biPlanes				= 1;			// we only have one bitplane
+	//bminfo.biBitCount			= 24;			// RGB mode is 24 bits
+	//bminfo.biCompression		= BI_RGB;	
+	//bminfo.biSizeImage			= 0;			// can be 0 for 24 bit images
+	//bminfo.biXPelsPerMeter		= 0x0ec4;		// paint and PSP use this values
+	//bminfo.biYPelsPerMeter		= 0x0ec4;
+	//bminfo.biClrUsed			= 0;			// we are in RGB mode and have no palette
+	//bminfo.biClrImportant		= 0;			// all colors are important
+
+
+	output;
+	return 0;
+}
+					::cho::error_t																	bmpFileLoad									(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& output)					{
+	// declare bmp structures 
+	::BITMAPFILEHEADER																						* bmfile									= (::BITMAPFILEHEADER*)source;
+	bmfile;
+	return bmpInfoLoad(source + sizeof(::BITMAPFILEHEADER), output);
+	//// fill the fileheader with data
+	//bmfile.bfType			= 0x4d42;       // 0x4d42 = 'BM'
+	//bmfile.bfReserved1		= 0;
+	//bmfile.bfReserved2		= 0;
+	//bmfile.bfSize			= sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + paddedsize;
+	//bmfile.bfOffBits		= 0x36;		// number of bytes to start of bitmap bits
 }

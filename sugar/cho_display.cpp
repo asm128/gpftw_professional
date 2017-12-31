@@ -58,8 +58,8 @@
 	::HWND																								windowHandle								= displayInstance.PlatformDetail.WindowHandle;
 	retwarn_warn_if(0 == windowHandle, "presentTarget called without a valid window handle set for the main window.");
 	::HDC																								dc											= ::GetDC(windowHandle);
+	reterr_error_if(0 == dc, "Failed to retrieve device context from the provided window handle.");
 	error_if(errored(::drawBuffer(dc, displayInstance.Size.x, displayInstance.Size.y, &targetToPresent[0])), "Not sure why this would happen.");
 	::ReleaseDC(windowHandle, dc);
 	return 0;
 }
-

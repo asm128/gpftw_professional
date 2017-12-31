@@ -39,10 +39,4 @@ struct SApplication {
 																										SApplication								(::cho::SRuntimeValues& runtimeValues)											: RuntimeValues(runtimeValues) {}
 };
 
-					::cho::error_t																	setup										(::SApplication& applicationInstance);
-					::cho::error_t																	cleanup										(::SApplication& applicationInstance);
-					::cho::error_t																	update										(::SApplication& applicationInstance, bool systemRequestedExit);
-					::cho::error_t																	draw										(::SApplication& applicationInstance);
-
-
 #endif // APPLICATION_H_098273498237423

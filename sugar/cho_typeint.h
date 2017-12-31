@@ -5,11 +5,12 @@
 #ifndef CHO_TYPEINT_H_29873490827342
 #define CHO_TYPEINT_H_29873490827342
 
+typedef signed char						schar_t	, sbyte_t	;
+typedef char							char_t	, byte_t	;
+typedef unsigned char					uchar_t	, ubyte_t	;
+
 namespace cho
 {
-	typedef signed char						schar_t	, sbyte_t	;
-	typedef char							char_t	, byte_t	;
-	typedef unsigned char					uchar_t	, ubyte_t	;
 #if defined CHO_WINDOWS
 #	define	REFCOUNT_T						long
 	typedef volatile REFCOUNT_T				refcount_t			;
