@@ -92,38 +92,81 @@ static				void																			updateOffscreen								(::SApplication& applica
 	return 0;
 }
 
-					::cho::error_t																	bmpInfoLoad									(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& output)					{
-	::BITMAPINFOHEADER																						& bminfo									= *(::BITMAPINFOHEADER*)source;
-	cho_necall(output.resize((uint32_t)(bminfo.biWidth * bminfo.biHeight)), "Out of memory?");
-	::RGBQUAD																								* rgbArray									= (RGBQUAD*)(source + sizeof(::BITMAPINFOHEADER));
-	for(uint32_t iCell = 0, cellCount = bminfo.biWidth * bminfo.biHeight; iCell < cellCount; ++iCell)
-		output[iCell]																						= {rgbArray[iCell].rgbBlue, rgbArray[iCell].rgbGreen, rgbArray[iCell].rgbRed, rgbArray[iCell].rgbReserved};
-	// fill the infoheader
-	//bminfo.biSize				= sizeof(BITMAPINFOHEADER);
-	//bminfo.biWidth				= width;
-	//bminfo.biHeight				= height;
-	//bminfo.biPlanes				= 1;			// we only have one bitplane
-	//bminfo.biBitCount			= 24;			// RGB mode is 24 bits
-	//bminfo.biCompression		= BI_RGB;	
-	//bminfo.biSizeImage			= 0;			// can be 0 for 24 bit images
-	//bminfo.biXPelsPerMeter		= 0x0ec4;		// paint and PSP use this values
-	//bminfo.biYPelsPerMeter		= 0x0ec4;
-	//bminfo.biClrUsed			= 0;			// we are in RGB mode and have no palette
-	//bminfo.biClrImportant		= 0;			// all colors are important
+#pragma pack(push, 1)
 
+//BMP File header 
+struct SHeaderFileBMP
+{
+	unsigned char	m_ucType[2];	//Identifier, must be BM
+	unsigned int	m_uiSize;		//Size of BMP file
+	unsigned int	m_uiReserved;	//0
+	unsigned int	m_uiOffset;	
+};
 
-	output;
-	return 0;
-}
+//BMP Information Header
+struct SHeaderInfoBMP
+{
+	unsigned int	m_uiSize;			// Number of bytes in structure
+	unsigned int	m_uiWidth;			// Width of Image
+	unsigned int	m_uiHeight;		// Height of Image
+	unsigned short	m_uiPlanes;		// Always 1
+	unsigned short	m_uiBpp;			// Bits Per Pixel (must be 24 for now)
+	unsigned int	m_uiCompression;	// Must be 0 (uncompressed)
+	unsigned int	m_uiXPPM;			// X Pels Per Meter
+	unsigned int	m_uiYPPM;			// Y Pels Per Meter
+	unsigned int	m_uiClrUsed;		// 0 for 24 bpp bmps
+	unsigned int	m_uiClrImp;		// 0
+	unsigned int	m_dunno;			// 0
+};
+
+#pragma pack( pop )
+
 					::cho::error_t																	bmpFileLoad									(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& output)					{
-	// declare bmp structures 
-	::BITMAPFILEHEADER																						* bmfile									= (::BITMAPFILEHEADER*)source;
-	bmfile;
-	return bmpInfoLoad(source + sizeof(::BITMAPFILEHEADER), output);
-	//// fill the fileheader with data
-	//bmfile.bfType			= 0x4d42;       // 0x4d42 = 'BM'
-	//bmfile.bfReserved1		= 0;
-	//bmfile.bfReserved2		= 0;
-	//bmfile.bfSize			= sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + paddedsize;
-	//bmfile.bfOffBits		= 0x36;		// number of bytes to start of bitmap bits
+	info_printf("sizeof(SBMPFHeader) = %u", (int)sizeof(SHeaderFileBMP));
+	info_printf("sizeof(SBMPIHeader) = %u", (uint32_t)sizeof(SHeaderInfoBMP));
+	//SHeaderFileBMP																							& fileHeader								= *(SHeaderFileBMP*)*source;	
+	SHeaderInfoBMP																							& infoHeader								= *(SHeaderInfoBMP*)*(source + sizeof(SHeaderFileBMP));
+
+	ree_if(infoHeader.m_uiBpp != 24, "%s", "Unsupported BMP file! The image is not 24 bit.");	// make sure its 24 bpp 
+
+	uint32_t																								nPixelCount									= infoHeader.m_uiWidth * infoHeader.m_uiHeight;
+	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.m_uiWidth, infoHeader.m_uiHeight );	// make sure it contains data 
+	output.resize(nPixelCount);
+	ubyte_t																									* srcBytes									= (ubyte_t*)(source + sizeof(SHeaderFileBMP) + sizeof(SHeaderInfoBMP));
+	bool																									b32Bit										= false;
+	uint32_t																								colorSize									= 0;
+	switch(infoHeader.m_uiBpp) {
+	case 32:
+		b32Bit																								= true;
+	case 24:
+		colorSize																							= b32Bit ? 4 : 3;
+		for( uint32_t y = 0; y < infoHeader.m_uiHeight; y++ )
+			for( uint32_t x = 0; x < infoHeader.m_uiWidth; x++ ) {
+				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth * colorSize + (x * colorSize);
+				output[y * infoHeader.m_uiWidth + x]																= 
+					{ srcBytes[linearIndexSrc + 2]
+					, srcBytes[linearIndexSrc + 1]
+					, srcBytes[linearIndexSrc + 0]
+					, b32Bit ? srcBytes[linearIndexSrc + 3] : 0xFFU
+					};
+			}
+		break;
+	case 8:
+		for( uint32_t y = 0; y < infoHeader.m_uiHeight; ++y )
+			for( uint32_t x = 0; x < infoHeader.m_uiWidth; ++x ) {
+				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth + x;
+				output[linearIndexSrc]																				= 
+					{ srcBytes[linearIndexSrc]
+					, srcBytes[linearIndexSrc]
+					, srcBytes[linearIndexSrc]
+					, 0xFFU
+					};
+			}
+		break;
+	default:
+		error_printf("Unsupported BMP file! The image is not 24 bit.");
+		return -1;
+
+	}
+	return 0;
 }

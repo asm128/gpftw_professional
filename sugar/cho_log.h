@@ -191,7 +191,17 @@ namespace cho
 			return retval; 																																							\
 	} while(0)
 
-#	define cho_pecall(retVal, chol_call, ...)  do {																																	\
+#	define cho_rve_hrcall(retVal, chol_call, ...) do {																																\
+		if(FAILED(chol_call))  																																						\
+			return retval; 																																							\
+	} while(0)
+
+#	define cho_rv_hrcall(retVal, chol_call) do {																																	\
+		if(FAILED(chol_call))  																																						\
+			return retval; 																																							\
+	} while(0)
+
+#	define cho_pecall(retVal, chol_call, ...) do {																																	\
 		::cho::error_t _cho_errCall = ::cho::succeeded(chol_call);																													\
 		if(::cho::failed(_cho_errCall)) 																																			\
 			return retval; 																																							\
