@@ -167,7 +167,7 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	error_if(errored(::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height())	), "Not sure why this would fail at this point.");
 	::cho::SDisplay																							& mainWindow								= applicationInstance.MainWindow;
 	::cho::SDisplayPlatformDetail																			& displayDetail								= mainWindow.PlatformDetail;
-	::initWndClass(applicationInstance.RuntimeValues.hInstance, displayDetail.WindowClassName, displayDetail.WindowClass);
+	::initWndClass(applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance, displayDetail.WindowClassName, displayDetail.WindowClass);
 	::RegisterClassEx(&displayDetail.WindowClass);
 
 	//::std::vector<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;

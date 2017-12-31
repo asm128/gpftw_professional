@@ -9,13 +9,29 @@
 
 namespace cho 
 {
-	struct SRuntimeValues {
 #if defined(CHO_WINDOWS)
-		::HINSTANCE																		hInstance									= {}; 
-		::HINSTANCE																		hPrevInstance								= {}; 
-		::LPSTR																			lpCmdLine									= {}; 
-		::INT																			nShowCmd									= {}; 
+	struct SWindowsEntryPointArgs {
+				HINSTANCE														hInstance							;
+				HINSTANCE														hPrevInstance						;
+				LPSTR															lpCmdLine							;
+				int																nShowCmd							;
+	};
 #endif
+
+	struct SRuntimeValuesDetail {	
+#if defined(CHO_ANDROID)
+				ANativeActivity													* Activity							= nullptr;
+				void															* SavedState						= nullptr;
+				size_t															SavedStateSize						= 0;
+#elif defined(CHO_WINDOWS)
+				SWindowsEntryPointArgs											EntryPointArgs						;
+#else
+#	error "Not implemented."
+#endif
+	};
+
+	struct SRuntimeValues {
+		SRuntimeValuesDetail													PlatformDetail						;
 	};
 }
 

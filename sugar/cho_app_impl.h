@@ -5,7 +5,7 @@
 #define CHO_DEFINE_APPLICATION_ENTRY_POINT(_mainClass)																																													\
 		::cho::error_t																				rtMain										(::cho::SRuntimeValues& runtimeValues);													\
 		int																							main										()																					{	\
-	::cho::SRuntimeValues																					runtimeValues								= {::GetModuleHandle(NULL), 0, 0, SW_SHOW};										\
+	::cho::SRuntimeValues																					runtimeValues								= {{::GetModuleHandle(NULL), 0, 0, SW_SHOW},};									\
 	return ::cho::failed(::rtMain(runtimeValues)) ? EXIT_FAILURE : EXIT_SUCCESS;																																						\
 }																																																										\
 																																																										\
@@ -17,11 +17,11 @@
 	)																																																									\
 {																																																										\
 	::cho::SRuntimeValues																					runtimeValues								= 																				\
-		{	hInstance																																																					\
+		{{	hInstance																																																					\
 		,	hPrevInstance																																																				\
 		,	lpCmdLine																																																					\
 		,	nShowCmd																																																					\
-		};																																																								\
+		},};																																																							\
 	return ::cho::failed(::rtMain(runtimeValues)) ? EXIT_FAILURE : EXIT_SUCCESS;																																						\
 }																																																										\
 																																																										\
