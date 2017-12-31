@@ -33,7 +33,7 @@
 	cho_necall(::setup(*applicationInstance), "User reported error. Execution stopped.");																																				\
 	info_printf("Application instance initialized successfully. Executing main loop...");																																				\
 	while(true) {																																																						\
-		::cho::error_t																						updateResult								= ::update(*applicationInstance);												\
+		::cho::error_t																							updateResult								= ::update(*applicationInstance, ::GetAsyncKeyState(VK_ESCAPE) != 0);			\
 		break_info_if(1 == updateResult, "Application requested termination.");																																							\
 		break_error_if(errored(updateResult), "update() returned error.");																																								\
 		error_if(::draw(*applicationInstance), "Why would this ever happen?");																																							\

@@ -123,7 +123,8 @@ static	::RECT																						minClientRect								= {100, 100, 100 + 320, 
 	return 0;
 }
 
-					::cho::error_t																	update										(::SApplication& applicationInstance)											{ 
+					::cho::error_t																	update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
+	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
 	error_if(errored(::cho::asciiDisplayPresent	(applicationInstance.ASCIIRenderTarget)), "Could this fail if the console isn't properly initialized?");
 	error_if(errored(::cho::asciiTargetClear	(applicationInstance.ASCIIRenderTarget)), "This shouldn't fail either unless memory corruption happened.");
 	applicationInstance.Timer		.Frame();

@@ -41,7 +41,7 @@ struct SApplication {
 
 					::cho::error_t																	setup										(::SApplication& applicationInstance);
 					::cho::error_t																	cleanup										(::SApplication& applicationInstance);
-					::cho::error_t																	update										(::SApplication& applicationInstance);
+					::cho::error_t																	update										(::SApplication& applicationInstance, bool systemRequestedExit);
 					::cho::error_t																	draw										(::SApplication& applicationInstance);
 
 
