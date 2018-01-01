@@ -5,6 +5,7 @@
 #include "cho_input.h"
 #include "cho_display.h"
 #include "cho_runtime.h"
+#include "cho_grid.h"
 
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
