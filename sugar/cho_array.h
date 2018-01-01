@@ -7,21 +7,21 @@
 namespace cho 
 {
 	// Base for arrays that keeps track of its actual size.
-	template<typename _tBase>
-	struct array_base : public array_view<_tBase> {
+	template<typename _tCell>
+	struct array_base : public array_view<_tCell> {
 	protected:
-		using				array_view<_tBase>::		Count;
+		using				array_view<_tCell>::		Count;
 							uint32_t					Size										= 0;
 
 		inline constexpr								array_base									()																			noexcept	= default;
-		inline constexpr								array_base									(const array_base<_tBase>&		other)										noexcept	= delete;
-		inline constexpr								array_base									(const array_base<_tBase>&&	other)											noexcept	= delete;
+		inline constexpr								array_base									(const array_base<_tCell>&	other)											noexcept	= delete;
+		inline constexpr								array_base									(const array_base<_tCell>&&	other)											noexcept	= delete;
 
-							array_base<_tBase>&			operator =									(const array_base<_tBase>&		other)													= delete;
-							array_base<_tBase>&			operator =									(const array_base<_tBase>&&	other)														= delete;
+							array_base<_tCell>&			operator =									(const array_base<_tCell>&	other)														= delete;
+							array_base<_tCell>&			operator =									(const array_base<_tCell>&&	other)														= delete;
 		// This helper method is used to prevent redundancies. It returns a safe integer of the same or a higher value than the one passed as argument.
-		inline constexpr	uint32_t					calc_reserve_size							(const uint32_t newSize)											const	noexcept	{ return ::cho::max(newSize, newSize + ::cho::max(newSize >> 1, 4U));						}
-		inline constexpr	uint32_t					calc_malloc_size							(const uint32_t newSize)											const	noexcept	{ return ::cho::max(newSize*(uint32_t)sizeof(_tBase), Count*(uint32_t)sizeof(_tBase));	}
+		inline constexpr	uint32_t					calc_reserve_size							(const uint32_t newSize)											const	noexcept	{ return ::cho::max(newSize, newSize + ::cho::max(newSize >> 1, 4U));					}
+		inline constexpr	uint32_t					calc_malloc_size							(const uint32_t newSize)											const	noexcept	{ return ::cho::max(newSize*(uint32_t)sizeof(_tCell), Count*(uint32_t)sizeof(_tCell));	}
 	}; // array_base
 
 	// This class is optimized to contain POD instances and won't work for C++ objects that require calling constructors/destructors.

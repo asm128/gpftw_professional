@@ -120,6 +120,12 @@
     <ClInclude Include="cho_auto_handler.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="cho_bitmap_file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_grid.h">
+      <Filter>container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_log.cpp">
@@ -136,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="cho_display.cpp">
       <Filter>display</Filter>
+    </ClCompile>
+    <ClCompile Include="cho_bitmap_file.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

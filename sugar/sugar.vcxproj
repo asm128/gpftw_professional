@@ -175,6 +175,7 @@
     <ClInclude Include="cho_ascii_display.h" />
     <ClInclude Include="cho_ascii_target.h" />
     <ClInclude Include="cho_auto_handler.h" />
+    <ClInclude Include="cho_bitmap_file.h" />
     <ClInclude Include="cho_bitmap_target.h" />
     <ClInclude Include="cho_color.h" />
     <ClInclude Include="cho_coord.h" />
@@ -182,6 +183,7 @@
     <ClInclude Include="cho_display.h" />
     <ClInclude Include="cho_eval.h" />
     <ClInclude Include="cho_frameinfo.h" />
+    <ClInclude Include="cho_grid.h" />
     <ClInclude Include="cho_grid_view.h" />
     <ClInclude Include="cho_input.h" />
     <ClInclude Include="cho_log.h" />
@@ -199,6 +201,7 @@
   <ItemGroup>
     <ClCompile Include="cho_ascii_display.cpp" />
     <ClCompile Include="cho_ascii_target.cpp" />
+    <ClCompile Include="cho_bitmap_file.cpp" />
     <ClCompile Include="cho_display.cpp" />
     <ClCompile Include="cho_log.cpp" />
     <ClCompile Include="cho_timer.cpp" />
