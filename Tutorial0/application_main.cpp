@@ -55,7 +55,24 @@ static				void																			updateOffscreen								(::SApplication& applica
 	fopen_s(&source, fontFileName, "rb");
 	if(source) {
 		::cho::array_pod<::cho::SColorBGRA>																		& colors									= applicationInstance.FontTexture;
-		cho_necall(::cho::bmpFileLoad(source, colors), "Failed to load file: '%s'. File not found?", fontFileName);
+		if errored(::cho::bmpFileLoad(source, colors)) {
+			error_printf("Failed to load file: '%s'. File not found?", fontFileName);
+			fclose(source);
+			return -1;
+		}
+		fclose(source);
+	}
+
+	static constexpr	const char																			bkgdFileName	[]							= "earth_light.bmp";
+	source																								= 0; 
+	fopen_s(&source, bkgdFileName, "rb");
+	if(source) {
+		::cho::array_pod<::cho::SColorBGRA>																		& colors									= applicationInstance.BackgroundTexture;
+		if errored(::cho::bmpFileLoad(source, colors)) {
+			error_printf("Failed to load file: '%s'. File not found?", fontFileName);
+			fclose(source);
+			return -1;
+		}
 		fclose(source);
 	}
 
@@ -93,6 +110,13 @@ static				void																			updateOffscreen								(::SApplication& applica
 	geometry2.C																							+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	::cho::SBitmapTargetBGRA																				bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());
+	for(uint32_t y = 0, yMax = 512; y < yMax; ++y)
+	for(uint32_t x = 0, xMax = 1024; x < xMax; ++x) {
+		if( ::cho::in_range(x, 0U, bmpTarget.Colors.width()) 
+		 && ::cho::in_range(y, 0U, bmpTarget.Colors.height())
+		 )
+			bmpTarget.Colors[y][x]																				= applicationInstance.BackgroundTexture[y * xMax + x];
+	}
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), {geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
@@ -103,7 +127,12 @@ static				void																			updateOffscreen								(::SApplication& applica
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 	for(uint32_t y = 0, yMax = 128; y < yMax; ++y)
 	for(uint32_t x = 0, xMax = 288; x < xMax; ++x) {
-		bmpTarget.Colors[y][x]																				= applicationInstance.FontTexture[y * xMax + x];
+		if( ::cho::in_range(x, 0U, bmpTarget.Colors.width()) 
+		 && ::cho::in_range(y, 0U, bmpTarget.Colors.height())
+		 )
+			bmpTarget.Colors[y][x]																				= applicationInstance.FontTexture[y * xMax + x];
 	}
+
+
 	return 0;
 }

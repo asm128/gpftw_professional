@@ -17,6 +17,7 @@ struct SApplication {
 						::cho::STimer																	Timer										= {};
 						::cho::SFrameInfo																FrameInfo									= {};
 						::cho::array_pod<::cho::SColorBGRA>												FontTexture									= {};
+						::cho::array_pod<::cho::SColorBGRA>												BackgroundTexture							= {};
 
 						::cho::SASCIITarget																ASCIIRenderTarget							= {};
 						::cho::SPalette																	ASCIIPalette								= 
