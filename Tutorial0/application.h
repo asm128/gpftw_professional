@@ -16,6 +16,8 @@ struct SApplication {
 						::cho::SInput																	SystemInput									= {};
 						::cho::STimer																	Timer										= {};
 						::cho::SFrameInfo																FrameInfo									= {};
+						::cho::array_pod<::cho::SColorBGRA>												FontTexture									= {};
+
 						::cho::SASCIITarget																ASCIIRenderTarget							= {};
 						::cho::SPalette																	ASCIIPalette								= 
 		{	(uint32_t)::cho::ASCII_COLOR_INDEX_0		

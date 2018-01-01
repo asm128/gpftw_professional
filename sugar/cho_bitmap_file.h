@@ -6,7 +6,8 @@
 
 namespace cho
 {
-						::cho::error_t																	bmpFileLoad							(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& output);
+						::cho::error_t							bmpFileLoad							(byte_t	* source, ::cho::array_pod<::cho::SColorBGRA>& output);
+						::cho::error_t							bmpFileLoad							(FILE	* source, ::cho::array_pod<::cho::SColorBGRA>& output);
 }
 
 #endif // CHO_BITMAP_FILE_H_236544263544352344
