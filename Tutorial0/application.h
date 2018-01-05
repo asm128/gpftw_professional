@@ -17,8 +17,10 @@ struct SApplication {
 						::cho::SInput																	SystemInput									= {};
 						::cho::STimer																	Timer										= {};
 						::cho::SFrameInfo																FrameInfo									= {};
-						::cho::array_pod<::cho::SColorBGRA>												FontTexture									= {};
-						::cho::array_pod<::cho::SColorBGRA>												BackgroundTexture							= {};
+						::cho::array_pod<::cho::SColorBGRA>												TextureFont									= {};
+						::cho::array_pod<::cho::SColorBGRA>												TextureBackground							= {};
+						::cho::grid_view<::cho::SColorBGRA>												ViewTextureFont								= {};
+						::cho::grid_view<::cho::SColorBGRA>												ViewTextureBackground						= {};
 
 						::cho::SASCIITarget																ASCIIRenderTarget							= {};
 						::cho::SPalette																	ASCIIPalette								= 

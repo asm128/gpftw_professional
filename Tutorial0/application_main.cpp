@@ -54,8 +54,7 @@ static				void																			updateOffscreen								(::SApplication& applica
 	FILE																									* source									= 0; 
 	fopen_s(&source, fontFileName, "rb");
 	if(source) {
-		::cho::array_pod<::cho::SColorBGRA>																		& colors									= applicationInstance.FontTexture;
-		if errored(::cho::bmpFileLoad(source, colors)) {
+		if errored(::cho::bmpFileLoad(source, applicationInstance.TextureFont, applicationInstance.ViewTextureFont)) {
 			error_printf("Failed to load file: '%s'. File not found?", fontFileName);
 			fclose(source);
 			return -1;
@@ -67,8 +66,7 @@ static				void																			updateOffscreen								(::SApplication& applica
 	source																								= 0; 
 	fopen_s(&source, bkgdFileName, "rb");
 	if(source) {
-		::cho::array_pod<::cho::SColorBGRA>																		& colors									= applicationInstance.BackgroundTexture;
-		if errored(::cho::bmpFileLoad(source, colors)) {
+		if errored(::cho::bmpFileLoad(source, applicationInstance.TextureBackground, applicationInstance.ViewTextureBackground)) {
 			error_printf("Failed to load file: '%s'. File not found?", fontFileName);
 			fclose(source);
 			return -1;
@@ -110,9 +108,9 @@ static				void																			updateOffscreen								(::SApplication& applica
 	geometry2.C																							+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	::cho::SBitmapTargetBGRA																				bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());
-	for(uint32_t y = 0, yMax = ::cho::min(bmpTarget.Colors.height(),  512U); y < yMax; ++y)
-	for(uint32_t x = 0, xMax = ::cho::min(bmpTarget.Colors.width (), 1024U); x < xMax; ++x)
-		bmpTarget.Colors[y][x]																				= applicationInstance.BackgroundTexture[y * 1024U + x];
+	for(uint32_t y = 0, yMax = ::cho::min(bmpTarget.Colors.height(), applicationInstance.ViewTextureBackground.height()); y < yMax; ++y)
+	for(uint32_t x = 0, xMax = ::cho::min(bmpTarget.Colors.width (), applicationInstance.ViewTextureBackground.width ()); x < xMax; ++x)
+		bmpTarget.Colors[y][x]																				= applicationInstance.ViewTextureBackground[y][x];
 
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), {geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
@@ -122,9 +120,9 @@ static				void																			updateOffscreen								(::SApplication& applica
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA	]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
-	for(uint32_t y = 0, yMax = ::cho::min(bmpTarget.Colors.height(), 128U); y < yMax; ++y)
-	for(uint32_t x = 0, xMax = ::cho::min(bmpTarget.Colors.width (), 288U); x < xMax; ++x) 
-		bmpTarget.Colors[y][x]																				= applicationInstance.FontTexture[y * 288U + x];
+	for(uint32_t y = 0, yMax = ::cho::min(bmpTarget.Colors.height(), applicationInstance.ViewTextureFont.height()); y < yMax; ++y)
+	for(uint32_t x = 0, xMax = ::cho::min(bmpTarget.Colors.width (), applicationInstance.ViewTextureFont.width ()); x < xMax; ++x) 
+		bmpTarget.Colors[y][x]																				= applicationInstance.ViewTextureFont[y][x];
 
 	return 0;
 }

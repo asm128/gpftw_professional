@@ -4,10 +4,10 @@
 
 //BMP File header 
 struct SHeaderFileBMP {
-	unsigned char			m_ucType[2];		// Identifier, must be BM
-	unsigned int			m_uiSize;			// Size of BMP file
-	unsigned int			m_uiReserved;		// 0
-	unsigned int			m_uiOffset;	
+	unsigned char			Type[2];		// Identifier, must be BM
+	unsigned int			Size;			// Size of BMP file
+	unsigned int			Reserved;		// 0
+	unsigned int			Offset;	
 };
 
 //BMP Information Header
@@ -27,7 +27,7 @@ struct SHeaderInfoBMP {
 
 #pragma pack( pop )
 
-					::cho::error_t																	cho::bmpFileLoad							(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& output)					{
+					::cho::error_t																	cho::bmpFileLoad							(byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)					{
 	info_printf("sizeof(SBMPFHeader) = %u", (int)sizeof(SHeaderFileBMP));
 	info_printf("sizeof(SBMPIHeader) = %u", (uint32_t)sizeof(SHeaderInfoBMP));
 	//SHeaderFileBMP																							& fileHeader								= *(SHeaderFileBMP*)*source;	
@@ -40,7 +40,7 @@ struct SHeaderInfoBMP {
 
 	uint32_t																								nPixelCount									= infoHeader.m_uiWidth * infoHeader.m_uiHeight;
 	ree_if(0 == nPixelCount, "Invalid BMP image size! Valid images are at least 1x1 pixels! This image claims to contain %ux%u pixels", infoHeader.m_uiWidth, infoHeader.m_uiHeight );	// make sure it contains data 
-	output.resize(nPixelCount);
+	out_Colors.resize(nPixelCount);
 	ubyte_t																									* srcBytes									= (ubyte_t*)(source + sizeof(SHeaderFileBMP) + sizeof(SHeaderInfoBMP));
 	bool																									b32Bit										= false;
 	uint32_t																								colorSize									= 0;
@@ -53,7 +53,7 @@ struct SHeaderInfoBMP {
 		for( uint32_t y = 0; y < infoHeader.m_uiHeight; y++ )
 			for( uint32_t x = 0; x < infoHeader.m_uiWidth; x++ ) {
 				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth * colorSize + (x * colorSize);
-				output[y * infoHeader.m_uiWidth + x]																= 
+				out_Colors[y * infoHeader.m_uiWidth + x]																= 
 					{ srcBytes[linearIndexSrc + 2]
 					, srcBytes[linearIndexSrc + 1]
 					, srcBytes[linearIndexSrc + 0]
@@ -65,7 +65,7 @@ struct SHeaderInfoBMP {
 		for( uint32_t y = 0; y < infoHeader.m_uiHeight; ++y )
 			for( uint32_t x = 0; x < infoHeader.m_uiWidth; ++x ) {
 				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth + x;
-				output[linearIndexSrc]																				= 
+				out_Colors[linearIndexSrc]																				= 
 					{ srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
@@ -74,14 +74,15 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	}
+	out_ImageView																						= ::cho::grid_view<::cho::SColorBGRA>{out_Colors.begin(), infoHeader.m_uiWidth, infoHeader.m_uiHeight};
 	return 0;
 }
 
-										::cho::error_t																	cho::bmpFileLoad							(FILE* source, ::cho::array_pod<::cho::SColorBGRA>& output)					{
+					::cho::error_t																	cho::bmpFileLoad							(FILE* source, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)					{
 	info_printf("sizeof(SBMPFHeader) = %u", (uint32_t)sizeof(SHeaderFileBMP));
 	info_printf("sizeof(SBMPIHeader) = %u", (uint32_t)sizeof(SHeaderInfoBMP));
-	SHeaderFileBMP																							fileHeader								= {};	
-	SHeaderInfoBMP																							infoHeader								= {};
+	SHeaderFileBMP																							fileHeader									= {};	
+	SHeaderInfoBMP																							infoHeader									= {};
 	ree_if(fread(&fileHeader, 1, sizeof(SHeaderFileBMP), source) != sizeof(SHeaderFileBMP), "Failed to read file! File corrupt?");
 	ree_if(fread(&infoHeader, 1, sizeof(SHeaderInfoBMP), source) != sizeof(SHeaderInfoBMP), "Failed to read file! File corrupt?");
 	uint32_t																								nPixelCount									= infoHeader.m_uiWidth * infoHeader.m_uiHeight;
@@ -99,7 +100,7 @@ struct SHeaderInfoBMP {
 	int																										readResult								= fread(&srcBytes[0], pixelSize, nPixelCount, source);
 	ree_if(readResult != (int)nPixelCount, "Failed to read file! File corrupt?");
 
-	output.resize(nPixelCount);
+	out_Colors.resize(nPixelCount);
 	bool																									b32Bit										= false;
 	uint32_t																								colorSize									= 0;
 	switch(infoHeader.m_uiBpp) {
@@ -111,7 +112,7 @@ struct SHeaderInfoBMP {
 		for( uint32_t y = 0; y < infoHeader.m_uiHeight; y++ )
 			for( uint32_t x = 0; x < infoHeader.m_uiWidth; x++ ) {
 				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth * colorSize + (x * colorSize);
-				output[y * infoHeader.m_uiWidth + x]																= 
+				out_Colors[y * infoHeader.m_uiWidth + x]																= 
 					{ srcBytes[linearIndexSrc + 2]
 					, srcBytes[linearIndexSrc + 1]
 					, srcBytes[linearIndexSrc + 0]
@@ -123,7 +124,7 @@ struct SHeaderInfoBMP {
 		for( uint32_t y = 0; y < infoHeader.m_uiHeight; ++y )
 			for( uint32_t x = 0; x < infoHeader.m_uiWidth; ++x ) {
 				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth + x;
-				output[linearIndexSrc]																				= 
+				out_Colors[linearIndexSrc]																				= 
 					{ srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
@@ -135,7 +136,7 @@ struct SHeaderInfoBMP {
 		for( uint32_t y = 0; y < infoHeader.m_uiHeight; ++y )
 			for( uint32_t x = 0; x < infoHeader.m_uiWidth; ++x ) {
 				uint32_t																								linearIndexSrc								= y * infoHeader.m_uiWidth + x;
-				output[linearIndexSrc]																				= 
+				out_Colors[linearIndexSrc]																				= 
 					{ srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
 					, srcBytes[linearIndexSrc]
@@ -144,5 +145,6 @@ struct SHeaderInfoBMP {
 			}
 		break;
 	}
+	out_ImageView																						= ::cho::grid_view<::cho::SColorBGRA>{out_Colors.begin(), infoHeader.m_uiWidth, infoHeader.m_uiHeight};
 	return 0;
 }

@@ -114,6 +114,7 @@ namespace cho
 		typedef				::cho::ptr_nco<_tOBJ>				TNCOPtr;
 		typedef				::cho::ptr_obj<_tOBJ>				TOBJPtr;
 		typedef				::cho::cho_ref<_tOBJ>				TRef;
+		using				TNCOPtr								::Instance;
 
 		inline				const _tOBJ*						operator->							()													const	noexcept	{ return Instance;																}
 		inline				_tOBJ*								operator->							()															noexcept	{ return (0 == Instance) ? ::cho::ref_create(&Instance) : Instance->Instance;	}
@@ -129,6 +130,7 @@ namespace cho
 		typedef				::cho::ptr_nco<_tPOD>				TNCOPtr;
 		typedef				::cho::ptr_pod<_tPOD>				TPODPtr;
 		typedef				::cho::cho_ref<_tPOD>				TRef;
+		using				TNCOPtr								::Instance;
 
 		inline				const _tPOD*						operator->							()													const	noexcept	{ return Instance->Instance;																}
 		inline				_tPOD*								operator->							()															noexcept	{ return (0 == Instance) ? ::cho::ref_allocate(&Instance) : Instance->Instance;	}
@@ -140,4 +142,3 @@ namespace cho
 } // namespace
 
 #endif // CHO_PTR_H_0297349827348923
-
