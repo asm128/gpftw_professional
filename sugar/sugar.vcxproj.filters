@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="core">
-      <UniqueIdentifier>{ebfd77da-c19b-4df5-a3b4-125d1d2ba72d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="container">
       <UniqueIdentifier>{ce9a994d-5b8d-457d-9200-120d400350f4}</UniqueIdentifier>
     </Filter>
@@ -39,26 +36,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cho_eval.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cho_input.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_error.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_log.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_memory.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_platform.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_typeint.h">
-      <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="cho_array.h">
       <Filter>container</Filter>
@@ -102,23 +81,11 @@
     <ClInclude Include="cho_display.h">
       <Filter>display</Filter>
     </ClInclude>
-    <ClInclude Include="cho_debug.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_size.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="cho_timer.h">
       <Filter>time</Filter>
     </ClInclude>
     <ClInclude Include="cho_frameinfo.h">
       <Filter>time</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_sync.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="cho_auto_handler.h">
-      <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="cho_bitmap_file.h">
       <Filter>Header Files</Filter>
@@ -128,9 +95,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cho_log.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="cho_ascii_target.cpp">
       <Filter>raster</Filter>
     </ClCompile>

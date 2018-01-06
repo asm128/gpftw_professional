@@ -21,6 +21,7 @@ extern				::SApplication																	* g_ApplicationInstance						;
 		if(lParam) {
 			::cho::SCoord2<int32_t>																					newMetrics									= ::cho::SCoord2<WORD>{LOWORD(lParam), HIWORD(lParam)}.Cast<int32_t>();
 			if(newMetrics != applicationInstance.MainDisplay.Size.Cast<int32_t>()) {
+				applicationInstance.MainDisplay.PreviousSize														= applicationInstance.MainDisplay.Size;
 				applicationInstance.MainDisplay.Size																= newMetrics.Cast<uint32_t>();
 				applicationInstance.MainDisplay.Resized																= true;
 				applicationInstance.MainDisplay.Repaint																= true; 

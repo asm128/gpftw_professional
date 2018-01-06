@@ -100,7 +100,7 @@ static				void																			updateOffscreen								(::SApplication& applica
 	const ::cho::SDisplay																					& mainWindow								= applicationInstance.MainDisplay;
 	::cho::array_pod<::cho::SColorBGRA>																		& bmpOffscreen								= applicationInstance.BitmapOffsceen;
 	::cho::SCoord2		<int32_t>																			screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
-	::cho::SRectangle2D<int32_t>																			geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
+	::cho::SRectangle2D	<int32_t>																			geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
 	::cho::SCircle2D	<int32_t>																			geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	
 	::cho::STriangle2D	<int32_t>																			geometry2									= {{0, 0}, {15, 15}, {-5, 10}};	
 	geometry2.A																							+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};

@@ -22,6 +22,7 @@ namespace cho
 
 	struct SDisplay {
 							::cho::SDisplayPlatformDetail							PlatformDetail								= {};
+							::cho::SCoord2<uint32_t>								PreviousSize								= {};
 							::cho::SCoord2<uint32_t>								Size										= {};
 							bool													Resized										: 1;
 							bool													Repaint										: 1;
