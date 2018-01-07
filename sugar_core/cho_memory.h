@@ -29,7 +29,7 @@ namespace cho
 	static inline void*																			cho_malloc					(size_t size)													{ return _aligned_malloc(size, CHO_MALLOC_CUSTOM_ALIGN);	}
 	static inline void																			cho_free					(void* ptr)														{ _aligned_free(ptr);										}
 #elif defined(CHO_LINUX) || defined(CHO_ANDROID)
-	static inline void*																			cho_malloc					(size_t size)													{ return ::memalign(CHO_MALLOC_CUSTOM_ALIGN, size);		}
+	static inline void*																			cho_malloc					(size_t size)													{ return ::memalign(CHO_MALLOC_CUSTOM_ALIGN, size);			}
 	static inline void																			cho_free					(void* ptr)														{ ::free(ptr);												}
 #endif
 

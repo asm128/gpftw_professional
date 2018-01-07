@@ -66,10 +66,10 @@ namespace cho
 #	define success_printf(format, ...)								do { __VA_ARGS__; } while(0)
 #endif	
 
-#define throw_if(condition, exception, format, ...)				if(condition) { base_debug_print(#condition, -1); error_printf	(format, __VA_ARGS__); throw(exception);	}
-#define error_if(condition, format, ...)						if(condition) { base_debug_print(#condition, -1); error_printf	(format, __VA_ARGS__);						}
-#define warn_if(condition, format, ...)							if(condition) { base_debug_print(#condition, -1); warning_printf(format, __VA_ARGS__);						}
-#define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); }
+#define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); throw(exception);	}
+#define error_if(condition, format, ...)						if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
+#define warn_if(condition, format, ...)							if(condition) { warning_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
+#define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
 
 #define ret_error_if(condition, format, ...)					if(condition) { error_printf	(format, __VA_ARGS__); return;			}
 #define ret_warn_if(condition, format, ...)						if(condition) { warning_printf	(format, __VA_ARGS__); return;			}
@@ -87,46 +87,46 @@ namespace cho
 #define retval_warn_if(retVal, condition, format, ...)			if(condition) { warning_printf	(format, __VA_ARGS__); return retVal;	}
 #define retval_info_if(retVal, condition, format, ...)			if(condition) { info_printf		(format, __VA_ARGS__); return retVal;	}
 
-#define retnul_error_if(condition, format, ...)					retval_error_if	(0, condition, format, __VA_ARGS__)
-#define retnul_warn_if(condition, format, ...)					retval_warn_if	(0, condition, format, __VA_ARGS__)
-#define retnul_info_if(condition, format, ...)					retval_info_if	(0, condition, format, __VA_ARGS__)
+#define retnul_error_if(condition, format, ...)					retval_error_if	( 0, condition, format, __VA_ARGS__)
+#define retnul_warn_if(condition, format, ...)					retval_warn_if	( 0, condition, format, __VA_ARGS__)
+#define retnul_info_if(condition, format, ...)					retval_info_if	( 0, condition, format, __VA_ARGS__)
 
 #define reterr_error_if(condition, format, ...)					retval_error_if	(-1, condition, format, __VA_ARGS__)
 #define reterr_warn_if(condition, format, ...)					retval_warn_if	(-1, condition, format, __VA_ARGS__)
 #define reterr_info_if(condition, format, ...)					retval_info_if	(-1, condition, format, __VA_ARGS__)
 
-#define retwarn_error_if(condition, format, ...)				retval_error_if	(1, condition, format, __VA_ARGS__)
-#define retwarn_warn_if(condition, format, ...)					retval_warn_if	(1, condition, format, __VA_ARGS__)
-#define retwarn_info_if(condition, format, ...)					retval_info_if	(1, condition, format, __VA_ARGS__)
+#define retwarn_error_if(condition, format, ...)				retval_error_if	( 1, condition, format, __VA_ARGS__)
+#define retwarn_warn_if(condition, format, ...)					retval_warn_if	( 1, condition, format, __VA_ARGS__)
+#define retwarn_info_if(condition, format, ...)					retval_info_if	( 1, condition, format, __VA_ARGS__)
 
 #if defined (CHO_ERROR_PRINTF_ENABLED)
 // Non-propagable retval_error call.
 #	define cho_rve_ecall(retVal, chol_call, format, ...) do {																														\
-		::cho::error_t errCall = (chol_call);  																																		\
-		if(errCall < 0) {																																							\
-			debug_printf(0, "error", "%s: 0x%X.", #chol_call, errCall);																												\
+		::cho::error_t cho_errCall_ = (chol_call);  																																\
+		if(cho_errCall_ < 0) {																																						\
+			debug_printf(0, "error", "%s: 0x%X.", #chol_call, cho_errCall_);																										\
 			error_printf(format, __VA_ARGS__); 																																		\
 			return retVal; 																																							\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, cho_errCall_);																										\
 		}																																											\
 	} while(0)
 
 // Non-propagable retval_error error-warning call.
 #	define cho_rve_ewcall(retVal, chol_call, format, ...) do {																														\
-		if(::cho::error_t errCall = (chol_call)) { 																																	\
-			if(errCall < 0) {																																						\
-				debug_printf(0, "error", "%s: 0x%X.", #chol_call, errCall);																											\
+		if(::cho::error_t cho_errCall_ = (chol_call)) { 																															\
+			if(cho_errCall_ < 0) {																																					\
+				debug_printf(0, "error", "%s: 0x%X.", #chol_call, cho_errCall_);																									\
 				error_printf(format, __VA_ARGS__); 																																	\
 				return retval; 																																						\
 			}																																										\
 			else {																																									\
-				warning_printf("%s: 0x%X.", #chol_call, errCall);																													\
+				warning_printf("%s: 0x%X.", #chol_call, cho_errCall_);																												\
 			}																																										\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, cho_errCall_);																										\
 		}																																											\
 	} while(0)
 
@@ -157,31 +157,31 @@ namespace cho
 // --------------------------------------------------------------------
 // Propagable retval_error call.
 #	define cho_pecall(chol_call, ...) do {																																			\
-		::cho::error_t errCall = (chol_call);  																																		\
-		if(errCall < 0) {																																							\
-			debug_printf(0, "error", "%s: 0x%X", #chol_call, errCall);																												\
+		::cho::error_t cho_errCall_ = (chol_call);  																																\
+		if(cho_errCall_ < 0) {																																						\
+			debug_printf(0, "error", "%s: 0x%X", #chol_call, cho_errCall_);																											\
 			error_printf(__VA_ARGS__); 																																				\
-			return errCall; 																																						\
+			return cho_errCall_; 																																					\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, cho_errCall_);																										\
 		}																																											\
 	} while(0)
 
 // Propagable retval_error error-warning call.
 #	define cho_pewcall(chol_call, ...) do {																																			\
-		if(::cho::error_t errCall = (chol_call)) { 																																	\
-			if(errCall < 0) {																																						\
-				debug_printf(0, "error", "%s: 0x%X", #chol_call, errCall);																											\
+		if(::cho::error_t cho_errCall_ = (chol_call)) { 																															\
+			if(cho_errCall_ < 0) {																																					\
+				debug_printf(0, "error", "%s: 0x%X", #chol_call, cho_errCall_);																										\
 				error_printf(__VA_ARGS__); 																																			\
-				return errCall; 																																					\
+				return cho_errCall_; 																																				\
 			}																																										\
 			else {																																									\
-				warning_printf("%s: 0x%X.", #chol_call, errCall);																													\
+				warning_printf("%s: 0x%X.", #chol_call, cho_errCall_);																												\
 			}																																										\
 		}																																											\
 		else {																																										\
-			success_printf("%s: Success (0x%X).", #chol_call, errCall);																												\
+			success_printf("%s: Success (0x%X).", #chol_call, cho_errCall_);																										\
 		}																																											\
 	} while(0)
 
@@ -201,10 +201,10 @@ namespace cho
 			return retval; 																																							\
 	} while(0)
 
-#	define cho_pecall(retVal, chol_call, ...) do {																																	\
-		::cho::error_t _cho_errCall = ::cho::succeeded(chol_call);																													\
-		if(::cho::failed(_cho_errCall)) 																																			\
-			return retval; 																																							\
+#	define cho_pecall(chol_call, ...) do {																																			\
+		::cho::error_t cho_errCall_ = (chol_call);																																	\
+		if(::cho::failed(cho_errCall_)) 																																			\
+			return cho_errCall_; 																																					\
 	} while(0)
 
 #	define cho_rve_ewcall											cho_rve_ecall	// Non-propagable retval_error error-warning call.

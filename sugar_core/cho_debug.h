@@ -11,7 +11,7 @@
 #	elif defined(CHO_WINDOWS)
 #		include <crtdbg.h>
 #		define CHO_PLATFORM_CRT_BREAKPOINT		(void)_CrtDbgBreak
-#		define CHO_PLATFORM_CRT_CHECK_MEMORY()	// (void)_CrtCheckMemory
+#		define CHO_PLATFORM_CRT_CHECK_MEMORY()	do {} while(0) // (void)_CrtCheckMemory
 #	else
 #		error "Platform not supported."
 #	endif
