@@ -34,10 +34,10 @@ namespace cho
 	};
 
 	static inline			::cho::error_t									drawRectangle								(::cho::SASCIITarget& asciiTarget, const ::cho::SASCIICell& value, const ::cho::SRectangle2D<int32_t>& rectangle)	{
-		for(int32_t y = ::cho::max(0, rectangle.Offset.y), yStop = ::cho::min(rectangle.Offset.y + rectangle.Size.y, (int32_t)asciiTarget.Height	()); y < yStop; ++y)
-		for(int32_t x = ::cho::max(0, rectangle.Offset.x), xStop = ::cho::min(rectangle.Offset.x + rectangle.Size.x, (int32_t)asciiTarget.Width	()); x < xStop; ++x) {	
-			asciiTarget.Characters	[y][x]												= value.Character;
-			asciiTarget.Colors		[y][x]												= value.Color;
+		for(int32_t y = (int32_t)::cho::max(0, rectangle.Offset.y), yStop = ::cho::min((int32_t)(rectangle.Offset.y + rectangle.Size.y), (int32_t)asciiTarget.Height	()); y < yStop; ++y)
+		for(int32_t x = (int32_t)::cho::max(0, rectangle.Offset.x), xStop = ::cho::min((int32_t)(rectangle.Offset.x + rectangle.Size.x), (int32_t)asciiTarget.Width		()); x < xStop; ++x) {	
+			asciiTarget.Characters	[y][x]											= value.Character;
+			asciiTarget.Colors		[y][x]											= value.Color;
 		}
 		return 0;
 	}
@@ -46,29 +46,30 @@ namespace cho
 		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)asciiTarget.Height	()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(0, (int32_t)(circle.Center.x - circle.Radius)), xStop = ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)asciiTarget.Width	()); x < xStop; ++x) {	
 			::cho::SCoord2<int32_t>														cellCurrent									= {x, y};
-			double																			distance									= (cellCurrent - circle.Center).Length();
+			double																		distance									= (cellCurrent - circle.Center).Length();
 			if(distance < circle.Radius) {
-				asciiTarget.Characters	[y][x]												= value.Character;
-				asciiTarget.Colors		[y][x]												= value.Color;
+				asciiTarget.Characters	[y][x]											= value.Character;
+				asciiTarget.Colors		[y][x]											= value.Color;
 			}
 		}
 		return 0;
 	}
 
 	// A good article on this kind of triangle rasterization: https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/ 
-	static inline			::cho::error_t									drawTriangle								(::cho::SASCIITarget& asciiTarget, const ::cho::SASCIICell& value, const ::cho::STriangle2D<int32_t>& triangle)		{
-		::cho::SCoord2		<int32_t>												areaMin										= {::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), ::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
-		::cho::SCoord2		<int32_t>												areaMax										= {::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), ::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
+	template<typename _tCoord>
+	static inline			::cho::error_t									drawTriangle								(::cho::SASCIITarget& asciiTarget, const ::cho::SASCIICell& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
+		::cho::SCoord2		<int32_t>												areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::cho::SCoord2		<int32_t>												areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
 		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)asciiTarget.Height	()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(areaMin.x, 0), xStop = ::cho::min(areaMax.x, (int32_t)asciiTarget.Width	()); x < xStop; ++x) {	
-			const ::cho::SCoord2<int32_t>													cellCurrent									= {x, y};
+			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
-			int																				w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int																				w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int																				w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
+			int																			w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
-				asciiTarget.Characters	[y][x]												= value.Character;
-				asciiTarget.Colors		[y][x]												= value.Color;
+				asciiTarget.Characters	[y][x]											= value.Character;
+				asciiTarget.Colors		[y][x]											= value.Color;
 			}
 		}
 		return 0;
@@ -96,24 +97,30 @@ namespace cho
 		float																		error										= dx / 2.0f;
 		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
 		int32_t																		y											= (int32_t)y1;
-		for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-			if(steep) {
+		if(steep) {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
 				if(false == ::cho::in_range(x, 0, (int32_t)asciiTarget.Height()) || false == ::cho::in_range(y, 0, (int32_t)asciiTarget.Width()))
 					continue;
 				asciiTarget.Characters	[x][y]											= value.Character;
 				asciiTarget.Colors		[x][y]											= value.Color;
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
 			}
-			else {
+		}
+		else {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
 				if(false == ::cho::in_range(y, 0, (int32_t)asciiTarget.Height()) || false == ::cho::in_range(x, 0, (int32_t)asciiTarget.Width()))
 					continue;
 				asciiTarget.Characters	[y][x]											= value.Character;
 				asciiTarget.Colors		[y][x]											= value.Color;
-			}
- 
-			error																-= dy;
-			if(error < 0) {
-				y																	+= ystep;
-				error																+= dx;
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
 			}
 		}
 		return 0;

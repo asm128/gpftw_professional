@@ -9,41 +9,40 @@ namespace cho
 {
 	struct SBitmapTargetBGRA	{ typedef SColorBGRA	TColor; ::cho::grid_view<TColor>	Colors; };
 	
-	template<typename _tTarget>
-	static					::cho::error_t									drawRectangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SRectangle2D<int32_t>& rectangle)	{
-		for(int32_t y = ::cho::max(0, rectangle.Offset.y), yStop = ::cho::min(rectangle.Offset.y + rectangle.Size.y, (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
-		for(int32_t x = ::cho::max(0, rectangle.Offset.x), xStop = ::cho::min(rectangle.Offset.x + rectangle.Size.x, (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) {	
-			bitmapTarget.Colors		[y][x]												= value;
-		}
+	template<typename _tCoord, typename _tTarget>
+	static					::cho::error_t									drawRectangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SRectangle2D<_tCoord>& rectangle)		{
+		for(int32_t y = (int32_t)::cho::max(0, rectangle.Offset.y), yStop = (int32_t)::cho::min(rectangle.Offset.y + rectangle.Size.y, (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
+		for(int32_t x = (int32_t)::cho::max(0, rectangle.Offset.x), xStop = (int32_t)::cho::min(rectangle.Offset.x + rectangle.Size.x, (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) 	
+			bitmapTarget.Colors		[y][x]											= value;
 		return 0;
 	}
 
-	template<typename _tTarget>
-	static					::cho::error_t									drawCircle									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SCircle2D<int32_t>& circle)			{
+	template<typename _tCoord, typename _tTarget>
+	static					::cho::error_t									drawCircle									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SCircle2D<_tCoord>& circle)			{
 		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(0, (int32_t)(circle.Center.x - circle.Radius)), xStop = ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) {	
-			::cho::SCoord2<int32_t>															cellCurrent									= {x, y};
-			double																			distance									= (cellCurrent - circle.Center).Length();
+			::cho::SCoord2<int32_t>														cellCurrent									= {x, y};
+			double																		distance									= (cellCurrent - circle.Center).Length();
 			if(distance < circle.Radius) 
-				bitmapTarget.Colors		[y][x]												= value;
+				bitmapTarget.Colors		[y][x]											= value;
 		}
 		return 0;
 	}
 
 	// A good article on this kind of triangle rasterization: https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/ 
-	template<typename _tTarget>
-	static					::cho::error_t									drawTriangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::STriangle2D<int32_t>& triangle)		{
-		::cho::SCoord2		<int32_t>												areaMin										= {::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), ::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
-		::cho::SCoord2		<int32_t>												areaMax										= {::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), ::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
+	template<typename _tCoord, typename _tTarget>
+	static					::cho::error_t									drawTriangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
+		::cho::SCoord2		<int32_t>												areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::cho::SCoord2		<int32_t>												areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
 		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(areaMin.x, 0), xStop = ::cho::min(areaMax.x, (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) {	
-			const ::cho::SCoord2<int32_t>													cellCurrent									= {x, y};
+			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
-			int																				w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int																				w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int																				w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
+			int																			w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0)  // If p is on or inside all edges, render pixel.
-				bitmapTarget.Colors		[y][x]												= value;
+				bitmapTarget.Colors		[y][x]											= value;
 		}
 		return 0;
 	}
@@ -70,22 +69,28 @@ namespace cho
 		float																		error										= dx / 2.0f;
 		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
 		int32_t																		y											= (int32_t)y1;
-		for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-			if(steep) {
+		if(steep) {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
 				if(false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.Colors.height()) || false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.Colors.width()))
 					continue;
 				bitmapTarget.Colors		[x][y]											= value;
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
 			}
-			else {
+		}
+		else {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
 				if(false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.Colors.height()) || false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.Colors.width()))
 					continue;
 				bitmapTarget.Colors		[y][x]											= value;
-			}
- 
-			error																-= dy;
-			if(error < 0) {
-				y																	+= ystep;
-				error																+= dx;
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
 			}
 		}
 		return 0;

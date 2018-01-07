@@ -101,8 +101,8 @@ struct SHeaderInfoBMP {
 	uint32_t																								pixelSize								= infoHeader.Bpp == 1 ? 1 : infoHeader.Bpp / 8;
 	::cho::array_pod<ubyte_t>																				srcBytes								= {};
 	cho_necall(srcBytes.resize(nPixelCount * pixelSize), "Out of memory?");
-	int																										readResult								= fread(&srcBytes[0], pixelSize, nPixelCount, source);
-	ree_if(readResult != (int)nPixelCount, "Failed to read file! File corrupt?");
+	size_t																										readResult								= fread(&srcBytes[0], pixelSize, nPixelCount, source);
+	ree_if(readResult != (size_t)nPixelCount, "Failed to read file! File corrupt?");
 	cho_necall(out_Colors.resize(nPixelCount), "Out of memory?");
 	bool																									b32Bit										= false;
 	uint32_t																								colorSize									= 0;
