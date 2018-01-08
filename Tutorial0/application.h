@@ -11,19 +11,19 @@
 #define APPLICATION_H_098273498237423
 
 struct SApplication {
-						::cho::SDisplay																	MainDisplay									= {};
-						::cho::array_pod<::cho::SColorBGRA>												BitmapOffsceen								= {};
-						::cho::SRuntimeValues															RuntimeValues								= {};
-						::cho::SInput																	SystemInput									= {};
-						::cho::STimer																	Timer										= {};
-						::cho::SFrameInfo																FrameInfo									= {};
-						::cho::array_pod<::cho::SColorBGRA>												TextureFont									= {};
-						::cho::array_pod<::cho::SColorBGRA>												TextureBackground							= {};
-						::cho::grid_view<::cho::SColorBGRA>												ViewTextureFont								= {};
-						::cho::grid_view<::cho::SColorBGRA>												ViewTextureBackground						= {};
+						::cho::SDisplay								MainDisplay									= {};
+						::cho::array_pod<::cho::SColorBGRA>			BitmapOffsceen								= {};
+						::cho::SRuntimeValues						RuntimeValues								= {};
+						::cho::SInput								SystemInput									= {};
+						::cho::STimer								Timer										= {};
+						::cho::SFrameInfo							FrameInfo									= {};
+						::cho::array_pod<::cho::SColorBGRA>			TextureFont									= {};
+						::cho::array_pod<::cho::SColorBGRA>			TextureBackground							= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewTextureFont								= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackground						= {};
 
-						::cho::SASCIITarget																ASCIIRenderTarget							= {};
-						::cho::SPalette																	ASCIIPalette								= 
+						::cho::SASCIITarget							ASCIIRenderTarget							= {};
+						::cho::SPalette								ASCIIPalette								= 
 		{	(uint32_t)::cho::ASCII_COLOR_INDEX_0		
 		,	(uint32_t)::cho::ASCII_COLOR_INDEX_1 	
 		,	(uint32_t)::cho::ASCII_COLOR_INDEX_2 	
@@ -42,7 +42,7 @@ struct SApplication {
 		,	(uint32_t)::cho::ASCII_COLOR_INDEX_15	
 		};
 
-																										SApplication								(::cho::SRuntimeValues& runtimeValues)											: RuntimeValues(runtimeValues) {}
+																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 };
 
 #endif // APPLICATION_H_098273498237423

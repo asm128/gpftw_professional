@@ -1,6 +1,6 @@
 #include "application.h"
 
-static constexpr	const uint32_t														BMP_SCREEN_WIDTH							= 512;
+static constexpr	const uint32_t														BMP_SCREEN_WIDTH							= 1280;
 static constexpr	const uint32_t														BMP_SCREEN_HEIGHT							= uint32_t(::BMP_SCREEN_WIDTH * (9.0 / 16.0));
 static				::RECT																minClientRect								= {100, 100, 100 + 320, 100 + 200};
 
@@ -11,10 +11,13 @@ extern				::SApplication														* g_ApplicationInstance						;
 	static	const int																			adjustedMinRect								= ::AdjustWindowRectEx(&minClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 
 	::cho::SDisplay																				& mainDisplay								= applicationInstance.MainDisplay;
+	::cho::SInput																				& input										= applicationInstance.SystemInput;
 	::cho::SDisplayPlatformDetail																& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
 	switch(uMsg) {
 	default: break;		
 	case WM_CLOSE			: ::DestroyWindow(hWnd); return 0;
+	case WM_KEYDOWN			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; input.KeyboardCurrent.KeyState[wParam]  =  1; return 0;
+	case WM_KEYUP			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; input.KeyboardCurrent.KeyState[wParam] &= ~1; return 0;
 	case WM_GETMINMAXINFO	:	// Catch this message so to prevent the window from becoming too small.
 		((::MINMAXINFO*)lParam)->ptMinTrackSize													= {minClientRect.right - minClientRect.left, minClientRect.bottom - minClientRect.top}; 
 		return 0;

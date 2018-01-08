@@ -28,8 +28,7 @@
 	const uint32_t																						bytesToCopy									= sizeof(::RGBQUAD) * width * height;
 	offscreenDetail.BitmapInfoSize																	= sizeof(::BITMAPINFO) + bytesToCopy;
 	offscreenDetail.BitmapInfo																		= (::BITMAPINFO*)::malloc(offscreenDetail.BitmapInfoSize);
-	for(uint32_t iPixel = 0, pixelCount = width * height; iPixel < pixelCount; ++iPixel)
-		((::RGBQUAD*)offscreenDetail.BitmapInfo->bmiColors)[iPixel]										= {colorArray[iPixel].b, colorArray[iPixel].g, colorArray[iPixel].r, 0xFF};
+	memcpy(offscreenDetail.BitmapInfo->bmiColors, colorArray, width * height * sizeof(::cho::SColorBGRA));
 
 	offscreenDetail.BitmapInfo->bmiHeader.biSize													= sizeof(::BITMAPINFO);
 	offscreenDetail.BitmapInfo->bmiHeader.biWidth													= width;
