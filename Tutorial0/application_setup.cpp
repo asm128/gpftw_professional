@@ -23,10 +23,10 @@ extern				::SApplication														* g_ApplicationInstance						;
 		return 0;
 	case WM_SIZE			: 
 		if(lParam) {
-			::cho::SCoord2<int32_t>																		newMetrics									= ::cho::SCoord2<WORD>{LOWORD(lParam), HIWORD(lParam)}.Cast<int32_t>();
-			if(newMetrics != mainDisplay.Size.Cast<int32_t>()) {
+			::cho::SCoord2<uint32_t>																	newMetrics									= ::cho::SCoord2<WORD>{LOWORD(lParam), HIWORD(lParam)}.Cast<uint32_t>();
+			if(newMetrics != mainDisplay.Size) {
 				mainDisplay.PreviousSize																= mainDisplay.Size;
-				mainDisplay.Size																		= newMetrics.Cast<uint32_t>();
+				mainDisplay.Size																		= newMetrics;
 				mainDisplay.Resized																		= true;
 				mainDisplay.Repaint																		= true; 
 				//::updateOffscreen	(applicationInstance);

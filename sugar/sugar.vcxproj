@@ -195,6 +195,7 @@
     <ClInclude Include="cho_ptr.h" />
     <ClInclude Include="cho_runtime.h" />
     <ClInclude Include="cho_timer.h" />
+    <ClInclude Include="cho_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_display.cpp" />

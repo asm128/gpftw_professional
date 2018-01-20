@@ -63,7 +63,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	fopen_s(&source, bkgdFileName, "rb");
 	if(source) {
 		if errored(::cho::bmpFileLoad(source, applicationInstance.TextureBackground, applicationInstance.ViewTextureBackground)) {
-			error_printf("Failed to load file: '%s'. File not found?", fontFileName);
+			error_printf("Failed to load file: '%s'. File not found?", bkgdFileName);
 			fclose(source);
 			return -1;
 		}
@@ -80,7 +80,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	applicationInstance.Timer		.Frame();
 	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
 	::cho::SDisplay																& mainWindow								= applicationInstance.MainDisplay;
-	::cho::displayUpdate(mainWindow);
+	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
 	ree_if(errored(::updateOffscreen(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
 	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffsceen)), "Unknown error.");

@@ -93,6 +93,9 @@
     <ClInclude Include="cho_grid.h">
       <Filter>container</Filter>
     </ClInclude>
+    <ClInclude Include="cho_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">
