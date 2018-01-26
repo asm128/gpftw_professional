@@ -42,16 +42,16 @@ namespace cho
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
 			const uint32_t													ySrc						= y + srcRect.Offset.y;
-			if(yDst >= dst.height() || yDst >= (dstRect.Offset.y + dstRect.Size.y))
+			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
-			if(ySrc >= src.height() || ySrc >= (srcRect.Offset.y + srcRect.Size.y))
+			if(ySrc >= src.height() || ySrc >= (uint32_t)(srcRect.Offset.y + srcRect.Size.y))
 				continue;
 			for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 				const uint32_t													xDst						= x + dstRect.Offset.x;
 				const uint32_t													xSrc						= x + srcRect.Offset.x;
-				if(xDst >= dst.width() || xDst >= (dstRect.Offset.x + dstRect.Size.x))
+				if(xDst >= dst.width() || xDst >= (uint32_t)(dstRect.Offset.x + dstRect.Size.x))
 					continue;
-				if(xSrc >= src.width() || xSrc >= (srcRect.Offset.x + srcRect.Size.x))
+				if(xSrc >= src.width() || xSrc >= (uint32_t)(srcRect.Offset.x + srcRect.Size.x))
 					continue;
 				dst[yDst][xDst]												= src[ySrc][xSrc];
 			}
@@ -66,14 +66,14 @@ namespace cho
 			const uint32_t													ySrc						= y + srcRect.Offset.y;
 			if(yDst >= dst.height())
 				continue;
-			if(ySrc >= src.height() || ySrc >= (srcRect.Offset.y + srcRect.Size.y))
+			if(ySrc >= src.height() || ySrc >= (uint32_t)(srcRect.Offset.y + srcRect.Size.y))
 				continue;
 			for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 				const uint32_t													xDst						= x + dstOffset.x;
 				const uint32_t													xSrc						= x + srcRect.Offset.x;
 				if(xDst >= dst.width())
 					continue;
-				if(xSrc >= src.width() || xSrc >= (srcRect.Offset.x + srcRect.Size.x))
+				if(xSrc >= src.width() || xSrc >= (uint32_t)(srcRect.Offset.x + srcRect.Size.x))
 					continue;
 				dst[yDst][xDst]												= src[ySrc][xSrc];
 			}
@@ -86,14 +86,14 @@ namespace cho
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
 			const uint32_t													ySrc						= y + srcOffset.y;
-			if(yDst >= dst.height() || yDst >= (dstRect.Offset.y + dstRect.Size.y))
+			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
 			if(ySrc >= src.height())
 				continue;
 			for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 				const uint32_t													xDst						= x + dstRect.Offset.x;
 				const uint32_t													xSrc						= x + srcOffset.x;
-				if(xDst >= dst.width() || xDst >= (dstRect.Offset.x + dstRect.Size.x))
+				if(xDst >= dst.width() || xDst >= (uint32_t)(dstRect.Offset.x + dstRect.Size.x))
 					continue;
 				if(xSrc >= src.width())
 					continue;
@@ -107,11 +107,11 @@ namespace cho
 						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect)		{
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
-			if(yDst >= dst.height() || yDst >= (dstRect.Offset.y + dstRect.Size.y))
+			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
 			for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 				const uint32_t													xDst						= x + dstRect.Offset.x;
-				if(xDst >= dst.width() || xDst >= (dstRect.Offset.x + dstRect.Size.x))
+				if(xDst >= dst.width() || xDst >= (uint32_t)(dstRect.Offset.x + dstRect.Size.x))
 					continue;
 				dst[yDst][xDst]												= src[y][x];
 			}
