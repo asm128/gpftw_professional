@@ -377,6 +377,44 @@ namespace cho
 			ree_if(indexNew != indexExpected, "Failed to push value! Array size: %i.", indexExpected);
 			return indexNew;
 		}
+
+		// returns the new array size or -1 if failed.
+		template<typename _tObj>
+		inline				int32_t						erase										(const _tObj* address)																	{ 
+			ree_if(0 == Data, "Uninitialized array pointer!");
+			const ptrdiff_t										ptrDiff										= ptrdiff_t(address) - (ptrdiff_t)Data;
+			const uint32_t										index										= (uint32_t)(ptrDiff / (ptrdiff_t)sizeof(_tObj));
+			ree_if(index >= Count, "Invalid index: %u.", index);
+			return remove(index); 
+		}
+
+							int32_t						remove										(uint32_t index)																		{ 
+			ree_if(0 == Data, "Uninitialized array pointer!");
+			ree_if(index >= Count, "Invalid index: %u.", index);
+			--Count;
+			while(index < Count) {
+				Data[index].~_tObj();							// Destroy old
+				new (&Data[index]) _tObj(Data[index + 1]);		// Placement new
+				++index;
+			}
+			Data[index].~_tObj();							// Destroy last
+			return Count;
+		}
+
+		// Returns the new size of the list or -1 if the array pointer is not initialized.
+							int32_t						remove_unordered							(uint32_t index)																		{ 
+			ree_if(0 == Data, "Uninitialized array pointer!");
+			ree_if(index >= Count, "Invalid index: %u.", index);
+			Data[index].~_tObj();							// Destroy old
+			if(1 == Count) 
+				--Count;
+			else {
+				new (&Data[index]) _tObj(Data[--Count]);	// Placement new
+				Data[Count].~_tObj();						// Destroy reordered
+			}
+
+			return Count;
+		}
 		// returns the new size of the list or -1 on failure.
 							int32_t						insert										(uint32_t index, const _tObj& newValue)													{ 
 			ree_if(index >= Count, "Invalid index: %u.", index);
@@ -447,20 +485,6 @@ namespace cho
 
 			return (int32_t)Count;
 		}	
-		// Returns the new size of the list or -1 if the array pointer is not initialized.
-							int32_t						remove_unordered							(uint32_t index)																		{ 
-			ree_if(0 == Data, "Uninitialized array pointer!");
-			ree_if(index >= Count, "Invalid index: %u.", index);
-			Data[index].~_tObj();							// Destroy old
-			if(1 == Count) 
-				--Count;
-			else {
-				new (&Data[index]) _tObj(Data[--Count]);	// Placement new
-				Data[Count].~_tObj();						// Destroy reordered
-			}
-
-			return Count;
-		}
 		//// returns the index or -1 if not found.
 		//inline				int32_t						find										(const _tObj& valueToLookFor)										const				{
 		//	for(uint32_t i=0; i<Count; ++i)
