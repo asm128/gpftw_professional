@@ -81,6 +81,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)..\..\$(Platform).$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\..\obj\$(Platform).$(Configuration)\$(ProjectName)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

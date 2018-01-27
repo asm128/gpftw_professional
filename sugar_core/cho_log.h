@@ -12,6 +12,19 @@
 #ifndef CHO_LOG_H_8927349654687654365
 #define CHO_LOG_H_8927349654687654365
 
+//#ifndef NULLIFY_CHO_NECALL
+//#	define NULLIFY_CHO_NECALL
+//#endif
+//#ifndef NULLIFY_CONDITIONAL_RETERR
+//#	define NULLIFY_CONDITIONAL_RETERR
+//#endif
+//#ifndef NULLIFY_CONDITIONAL_LOG
+//#	define NULLIFY_CONDITIONAL_LOG
+//#endif
+//#ifndef NULLIFY_CONDITIONAL_THROW
+//#	define NULLIFY_CONDITIONAL_THROW
+//#endif
+
 #if defined CHO_WINDOWS
 #	define base_debug_print(text, charCount)						OutputDebugStringA(text); charCount
 #else
@@ -66,7 +79,6 @@ namespace cho
 #	define success_printf(format, ...)								do { __VA_ARGS__; } while(0)
 #endif	
 
-//#define NULLIFY_CONDITIONAL_THROW
 #ifndef NULLIFY_CONDITIONAL_THROW
 #define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); throw(exception);	}
 #else
@@ -75,7 +87,6 @@ namespace cho
 #define throw_if(condition, exception, format, ...)				do{ condition; } while(0)
 #endif
 
-//#define NULLIFY_CONDITIONAL_LOG
 #ifndef NULLIFY_CONDITIONAL_LOG
 #define error_if(condition, format, ...)						if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
 #define warn_if(condition, format, ...)							if(condition) { warning_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
@@ -108,9 +119,17 @@ namespace cho
 #define retnul_warn_if(condition, format, ...)					retval_warn_if	( 0, condition, format, __VA_ARGS__)
 #define retnul_info_if(condition, format, ...)					retval_info_if	( 0, condition, format, __VA_ARGS__)
 
+#ifndef NULLIFY_CONDITIONAL_RETERR
 #define reterr_error_if(condition, format, ...)					retval_error_if	(-1, condition, format, __VA_ARGS__)
 #define reterr_warn_if(condition, format, ...)					retval_warn_if	(-1, condition, format, __VA_ARGS__)
 #define reterr_info_if(condition, format, ...)					retval_info_if	(-1, condition, format, __VA_ARGS__)
+#else
+#pragma warning(disable:4552)	// this is required because "condition" may have no side effect.
+#pragma warning(disable:4553)	// this is required because "condition" may have no side effect.
+#define reterr_error_if(condition, format, ...)					do{ condition; } while(0)
+#define reterr_warn_if(condition, format, ...)					do{ condition; } while(0)
+#define reterr_info_if(condition, format, ...)					do{ condition; } while(0)
+#endif
 
 #define retwarn_error_if(condition, format, ...)				retval_error_if	( 1, condition, format, __VA_ARGS__)
 #define retwarn_warn_if(condition, format, ...)					retval_warn_if	( 1, condition, format, __VA_ARGS__)
@@ -229,10 +248,17 @@ namespace cho
 #	define cho_pewcall												cho_pecall			// Propagable retval_error error-warning call.
 #endif
 
+#ifndef NULLIFY_CHO_NECALL
 #define cho_necall(chol_call, ...)								cho_rve_ecall (-1, chol_call, __VA_ARGS__)	// Non-propagable error call.
 #define cho_newcall(chol_call, ...)								cho_rve_ewcall(-1, chol_call, __VA_ARGS__)	// Non-propagable error-warning call.
 #define cho_hrcall(hr_call)										cho_rv_hrcall (-1, hr_call)					// HRESULT call.
 #define cho_hrecall(hr_call, ...)								cho_rve_hrcall(-1, hr_call, __VA_ARGS__)	// HRESULT call.
+#else
+#define cho_necall(chol_call, ...)								do{chol_call; } while(0) // Non-propagable error call.
+#define cho_newcall(chol_call, ...)								do{chol_call; } while(0) // Non-propagable error-warning call.
+#define cho_hrcall(hr_call)										do{hr_call	; } while(0) // HRESULT call.
+#define cho_hrecall(hr_call, ...)								do{hr_call	; } while(0) // HRESULT call.
+#endif
 
 #define e_if													error_if
 #define w_if													warn_if

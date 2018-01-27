@@ -25,7 +25,9 @@ namespace cho
 		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount])									noexcept	: Data(_dataElements), Count(_elementCount)										{}
 
 		template <size_t _elementCount>
-		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)			noexcept	: Data(_dataElements), Count(::cho::min(_elementCount, elementCount))			{}
+		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)						: Data(_dataElements), Count(::cho::min(_elementCount, elementCount))			{
+			throw_if(elementCount > _elementCount, ::std::exception(""), "Element count out of range.");
+		}
 
 		// Operators
 							_tElement&				operator[]					(uint32_t index)																		{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(index >= Count, ::std::exception(""), "Invalid index."); return Data[index]; }

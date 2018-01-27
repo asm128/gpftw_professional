@@ -96,6 +96,18 @@
     <ClInclude Include="cho_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cho_gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_bit_blt.h">
+      <Filter>raster</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_layered_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_bit_array_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">

@@ -81,6 +81,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)..\..\$(Platform).$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)..\..\obj\$(Platform).$(Configuration)\$(ProjectName)\</IntDir>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -176,6 +177,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cho_bit_array_view.h" />
     <ClInclude Include="cho_app_impl.h" />
     <ClInclude Include="cho_array.h" />
     <ClInclude Include="cho_array_view.h" />
@@ -184,13 +186,16 @@
     <ClInclude Include="cho_ascii_target.h" />
     <ClInclude Include="cho_bitmap_file.h" />
     <ClInclude Include="cho_bitmap_target.h" />
+    <ClInclude Include="cho_bit_blt.h" />
     <ClInclude Include="cho_color.h" />
     <ClInclude Include="cho_coord.h" />
     <ClInclude Include="cho_display.h" />
     <ClInclude Include="cho_frameinfo.h" />
     <ClInclude Include="cho_grid.h" />
     <ClInclude Include="cho_grid_view.h" />
+    <ClInclude Include="cho_gui.h" />
     <ClInclude Include="cho_input.h" />
+    <ClInclude Include="cho_layered_view.h" />
     <ClInclude Include="cho_math.h" />
     <ClInclude Include="cho_ptr.h" />
     <ClInclude Include="cho_runtime.h" />

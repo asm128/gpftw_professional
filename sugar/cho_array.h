@@ -27,15 +27,15 @@ namespace cho
 	// This class is optimized to contain POD instances and won't work for C++ objects that require calling constructors/destructors.
 	template<typename _tPOD>
 	struct array_pod : public array_base<_tPOD> {
-		typedef				array_base<_tPOD>			_TVectorBase								;
-		typedef				array_view<_tPOD>			_TArrayView									;
+		typedef				array_base<_tPOD>			TArrayBase									;
+		typedef				array_view<_tPOD>			TArrayView									;
 
-		using				_TVectorBase::				Count										;
-		using				_TVectorBase::				Data										;
-		using				_TVectorBase::				Size										;
-		using				_TVectorBase::				calc_reserve_size							;
-		using				_TVectorBase::				calc_malloc_size							;
-		using				_TVectorBase::				operator[]									;
+		using				TArrayBase::				Count										;
+		using				TArrayBase::				Data										;
+		using				TArrayBase::				Size										;
+		using				TArrayBase::				calc_reserve_size							;
+		using				TArrayBase::				calc_malloc_size							;
+		using				TArrayBase::				operator[]									;
 
 		inline											~array_pod									()																						{ safe_cho_free(Data);		}
 		inline constexpr								array_pod									()																			noexcept	= default;
@@ -145,7 +145,7 @@ namespace cho
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, (uint32_t)Size);
 
-				_TArrayView											safe_data									= {newData, reserveSize};
+				TArrayView											safe_data									= {newData, reserveSize};
 				if(oldData) {
 					for(uint32_t i = 0, count = ::cho::min(newSize, oldCount); i<count; ++i)
 						safe_data[i]									= operator[](i);
@@ -176,7 +176,7 @@ namespace cho
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
 
-				_TArrayView											viewSafe									= {newData, Count+1};
+				TArrayView											viewSafe									= {newData, Count+1};
 				for(uint32_t i = 0, maxCount = ::cho::min(index, Count); i < maxCount; ++i)
 					viewSafe[i]										= oldData[i];
 				viewSafe[index]									= newValue;

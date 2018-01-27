@@ -4,6 +4,7 @@
 
 #include "cho_bitmap_target.h"
 #include "cho_bitmap_file.h"
+#include "cho_bit_blt.h"
 
 #include "cho_app_impl.h"
 
@@ -48,46 +49,51 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	FILE																		* source									= 0; 
 	{
-		static constexpr	const char												fontFileName	[]							= "Codepage-437-24.bmp";
-		fopen_s(&source, fontFileName, "rb");
+		static constexpr	const char												bmpFileName	[]								= "Codepage-437-24.bmp";
+		fopen_s(&source, bmpFileName, "rb");
 		if(source) {
 			if errored(::cho::bmpFileLoad(source, applicationInstance.TextureFont, applicationInstance.ViewTextureFont)) {
-				error_printf("Failed to load file: '%s'. File not found?", fontFileName);
+				error_printf("Failed to load file: '%s'. File not found?", bmpFileName);
 				fclose(source);
 				return -1;
 			}
 			fclose(source);
 		}
+		else
+			info_printf("Failed to open file %s.", bmpFileName);
 	}
 	{ // 
-		static constexpr	const char												bkgdFileName	[]							= "earth_color.bmp";
+		static constexpr	const char												bmpFileName	[]									= "earth_color.bmp";
 		source																	= 0; 
-		fopen_s(&source, bkgdFileName, "rb");
+		fopen_s(&source, bmpFileName, "rb");
 		if(source) {
 			if errored(::cho::bmpFileLoad(source, applicationInstance.TextureBackgroundDay, applicationInstance.ViewTextureBackgroundDay)) {
-				error_printf("Failed to load file: '%s'. File not found?", bkgdFileName);
+				error_printf("Failed to load file: '%s'. File not found?", bmpFileName);
 				fclose(source);
 				return -1;
 			}
 			fclose(source);
 		}
+		else
+			info_printf("Failed to open file %s.", bmpFileName);
 	}
 	{ // 
-		static constexpr	const char												bkgdFileName	[]							= "earth_light.bmp";
+		static constexpr	const char												bmpFileName	[]									= "earth_light.bmp";
 		source																	= 0; 
-		fopen_s(&source, bkgdFileName, "rb");
+		fopen_s(&source, bmpFileName, "rb");
 		if(source) {
 			if errored(::cho::bmpFileLoad(source, applicationInstance.TextureBackgroundNight, applicationInstance.ViewTextureBackgroundNight)) {
-				error_printf("Failed to load file: '%s'. File not found?", bkgdFileName);
+				error_printf("Failed to load file: '%s'. File not found?", bmpFileName);
 				fclose(source);
 				return -1;
 			}
 			fclose(source);
 		}
+		else
+			info_printf("Failed to open file %s.", bmpFileName);
 	}
 	return 0;
 }
-
 
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
@@ -143,14 +149,14 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	geometry2.B																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	geometry2.C																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
-	const ::cho::SCoord2<uint32_t>													dstOffsetNight								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundNight.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundNight.height() / 2};
-	const ::cho::SCoord2<uint32_t>													dstOffsetDay								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundDay.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundDay.height() / 2};
+	const ::cho::SCoord2<uint32_t>												dstOffsetNight								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundNight.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundNight.height() / 2};
+	const ::cho::SCoord2<uint32_t>												dstOffsetDay								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundDay.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundDay.height() / 2};
 
 	::cho::SBitmapTargetBGRA													bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());	// Clear target.
 	error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundDay, dstOffsetDay)), "I believe this never fails.");
 	error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundNight, dstOffsetNight)), "I believe this never fails.");
-	//error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
+	error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureFont, dstOffsetNight, ::cho::SRectangle2D<uint32_t>{{0,0}, {9, 128}})), "I believe this never fails.");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
@@ -160,12 +166,12 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 
-	static constexpr const ::cho::SCoord2<int32_t>									sizeCharCell							= {9, 16};
-	uint32_t																		lineOffset								= 0;
+	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
+	uint32_t																	lineOffset									= 0;
 	{
-		static constexpr const char														testText0	[]							= "Some";
-		static constexpr const uint32_t													sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
-		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
+		static constexpr const char													testText0	[]								= "Some";
+		static constexpr const uint32_t												sizeLine									= sizeCharCell.x * ::cho::size(testText0) - 1;
+		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
 		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
 			int32_t																			coordTableX								= testText0[iChar] % 32;
 			int32_t																			coordTableY								= testText0[iChar] / 32;
