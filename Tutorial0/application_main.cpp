@@ -151,7 +151,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundDay, dstOffsetDay)), "I believe this never fails.");
 	error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundNight, dstOffsetNight)), "I believe this never fails.");
 	//error_if(errored(::cho::bitBlt(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
-	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED		]), ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");

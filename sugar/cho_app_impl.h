@@ -3,7 +3,7 @@
 #include "cho_ptr.h"
 
 #define CHO_DEFINE_APPLICATION_ENTRY_POINT(_mainClass)																																													\
-		::cho::error_t																				rtMain										(::cho::SRuntimeValues& runtimeValues);													\
+static	::cho::error_t																				rtMain										(::cho::SRuntimeValues& runtimeValues);													\
 		int																							main										()																					{	\
 	::cho::SRuntimeValues																					runtimeValues								= {{::GetModuleHandle(NULL), 0, 0, SW_SHOW},};									\
 	return ::cho::failed(::rtMain(runtimeValues)) ? EXIT_FAILURE : EXIT_SUCCESS;																																						\
@@ -25,10 +25,10 @@
 	return ::cho::failed(::rtMain(runtimeValues)) ? EXIT_FAILURE : EXIT_SUCCESS;																																						\
 }																																																										\
 																																																										\
-		::cho::error_t																				setup										(_mainClass& applicationInstance);														\
-		::cho::error_t																				cleanup										(_mainClass& applicationInstance);														\
-		::cho::error_t																				update										(_mainClass& applicationInstance, bool systemRequestedExit);							\
-		::cho::error_t																				draw										(_mainClass& applicationInstance);														\
+static	::cho::error_t																				setup										(_mainClass& applicationInstance);														\
+static	::cho::error_t																				cleanup										(_mainClass& applicationInstance);														\
+static	::cho::error_t																				update										(_mainClass& applicationInstance, bool systemRequestedExit);							\
+static	::cho::error_t																				draw										(_mainClass& applicationInstance);														\
 		::cho::error_t																				rtMain										(::cho::SRuntimeValues& runtimeValues)												{	\
 	{																																																									\
 		_CrtSetDbgFlag(_CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF);																																									\
