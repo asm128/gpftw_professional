@@ -121,7 +121,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 }
 
 					::cho::error_t										drawTextFixedSize						(::cho::SBitmapTargetBGRA& bmpTarget, ::cho::grid_view<::cho::SColorBGRA> viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	for(int32_t iChar = 0; iChar < (int32_t)text0.size() - 1; ++iChar) {
+	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
 		int32_t																	coordTableX								= text0[iChar] % characterCellsX;
 		int32_t																	coordTableY								= text0[iChar] / characterCellsX;
 		const ::cho::SCoord2<int32_t>											coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
@@ -166,7 +166,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		static constexpr const char														testText0	[]							= "Some";
 		static constexpr const uint32_t													sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
-		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0); ++iChar) {
+		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
 			int32_t																			coordTableX								= testText0[iChar] % 32;
 			int32_t																			coordTableY								= testText0[iChar] / 32;
 			const ::cho::SCoord2<int32_t>													coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
@@ -180,7 +180,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		static constexpr const char														testText0	[]							= "Text";
 		const uint32_t																	sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
-		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0); ++iChar) {
+		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
 			int32_t																			coordTableX								= testText0[iChar] % 32;
 			int32_t																			coordTableY								= testText0[iChar] / 32;
 			const ::cho::SCoord2<int32_t>													coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
@@ -195,7 +195,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		const uint32_t																	sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
 		uint32_t																		dstOffsetY								= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		drawTextFixedSize(bmpTarget, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, testText0, dstTextOffset);
+		drawTextFixedSize(bmpTarget, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 
