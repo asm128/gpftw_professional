@@ -23,7 +23,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 }
 
 // --- Cleanup application resources.
-					::cho::error_t										cleanup										(::SApplication& applicationInstance)											{ 
+					::cho::error_t										cleanup										(::SApplication& applicationInstance)											{
 	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");

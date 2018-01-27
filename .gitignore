@@ -1,7 +1,12 @@
 ################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio, but then had to be modified manually because it made a mess by adding redundant lines.
 ################################################################################
-
-/.vs/
-Debug
-Release
+/.vs
+/Debug
+/Release
+/sugar/Debug
+/Tutorial0/x64/Debug
+/Lines_2017_12_29_2_42.txt
+/sugar/Lines_2017_12_31_1_16.txt
+/sugar/Lines_2017_12_30_23_56.txt
+/sugar/cho_truetype.h
