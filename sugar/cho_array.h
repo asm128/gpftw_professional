@@ -53,20 +53,16 @@ namespace cho
 				const uint32_t										newSize										= other.Count;
 				const uint32_t										reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				else {
-					::cho::auto_cho_free								safeguard;
-					Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
-						 throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize)
-					else throw_if(0 == other.Data	, "", "%s", "other.Data is null!")
-					else {
-						for(uint32_t i = 0, count = newSize; i<count; ++i)
-							Data[i]											= other[i];
-						Size											= (uint32_t)reserveSize;
-						Count											= other.Count;
-						safeguard.Handle								= 0;
-					}
-				}
+				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
+				::cho::auto_cho_free								safeguard;
+				Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
+				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
+				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
+				for(uint32_t i = 0, count = newSize; i<count; ++i)
+					Data[i]											= other[i];
+				Size											= (uint32_t)reserveSize;
+				Count											= other.Count;
+				safeguard.Handle								= 0;
 			}
 		}
 		template <size_t _otherCount>
@@ -75,20 +71,16 @@ namespace cho
 				const uint32_t										newSize										= other.Count;
 				const uint32_t										reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				else {
-					::cho::auto_cho_free								safeguard;
-					Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
-						 throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize) 
-					else throw_if(0 == other.Data	, "", "%s", "other.Data is null!") 
-					else {
-						for(uint32_t i = 0, count = newSize; i < count; ++i)
-							Data[i]											= other[i];
-						Size											= (uint32_t)reserveSize;
-						Count											= other.Count;
-						safeguard.Handle								= 0;
-					}
-				}
+				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
+				::cho::auto_cho_free								safeguard;
+				Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
+				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
+				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
+				for(uint32_t i = 0, count = newSize; i < count; ++i)
+					Data[i]											= other[i];
+				Size											= (uint32_t)reserveSize;
+				Count											= other.Count;
+				safeguard.Handle								= 0;
 			} // 
 		}
 							array_pod<_tPOD>&			operator =									(const array_pod<_tPOD>& other)															{
@@ -148,7 +140,7 @@ namespace cho
 				_tPOD												* oldData									= Data;
 				uint32_t											reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
+				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
 				::cho::auto_cho_free								safeguard;
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, (uint32_t)Size);
@@ -179,7 +171,7 @@ namespace cho
 				_tPOD												* oldData									= Data;
 				uint32_t											reserveSize									= calc_reserve_size(Count + 1);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
+				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
 				::cho::auto_cho_free								safeguard;
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
@@ -210,7 +202,7 @@ namespace cho
 				_tPOD												* oldData									= Data;
 				uint32_t											newSize										= calc_reserve_size(Count + chainLength);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
+				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
 				::cho::auto_cho_free								safeguard;
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
@@ -332,29 +324,23 @@ namespace cho
 				uint32_t											newSize										= other.Count;
 				uint32_t											reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				throw_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
-				else {
-					::cho::auto_cho_free								safeguard;
-					_tObj												* newData									= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
-						 throw_if(0 == newData		, "", "Failed to resize array. Requested size: %u. Current size: %u.", (uint32_t)newSize, (uint32_t)Size)
-					else throw_if(0 == other.Data	, "", "%s", "other.Data is null!")
-					else {
-						for(uint32_t i = 0; i < newSize; ++i) 
-							new (&newData[i]) _tObj(other.Data[i]);
-						Data											= newData;
-						Size											= reserveSize;
-						Count											= other.Count;
-						safeguard.Handle								= 0;
-					}
-				}
+				throw_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
+				::cho::auto_cho_free								safeguard;
+				_tObj												* newData									= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
+				throw_if(0 == newData		, "", "Failed to resize array. Requested size: %u. Current size: %u.", (uint32_t)newSize, (uint32_t)Size);
+				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
+				for(uint32_t i = 0; i < newSize; ++i) 
+					new (&newData[i]) _tObj(other.Data[i]);
+				Data											= newData;
+				Size											= reserveSize;
+				Count											= other.Count;
+				safeguard.Handle								= 0;
 			}
 		}
 		inline				array_obj<_tObj>&			operator =									(const array_obj<_tObj>& other)															{
-			throw_if(resize(other.Count) != (int32_t)other.Count, "", "Failed to resize array!")
-			else {
-				for(uint32_t iElement = 0; iElement < other.Count; ++iElement)
-					operator[](iElement)							= other[iElement];
-			}
+			throw_if(resize(other.Count) != (int32_t)other.Count, "", "Failed to resize array!");
+			for(uint32_t iElement = 0; iElement < other.Count; ++iElement)
+				operator[](iElement)							= other[iElement];
 			return *this;
 		}
 		inline				int32_t						clear										()																						{ 
@@ -423,7 +409,7 @@ namespace cho
 				_tObj												* oldData								= Data;
 				uint32_t											reserveSize								= calc_reserve_size(Count+1);
 				uint32_t											mallocSize								= calc_malloc_size(reserveSize);
-				ree_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
+				ree_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
 				::cho::auto_cho_free								safeguard;
 				_tObj												* newData								= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(0 == newData, "Failed to allocate for inserting new element into array! current size: %u. new size: %u.", Size, mallocSize);
@@ -458,10 +444,10 @@ namespace cho
 				_tObj												* oldData									= Data;
 				uint32_t											reserveSize									= calc_reserve_size(newSize);
 				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				ree_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize)
+				ree_if(mallocSize != (reserveSize*(uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
 				::cho::auto_cho_free								safeguard;
 				_tObj												* newData									= (_tObj*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
-				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, Size)
+				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, Size);
 				if(oldData) {
 					for(uint32_t i = 0, copyCount = ::cho::min(oldCount, newSize); i < copyCount; ++i)
 						new (&newData[i]) _tObj(oldData[i]);

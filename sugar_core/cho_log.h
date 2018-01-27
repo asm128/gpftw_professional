@@ -66,10 +66,27 @@ namespace cho
 #	define success_printf(format, ...)								do { __VA_ARGS__; } while(0)
 #endif	
 
+//#define NULLIFY_CONDITIONAL_THROW
+#ifndef NULLIFY_CONDITIONAL_THROW
 #define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); throw(exception);	}
+#else
+#pragma warning(disable:4552)	// this is required because "condition" may have no side effect.
+#pragma warning(disable:4553)	// this is required because "condition" may have no side effect.
+#define throw_if(condition, exception, format, ...)				do{ condition; } while(0)
+#endif
+
+//#define NULLIFY_CONDITIONAL_LOG
+#ifndef NULLIFY_CONDITIONAL_LOG
 #define error_if(condition, format, ...)						if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
 #define warn_if(condition, format, ...)							if(condition) { warning_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
 #define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
+#else
+#pragma warning(disable:4552)	// this is required because "condition" may have no side effect.
+#pragma warning(disable:4553)	// this is required because "condition" may have no side effect.
+#define error_if(condition, format, ...)						do{ condition; } while(0)
+#define warn_if(condition, format, ...)							do{ condition; } while(0)
+#define info_if(condition, format, ...)							do{ condition; } while(0)
+#endif
 
 #define ret_error_if(condition, format, ...)					if(condition) { error_printf	(format, __VA_ARGS__); return;			}
 #define ret_warn_if(condition, format, ...)						if(condition) { warning_printf	(format, __VA_ARGS__); return;			}
@@ -98,6 +115,7 @@ namespace cho
 #define retwarn_error_if(condition, format, ...)				retval_error_if	( 1, condition, format, __VA_ARGS__)
 #define retwarn_warn_if(condition, format, ...)					retval_warn_if	( 1, condition, format, __VA_ARGS__)
 #define retwarn_info_if(condition, format, ...)					retval_info_if	( 1, condition, format, __VA_ARGS__)
+
 
 #if defined (CHO_ERROR_PRINTF_ENABLED)
 // Non-propagable retval_error call.

@@ -18,9 +18,11 @@ struct SApplication {
 						::cho::STimer								Timer										= {};
 						::cho::SFrameInfo							FrameInfo									= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureFont									= {};
-						::cho::array_pod<::cho::SColorBGRA>			TextureBackground							= {};
+						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundDay						= {};
+						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundNight						= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureFont								= {};
-						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackground						= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundDay					= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundNight					= {};
 
 						::cho::SASCIITarget							ASCIIRenderTarget							= {};
 						::cho::SPalette								ASCIIPalette								= 
