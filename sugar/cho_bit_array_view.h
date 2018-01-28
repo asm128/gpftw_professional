@@ -32,7 +32,17 @@ namespace cho
 
 		inline				bit_array_view_iterator&					operator=					(bool value)																			{ value ? *Element |= (1 << Offset) : *Element &= ~(1 << Offset); return *this; }
 							bit_array_view_iterator&					operator++					()																						{ ++Offset; if(Offset >= ELEMENT_BITS)	{ ++Element; Offset = 0;				throw_if(Element >= (End	+ 1), ::std::exception(""), "Out of range"); } return *this; }
-							bit_array_view_iterator&					operator--					()																						{ --Offset; if(Offset < 0)				{ --Element; Offset = ELEMENT_BITS - 1; throw_if(Element <  Begin		, ::std::exception(""), "Out of range"); } return *this; }
+							bit_array_view_iterator&					operator--					()																						{ --Offset; if(Offset < 0)				{ --Element; Offset = ELEMENT_BITS - 1; throw_if(Element <  (Begin	- 1), ::std::exception(""), "Out of range"); } return *this; }
+							bit_array_view_iterator						operator++					(int)																					{ 
+			bit_array_view_iterator												result						(*this);	// Make a copy.
+			++(*this);																									// Use the prefix version to do the work.
+			return result;																								// Return the old value.
+		}
+							bit_array_view_iterator						operator--					(int)																					{ 
+			bit_array_view_iterator												result						(*this);	// Make a copy.
+			--(*this);																									// Use the prefix version to do the work.
+			return result;																								// Return the old value.
+		}
 	};
 
 	template <typename _tElement>

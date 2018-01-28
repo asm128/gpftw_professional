@@ -16,7 +16,7 @@ static	::cho::error_t																				rtMain										(::cho::SRuntimeValues&
 	,	_In_		::INT			nShowCmd																																															\
 	)																																																									\
 {																																																										\
-	::cho::SRuntimeValues																					runtimeValues								= 																				\
+	::cho::SRuntimeValues																					runtimeValues								=																				\
 		{{	hInstance																																																					\
 		,	hPrevInstance																																																				\
 		,	lpCmdLine																																																					\

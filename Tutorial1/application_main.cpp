@@ -100,7 +100,6 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		for(uint32_t i=0; i < testView.size(); ++i)
 			printf("%X", (uint32_t)testView[i]);
 		printf("\n");
-
 		for(uint32_t i=0; i < testView.size(); ++i) {
 			testView[i]																= i % 2;
 			printf("%X", (uint32_t)testView[i]);
@@ -114,12 +113,11 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	{
 		uint8_t																		testBitfield2[]									= {1,3,7,15,31,63,127,255};
 		::cho::bit_array_view<uint8_t>												testView2										= testBitfield2;
-		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
+		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); item++) {
 			bool value = item;
 			printf("%X", (uint32_t)value);
 		}
 		printf("\n");
-
 		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
 			item																	= 1;
 			bool value = item;
