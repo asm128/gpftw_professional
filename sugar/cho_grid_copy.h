@@ -45,7 +45,7 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						uint32_t								grid_copy_row_calc			(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& /*dstOffset*/, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t xDstOffset, uint32_t xSrcOffset)		{
+						uint32_t								grid_copy_row_calc			(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t xDstOffset, uint32_t xSrcOffset)		{
 		return (uint32_t)::cho::max
 			( 0
 			, ::cho::min
@@ -60,7 +60,7 @@ namespace cho
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcRect.Offset.x	, 0, (int32_t)src.width());			// 
-		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstOffset, srcRect, xDstOffset, xSrcOffset);
+		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, srcRect, xDstOffset, xSrcOffset);
 		if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
@@ -81,22 +81,11 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						uint32_t								grid_copy_row_calc			(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& /*srcOffset*/, uint32_t xDstOffset, uint32_t xSrcOffset)		{
-		return (uint32_t)::cho::max
-			( 0
-			, ::cho::min
-				( ::cho::min((int32_t)(src.width() - xSrcOffset), (int32_t)(dst.width() - xDstOffset))
-				, (int32_t)dstRect.Size.x
-				)
-			);	// 
-		
-	}
-	template<typename _tCell, typename _tCoord>
 						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x	, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcOffset.x			, 0, (int32_t)src.width());			// 
-		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, srcOffset, xDstOffset, xSrcOffset);
+		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, xDstOffset, xSrcOffset);
 		if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
