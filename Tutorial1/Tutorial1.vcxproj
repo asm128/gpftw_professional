@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_WINDOWS; WIN32; NDEBUG; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
+      <AdditionalOptions>/permissive-</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -124,6 +125,7 @@
       <PreprocessorDefinitions>_WINDOWS; WIN32; _DEBUG; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
+      <AdditionalOptions>/permissive-</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -141,6 +143,7 @@
       <PreprocessorDefinitions>_WINDOWS; _DEBUG; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
+      <AdditionalOptions>/permissive-</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -160,6 +163,7 @@
       <PreprocessorDefinitions>_WINDOWS; NDEBUG; %(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
+      <AdditionalOptions>/permissive-</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

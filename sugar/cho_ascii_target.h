@@ -11,7 +11,7 @@
 
 namespace cho
 {
-	typedef					::cho::array_pod<::cho::SColorRGBA>				SPalette;
+	typedef					::std::vector<::cho::SColorRGBA>				SPalette;
 
 	struct SASCIITarget {
 								::cho::grid_view<uint8_t>						Characters									= {};

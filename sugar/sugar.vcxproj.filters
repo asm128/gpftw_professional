@@ -114,6 +114,9 @@
     <ClInclude Include="cho_gui.h">
       <Filter>gui</Filter>
     </ClInclude>
+    <ClInclude Include="cho_grid_scale.h">
+      <Filter>container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">
