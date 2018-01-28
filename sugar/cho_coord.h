@@ -1,4 +1,6 @@
 #include "cho_math.h"
+#include "cho_bit.h"
+#include "cho_eval.h"
 
 #ifndef CHO_COORD_H_928374982364923322
 #define CHO_COORD_H_928374982364923322
@@ -180,6 +182,85 @@ namespace cho
 
 	// Returns the volume of a sphere. This is used to calculate how to recurse into the bounding volume tree. For a bounding sphere it is a simple calculation.
 	template<typename _tElement>	static					double					sphereSize				(const SSphere2D<_tElement> &sphere)										noexcept	{ return 1.3333333333333333 * ::cho::math_pi * sphere.Radius * sphere.Radius * sphere.Radius; }
+
+
+#pragma pack(push)
+	enum AXIS : uint8_t
+		{	AXIS_XPOSITIVE			= 0x1
+		,	AXIS_XNEGATIVE			= 0x2
+		,	AXIS_YPOSITIVE			= 0x4
+		,	AXIS_YNEGATIVE			= 0x8
+		,	AXIS_ZPOSITIVE			= 0x10
+		,	AXIS_ZNEGATIVE			= 0x20
+		};
+
+	enum ALIGN : uint8_t
+		{	ALIGN_RIGHT				= ((uint8_t)AXIS_XPOSITIVE)
+		,	ALIGN_LEFT				= ((uint8_t)AXIS_XNEGATIVE)
+		,	ALIGN_BOTTOM			= ((uint8_t)AXIS_YPOSITIVE)
+		,	ALIGN_TOP				= ((uint8_t)AXIS_YNEGATIVE)
+		,	ALIGN_FAR				= ((uint8_t)AXIS_ZPOSITIVE)
+		,	ALIGN_NEAR				= ((uint8_t)AXIS_ZNEGATIVE)
+		,	ALIGN_CENTER			= ALIGN_LEFT	| ALIGN_RIGHT
+		,	ALIGN_VCENTER			= ALIGN_TOP		| ALIGN_BOTTOM
+		,	ALIGN_ZCENTER			= ALIGN_FAR		| ALIGN_NEAR
+		,	ALIGN_TOP_LEFT			= ALIGN_TOP		| ALIGN_LEFT  
+		,	ALIGN_TOP_RIGHT			= ALIGN_TOP		| ALIGN_RIGHT 
+		,	ALIGN_BOTTOM_LEFT		= ALIGN_BOTTOM	| ALIGN_LEFT  
+		,	ALIGN_BOTTOM_RIGHT		= ALIGN_BOTTOM	| ALIGN_RIGHT 
+		,	ALIGN_CENTER_TOP		= ALIGN_CENTER	| ALIGN_TOP	
+		,	ALIGN_CENTER_BOTTOM		= ALIGN_CENTER	| ALIGN_BOTTOM	
+		,	ALIGN_VCENTER_LEFT		= ALIGN_VCENTER	| ALIGN_LEFT		
+		,	ALIGN_VCENTER_RIGHT		= ALIGN_VCENTER	| ALIGN_RIGHT	
+		};
+#pragma pack(pop)
+	//------------------------------------------------------------------------------------------------------------
+	template <typename _tCoord>
+				::cho::SRectangle2D<_tCoord>&									realignRectangle		
+					(	const ::cho::SCoord2<uint32_t>			& targetSize
+					,	const ::cho::SRectangle2D<_tCoord>		& rectangleToRealign
+					,	::cho::SRectangle2D<_tCoord>			& rectangleRealigned
+					,	ALIGN							align
+					)																																					noexcept	{
+		rectangleRealigned															= rectangleToRealign;
+ 			 if gbit_true(align, ALIGN_CENTER	)	rectangleRealigned.Offset.x			= (targetSize.x	>> 1) - (rectangleToRealign.Size.x >> 1) + rectangleToRealign.Offset.x;	
+		else if gbit_true(align, ALIGN_RIGHT	)	rectangleRealigned.Offset.x			= targetSize.x  - rectangleToRealign.Offset.x - rectangleToRealign.Size.x;				
+
+			 if gbit_true(align, ALIGN_VCENTER	)	rectangleRealigned.Offset.y			= (targetSize.y >> 1) - (rectangleToRealign.Size.y >> 1) + rectangleToRealign.Offset.y;	
+		else if gbit_true(align, ALIGN_BOTTOM	)	rectangleRealigned.Offset.y			= targetSize.y - rectangleToRealign.Offset.y - rectangleToRealign.Size.y;				
+		return rectangleRealigned;
+	}
+
+	//------------------------------------------------------------------------------------------------------------
+	template <typename _tCoord>
+				::cho::SCoord2<_tCoord>&										realignCoord		
+					(	const ::cho::SCoord2<uint32_t>		& targetSize
+					,	const ::cho::SCoord2<_tCoord>		& coordToRealign
+					,	::cho::SCoord2<_tCoord>				& coordRealigned
+					,	::cho::ALIGN						align
+					)																																					noexcept	{
+		coordRealigned																= coordToRealign;
+ 			 if gbit_true(align, ALIGN_CENTER	)	coordRealigned.x					= (targetSize.x	>> 1) + coordToRealign.Offset.x;	
+		else if gbit_true(align, ALIGN_RIGHT	)	coordRealigned.x					= targetSize.x - coordToRealign.Offset.x;			
+
+			 if gbit_true(align, ALIGN_VCENTER	)	coordRealigned.y					= (targetSize.y >> 1) + coordToRealign.Offset.y;	
+		else if gbit_true(align, ALIGN_BOTTOM	)	coordRealigned.y					= targetSize.y - coordToRealign.Offset.y;			
+		return coordRealigned;
+	}
+
+	template<typename _tValue>	
+	static inline constexpr		bool				in_range		(const ::cho::SCoord2<_tValue>& valueToTest, const ::cho::SCoord2<_tValue>& rangeStart, const ::cho::SCoord2<_tValue>& rangeStop)	noexcept	{ 
+		return	::cho::in_range(valueToTest.x, rangeStart.x, rangeStop.x) 
+			&&	::cho::in_range(valueToTest.y, rangeStart.y, rangeStop.y)
+			;
+	}
+
+	template<typename _tValue>	
+	static inline constexpr		bool				in_range		(const ::cho::SCoord2<_tValue>& pointToTest, const ::cho::SRectangle2D<_tValue>& area)	noexcept	{ 
+		return	::cho::in_range(pointToTest.x, area.Offset.x, area.Offset.x + area.Size.x) 
+			&&	::cho::in_range(pointToTest.y, area.Offset.y, area.Offset.y + area.Size.y)
+			;
+	}
 }
 
 #endif // CHO_COORD_H_928374982364923322

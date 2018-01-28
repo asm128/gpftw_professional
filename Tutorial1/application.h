@@ -17,6 +17,8 @@ struct SApplication {
 						::cho::SInput								SystemInput									= {};
 						::cho::STimer								Timer										= {};
 						::cho::SFrameInfo							FrameInfo									= {};
+						::cho::SGUI									GUI											= {};
+
 						::cho::array_pod<::cho::SColorBGRA>			TextureFont									= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundDay						= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundNight						= {};
@@ -26,22 +28,22 @@ struct SApplication {
 
 						::cho::SASCIITarget							ASCIIRenderTarget							= {};
 						::cho::SPalette								ASCIIPalette								= 
-		{	(uint32_t)::cho::ASCII_COLOR_INDEX_0		
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_1 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_2 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_3 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_4 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_5 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_6 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_7 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_8 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_9 	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_10	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_11	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_12	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_13	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_14	
-		,	(uint32_t)::cho::ASCII_COLOR_INDEX_15	
+		{ (uint32_t)::cho::ASCII_COLOR_INDEX_0		
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_1 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_2 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_3 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_4 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_5 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_6 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_7 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_8 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_9 	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_10	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_11	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_12	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_13	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_14	
+		, (uint32_t)::cho::ASCII_COLOR_INDEX_15	
 		};
 
 																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}

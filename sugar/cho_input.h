@@ -8,10 +8,10 @@ namespace cho
 {
 	struct SInputMouse {
 							::cho::SCoord2<int32_t>					Position									= {};
+							::cho::SCoord2<int32_t>					Deltas										= {};
 							uint8_t									ButtonState			[32]					= {};
 							double									ButtonTime			[32]					= {};
 							int64_t									ButtonStrength		[32]					= {};
-
 	};
 
 	struct SInputKeyboard {

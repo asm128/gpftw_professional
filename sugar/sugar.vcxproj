@@ -177,6 +177,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cho_bit.h" />
     <ClInclude Include="cho_bit_array_view.h" />
     <ClInclude Include="cho_app_impl.h" />
     <ClInclude Include="cho_array.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="cho_ascii_target.cpp" />
     <ClCompile Include="cho_bitmap_file.cpp" />
     <ClCompile Include="cho_display.cpp" />
+    <ClCompile Include="cho_gui.cpp" />
     <ClCompile Include="cho_timer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -3,6 +3,7 @@
 #include "cho_error.h"
 #include "cho_coord.h"
 #include "cho_color.h"
+#include "cho_array.h"
 #include <vector>
 
 #ifndef CHO_ASCII_TARGET_H_29874982734
@@ -10,7 +11,7 @@
 
 namespace cho
 {
-	typedef					::std::vector<::cho::SColorRGBA>					SPalette;
+	typedef					::cho::array_pod<::cho::SColorRGBA>				SPalette;
 
 	struct SASCIITarget {
 								::cho::grid_view<uint8_t>						Characters									= {};

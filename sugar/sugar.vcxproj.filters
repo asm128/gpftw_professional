@@ -34,6 +34,9 @@
     <Filter Include="time">
       <UniqueIdentifier>{525b3a0d-4d27-420f-bffd-801c1051b894}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{15816c47-b07f-40b9-97c1-8378769c60fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cho_input.h">
@@ -96,9 +99,6 @@
     <ClInclude Include="cho_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cho_gui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cho_layered_view.h">
       <Filter>container</Filter>
     </ClInclude>
@@ -107,6 +107,12 @@
     </ClInclude>
     <ClInclude Include="cho_grid_copy.h">
       <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_bit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_gui.h">
+      <Filter>gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +130,9 @@
     </ClCompile>
     <ClCompile Include="cho_bitmap_file.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cho_gui.cpp">
+      <Filter>gui</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
