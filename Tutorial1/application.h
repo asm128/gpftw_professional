@@ -10,7 +10,6 @@
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
 
-
 struct SApplication {
 						::cho::SDisplay								MainDisplay									= {};
 						::cho::array_pod<::cho::SColorBGRA>			BitmapOffsceen								= {};

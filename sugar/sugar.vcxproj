@@ -186,7 +186,7 @@
     <ClInclude Include="cho_ascii_target.h" />
     <ClInclude Include="cho_bitmap_file.h" />
     <ClInclude Include="cho_bitmap_target.h" />
-    <ClInclude Include="cho_bit_blt.h" />
+    <ClInclude Include="cho_grid_copy.h" />
     <ClInclude Include="cho_color.h" />
     <ClInclude Include="cho_coord.h" />
     <ClInclude Include="cho_display.h" />

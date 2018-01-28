@@ -99,13 +99,13 @@
     <ClInclude Include="cho_gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cho_bit_blt.h">
-      <Filter>raster</Filter>
-    </ClInclude>
     <ClInclude Include="cho_layered_view.h">
       <Filter>container</Filter>
     </ClInclude>
     <ClInclude Include="cho_bit_array_view.h">
+      <Filter>container</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_grid_copy.h">
       <Filter>container</Filter>
     </ClInclude>
   </ItemGroup>

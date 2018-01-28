@@ -5,9 +5,8 @@
 
 namespace cho
 {
-
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcRect.Offset.x, 0, (int32_t)src.width());			// 
@@ -27,7 +26,7 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SRectangle2D<_tCoord>& srcRect)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SRectangle2D<_tCoord>& srcRect)		{
 		uint32_t														elementsCopied				= 0;
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
@@ -35,13 +34,13 @@ namespace cho
 			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
 			if(ySrc <  src.height() && ySrc <  (uint32_t)(srcRect.Offset.y + srcRect.Size.y))
-				elementsCopied												+= ::cho::bitBltRow(dst, src, dstRect, srcRect, yDst, ySrc);
+				elementsCopied												+= ::cho::grid_copy_row(dst, src, dstRect, srcRect, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBltRow						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcRect.Offset.x	, 0, (int32_t)src.width());			// 
@@ -58,7 +57,7 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect)		{
 		uint32_t														elementsCopied				= 0;
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstOffset.y;
@@ -66,13 +65,13 @@ namespace cho
 			if(yDst >= dst.height())
 				continue;
 			if(ySrc < src.height() && ySrc < (uint32_t)(srcRect.Offset.y + srcRect.Size.y))
-				elementsCopied												+= ::cho::bitBltRow(dst, src, dstOffset, srcRect, yDst, ySrc);
+				elementsCopied												+= ::cho::grid_copy_row(dst, src, dstOffset, srcRect, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBltRow						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x	, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcOffset.x			, 0, (int32_t)src.width());			// 
@@ -89,7 +88,7 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset)		{
 		uint32_t														elementsCopied				= 0;
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
@@ -97,13 +96,13 @@ namespace cho
 			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
 			if(ySrc < src.height())
-				elementsCopied												+= ::cho::bitBltRow(dst, src, dstRect, srcOffset, yDst, ySrc);
+				elementsCopied												+= ::cho::grid_copy_row(dst, src, dstRect, srcOffset, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xCopyCells					= ::cho::min
@@ -118,18 +117,18 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect)		{
 		uint32_t														elementsCopied				= 0;
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
 			if(yDst < dst.height() && yDst < (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
-				elementsCopied												+= ::cho::bitBltRow(dst, src, dstRect, yDst, y);
+				elementsCopied												+= ::cho::grid_copy_row(dst, src, dstRect, yDst, y);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcOffset.x, 0, (int32_t)src.width());			// 
@@ -140,19 +139,19 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<_tCoord>& srcOffset)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<_tCoord>& srcOffset)		{
 		uint32_t														elementsCopied				= 0;
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstOffset.y;
 			const uint32_t													ySrc						= y + srcOffset.y;
 			if(yDst < dst.height() && ySrc < src.height())
-				elementsCopied												+= ::cho::bitBltRow(dst, src, dstOffset, srcOffset, yDst, ySrc);
+				elementsCopied												+= ::cho::grid_copy_row(dst, src, dstOffset, srcOffset, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							grid_copy_row				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, uint32_t yDst, uint32_t ySrc)		{
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xCopyCells					= (uint32_t)::cho::max(0, (int32_t)::cho::min((int32_t)src.width(), (int32_t)dst.width() - (int32_t)xDstOffset));	// 
@@ -162,18 +161,18 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset)		{
 		uint32_t														elementsCopied				= 0;
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstOffset.y;
 			if(yDst < dst.height())
-				elementsCopied												+= ::cho::bitBltRow(dst, src, dstOffset, yDst, y);
+				elementsCopied												+= ::cho::grid_copy_row(dst, src, dstOffset, yDst, y);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell>
-						::cho::error_t							bitBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src)		{
+						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src)		{
 		const uint32_t													yCopyRows					= ::cho::min(dst.height(), src.height());
 		const uint32_t													xCopyCells					= ::cho::min(dst.width (), src.width ());
 		for(uint32_t y = 0; y < yCopyRows; ++y) 
@@ -181,9 +180,9 @@ namespace cho
 		return xCopyCells * yCopyRows;
 	}
 
-//------ objBlt(): Same as bitBlt() but with assignment operator instead of memcpy().
+//------ objBlt(): Same as grid_copy() but with assignment operator instead of memcpy().
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							objBltRow						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)	{
+						::cho::error_t							objBlt_row					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)	{
 		for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 			const uint32_t													xDst						= x + dstRect.Offset.x;
 			const uint32_t													xSrc						= x + srcRect.Offset.x;
@@ -204,13 +203,13 @@ namespace cho
 			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
 			if(ySrc <  src.height() && ySrc <  (uint32_t)(srcRect.Offset.y + srcRect.Size.y))
-				elementsCopied												+= ::cho::objBltRow(dst, src, dstRect, srcRect, yDst, ySrc);
+				elementsCopied												+= ::cho::objBlt_row(dst, src, dstRect, srcRect, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							objBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							objBlt_row					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect, uint32_t yDst, uint32_t ySrc)		{
 		for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 			const uint32_t													xDst						= x + dstOffset.x;
 			const uint32_t													xSrc						= x + srcRect.Offset.x;
@@ -230,13 +229,13 @@ namespace cho
 			if(yDst >= dst.height())
 				continue;
 			if(ySrc < src.height() && ySrc < (uint32_t)(srcRect.Offset.y + srcRect.Size.y))
-				elementsCopied												+= ::cho::objBltRow(dst, src, dstOffset, srcRect, yDst, ySrc);
+				elementsCopied												+= ::cho::objBlt_row(dst, src, dstOffset, srcRect, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							objBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							objBlt_row					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
 		for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 			const uint32_t													xDst						= x + dstRect.Offset.x;
 			const uint32_t													xSrc						= x + srcOffset.x;
@@ -257,13 +256,13 @@ namespace cho
 			if(yDst >= dst.height() || yDst >= (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
 				continue;
 			if(ySrc < src.height())
-				elementsCopied												+= ::cho::objBltRow(dst, src, dstRect, srcOffset, yDst, ySrc);
+				elementsCopied												+= ::cho::objBlt_row(dst, src, dstRect, srcOffset, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							objBltRow					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							objBlt_row					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, uint32_t yDst, uint32_t ySrc)		{
 		for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 			const uint32_t													xDst						= x + dstRect.Offset.x;
 			if(xDst < dst.width() && xDst < (uint32_t)(dstRect.Offset.x + dstRect.Size.x))
@@ -278,13 +277,13 @@ namespace cho
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstRect.Offset.y;
 			if(yDst < dst.height() && yDst < (uint32_t)(dstRect.Offset.y + dstRect.Size.y))
-				elementsCopied												+= ::cho::objBltRow(dst, src, dstRect, yDst, y);
+				elementsCopied												+= ::cho::objBlt_row(dst, src, dstRect, yDst, y);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							objBltRow						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							objBlt_row						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<_tCoord>& srcOffset, uint32_t yDst, uint32_t ySrc)		{
 		for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 			const uint32_t													xDst						= x + dstOffset.x;
 			const uint32_t													xSrc						= x + srcOffset.x;
@@ -305,13 +304,13 @@ namespace cho
 			if(yDst >= dst.height())
 				continue;
 			if(ySrc < src.height())
-				elementsCopied												+= ::cho::objBltRow(dst, src, dstOffset, srcOffset, yDst, ySrc);
+				elementsCopied												+= ::cho::objBlt_row(dst, src, dstOffset, srcOffset, yDst, ySrc);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell, typename _tCoord>
-						::cho::error_t							objBltRow						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, uint32_t yDst, uint32_t ySrc)		{
+						::cho::error_t							objBlt_row						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, uint32_t yDst, uint32_t ySrc)		{
 		for(uint32_t x = 0, xMax = src.width (); x < xMax; ++x) {
 			const uint32_t													xDst						= x + dstOffset.x;
 			if(xDst < dst.width())
@@ -326,18 +325,19 @@ namespace cho
 		for(uint32_t y = 0, yMax = src.height(); y < yMax; ++y) {
 			const uint32_t													yDst						= y + dstOffset.y;
 			if(yDst < dst.height())
-				elementsCopied												+= ::cho::objBltRow(dst, src, dstOffset, yDst, y);
+				elementsCopied												+= ::cho::objBlt_row(dst, src, dstOffset, yDst, y);
 		}
 		return elementsCopied;
 	}
 
 	template<typename _tCell>
 						::cho::error_t							objBlt						(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src)		{
-		uint32_t														elementsCopied				= 0;
-		for(uint32_t y = 0, yMax = ::cho::min(dst.height(), src.height()); y < yMax; ++y)
-		for(uint32_t x = 0, xMax = ::cho::min(dst.width (), src.width ()); x < xMax; ++x) 
+		const uint32_t													yCopyRows					= ::cho::min(dst.height(), src.height());
+		const uint32_t													xCopyCells					= ::cho::min(dst.width (), src.width ());
+		for(uint32_t y = 0; y < yCopyRows	; ++y)
+		for(uint32_t x = 0; x < xCopyCells	; ++x) 
 			dst[y][x]													= src[y][x];
-		return elementsCopied;
+		return xCopyCells * yCopyRows;
 	}
 
 
