@@ -9,77 +9,65 @@
 namespace cho
 {
 	template <typename _tElement>
-	class bit_array_view_proxy {
+	struct bit_array_view_proxy {
+							_tElement						& Element;
+							uint8_t							Offset;
 
+							operator						bool						()																	const				{ return Element & (1 << Offset); }
+							bit_array_view_proxy&			operator=					(bool value)																			{ value ? Element |= (1 << Offset) : Element &= ~(1 << Offset); return *this; }
 	};
 
 	template <typename _tElement>
 	class bit_array_view {
 	protected:
 		// Properties / Member Variables
-		static constexpr	const uint32_t			ELEMENT_BITS				= sizeof(_tElement) * 8;
+		static constexpr	const uint32_t					ELEMENT_BITS				= sizeof(_tElement) * 8;
 
-							_tElement				* Data						= 0;
-							uint32_t				Count						= 0;
+							_tElement						* Data						= 0;
+							uint32_t						Count						= 0;
 	public:
 		// Constructors
-		inline constexpr							bit_array_view				()																			noexcept	= default;
-		inline										bit_array_view				(_tElement* dataElements, uint32_t elementCount)										: Data(dataElements), Count(elementCount)										{
+		inline constexpr									bit_array_view				()																			noexcept	= default;
+		inline												bit_array_view				(_tElement* dataElements, uint32_t elementCount)										: Data(dataElements), Count(elementCount)										{
 			throw_if(0 == dataElements && 0 != elementCount, ::std::exception(""), "Invalid parameters.");	// Crash if we received invalid parameters in order to prevent further malfunctioning.
 		}
 
 		template <size_t _elementCount>
-		inline constexpr							bit_array_view				(_tElement (&_dataElements)[_elementCount])									noexcept	: Data(_dataElements), Count(_elementCount * elementBits)											{}
+		inline constexpr									bit_array_view				(_tElement (&_dataElements)[_elementCount])									noexcept	: Data(_dataElements), Count(_elementCount * ELEMENT_BITS)											{}
 
 		template <size_t _elementCount>
-		inline constexpr							bit_array_view				(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)						: Data(_dataElements), Count(::cho::min(_elementCount * elementBits, elementCount * ELEMENT_BITS))	{
+		inline constexpr									bit_array_view				(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)						: Data(_dataElements), Count(::cho::min(_elementCount * ELEMENT_BITS, elementCount))	{
 			throw_if(elementCount > (_elementCount * ELEMENT_BITS), ::std::exception(""), "Out of range count.");
 		}
 
 		// Operators
-							bool					operator[]					(uint32_t index)																		{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(index >= Count, ::std::exception(""), "Invalid index."); return Data[index]; }
-							bool					operator[]					(uint32_t index)													const				{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(index >= Count, ::std::exception(""), "Invalid index."); return Data[index]; }
+							bit_array_view_proxy<_tElement>	operator[]					(uint32_t index)																		{ 
+			throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); 
+			throw_if(index >= Count, ::std::exception(""), "Invalid index."); 
+			const uint32_t											offsetRow					= index / ELEMENT_BITS;
+			const uint32_t											offsetBit					= index % ELEMENT_BITS;
+			_tElement												& selectedElement			= Data[offsetRow];
+			return {selectedElement, (uint8_t)offsetBit};
+		}
+
+							bool							operator[]					(uint32_t index)													const				{ 
+			throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); 
+			throw_if(index >= Count, ::std::exception(""), "Invalid index."); 
+			const uint32_t											offsetElement				= index / ELEMENT_BITS;
+			const uint32_t											offsetLocal					= index % ELEMENT_BITS;
+			const _tElement											& selectedElement			= Data[offsetElement];
+			return selectedElement & (1 << offsetLocal); 
+		}
 
 		// Methods
-		inline				_tElement*				begin						()																			noexcept	{ return Data;			}
-		inline				_tElement*				end							()																			noexcept	{ return Data + Count;	}
+		inline				_tElement*						begin						()																			noexcept	{ return Data;							}
+		inline				_tElement*						end							()																			noexcept	{ return Data + Count / ELEMENT_BITS;	}
 
-		inline constexpr	const _tElement*		begin						()																	const	noexcept	{ return Data;			}
-		inline constexpr	const _tElement*		end							()																	const	noexcept	{ return Data + Count;	}
+		inline constexpr	const _tElement*				begin						()																	const	noexcept	{ return Data;							}
+		inline constexpr	const _tElement*				end							()																	const	noexcept	{ return Data + Count / ELEMENT_BITS;	}
 
-		inline constexpr	uint32_t				size						()																	const	noexcept	{ return Count;			}
+		inline constexpr	uint32_t						size						()																	const	noexcept	{ return Count;							}
 	};
-
-	// array_view common typedefs
-	typedef				::cho::bit_array_view<char_t			>	view_string			;
-	typedef				::cho::bit_array_view<ubyte_t			>	view_ubyte			;
-	typedef				::cho::bit_array_view<byte_t			>	view_byte			;
-	typedef				::cho::bit_array_view<float				>	view_float32		;
-	typedef				::cho::bit_array_view<double			>	view_float64		;
-	typedef				::cho::bit_array_view<uint8_t			>	view_uint8			;
-	typedef				::cho::bit_array_view<uint16_t			>	view_uint16			;
-	typedef				::cho::bit_array_view<uint32_t			>	view_uint32			;
-	typedef				::cho::bit_array_view<uint64_t			>	view_uint64			;
-	typedef				::cho::bit_array_view<int8_t			>	view_int8			;
-	typedef				::cho::bit_array_view<int16_t			>	view_int16			;
-	typedef				::cho::bit_array_view<int32_t			>	view_int32			;
-	typedef				::cho::bit_array_view<int64_t			>	view_int64			;
-
-	// array_view<const> common typedefs
-	typedef				::cho::bit_array_view<const char_t		>	view_const_string	;
-	typedef				::cho::bit_array_view<const ubyte_t		>	view_const_ubyte	;
-	typedef				::cho::bit_array_view<const byte_t		>	view_const_byte		;
-	typedef				::cho::bit_array_view<const float		>	view_const_float32	;
-	typedef				::cho::bit_array_view<const double		>	view_const_float64	;
-	typedef				::cho::bit_array_view<const uint8_t		>	view_const_uint8	;
-	typedef				::cho::bit_array_view<const uint16_t	>	view_const_uint16	;
-	typedef				::cho::bit_array_view<const uint32_t	>	view_const_uint32	;
-	typedef				::cho::bit_array_view<const uint64_t	>	view_const_uint64	;
-	typedef				::cho::bit_array_view<const int8_t		>	view_const_int8		;
-	typedef				::cho::bit_array_view<const int16_t		>	view_const_int16	;
-	typedef				::cho::bit_array_view<const int32_t		>	view_const_int32	;
-	typedef				::cho::bit_array_view<const int64_t		>	view_const_int64	;
-
 } // namespace
 
 #endif // CHO_ARRAY_VIEW_BIT_H_9276349872384

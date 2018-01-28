@@ -38,7 +38,7 @@ namespace cho
 #pragma pack(pop)
 
 	// array_view common typedefs
-	typedef				::cho::grid_view<char_t				>	view2d_string			;
+	typedef				::cho::grid_view<char_t				>	view2d_char				;
 	typedef				::cho::grid_view<ubyte_t			>	view2d_ubyte			;
 	typedef				::cho::grid_view<byte_t				>	view2d_byte				;
 	typedef				::cho::grid_view<float				>	view2d_float32			;
@@ -53,7 +53,7 @@ namespace cho
 	typedef				::cho::grid_view<int64_t			>	view2d_int64			;
 
 	// array_view<const> common typedefs
-	typedef				::cho::grid_view<const char_t		>	view2d_const_string		;
+	typedef				::cho::grid_view<const char_t		>	view2d_const_char		;
 	typedef				::cho::grid_view<const ubyte_t		>	view2d_const_ubyte		;
 	typedef				::cho::grid_view<const byte_t		>	view2d_const_byte		;
 	typedef				::cho::grid_view<const float		>	view2d_const_float32	;

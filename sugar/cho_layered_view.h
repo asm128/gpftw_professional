@@ -39,7 +39,7 @@ namespace cho
 #pragma pack(pop)
 
 	// grid_view common typedefs
-	typedef				::cho::layered_view<char_t				>	view3d_string			;
+	typedef				::cho::layered_view<char_t				>	view3d_char				;
 	typedef				::cho::layered_view<ubyte_t				>	view3d_ubyte			;
 	typedef				::cho::layered_view<byte_t				>	view3d_byte				;
 	typedef				::cho::layered_view<float				>	view3d_float32			;
@@ -54,7 +54,7 @@ namespace cho
 	typedef				::cho::layered_view<int64_t				>	view3d_int64			;
 
 	// grid_view<const> common typedefs
-	typedef				::cho::layered_view<const char_t		>	view3d_const_string		;
+	typedef				::cho::layered_view<const char_t		>	view3d_const_char		;
 	typedef				::cho::layered_view<const ubyte_t		>	view3d_const_ubyte		;
 	typedef				::cho::layered_view<const byte_t		>	view3d_const_byte		;
 	typedef				::cho::layered_view<const float			>	view3d_const_float32	;
