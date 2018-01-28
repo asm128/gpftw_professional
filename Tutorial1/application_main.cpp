@@ -157,6 +157,8 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	applicationInstance.SystemInput.KeyboardPrevious						= applicationInstance.SystemInput.KeyboardCurrent;
 	applicationInstance.SystemInput.MousePrevious							= applicationInstance.SystemInput.MouseCurrent;
 
+	::cho::updateGUI(applicationInstance.GUI, applicationInstance.SystemInput);
+
 	char																		buffer		[256]							= {};
 	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / applicationInstance.Timer.LastTimeSeconds, applicationInstance.Timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
