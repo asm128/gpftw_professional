@@ -43,6 +43,10 @@ namespace cho
 		inline											~array_pod									()																						{ safe_cho_free(Data);		}
 		inline constexpr								array_pod									()																			noexcept	= default;
 		inline											array_pod									(uint32_t initialSize)																	{ resize(initialSize);		}
+		inline											array_pod									(::std::initializer_list<_tPOD> init)													{ 
+			throw_if(errored(resize(init.size())), ::std::exception(), "Failed to resize array! Why?");
+			memcpy(Data, init.begin(), Count * sizeof(_tPOD));
+		}
 		inline											array_pod									(array_pod<_tPOD>&& other)													noexcept	{
 			Size											= other.Size									;
 			Count											= other.Count									;

@@ -1,6 +1,7 @@
 #include "cho_grid_view.h"
 #include "cho_color.h"
 #include "cho_coord.h"
+#include <memory> // this is required for ::std::swap()
 
 #ifndef BITMAP_TARGET_H_98237498023745654654
 #define BITMAP_TARGET_H_98237498023745654654
@@ -11,20 +12,32 @@ namespace cho
 	
 	template<typename _tCoord, typename _tTarget>
 	static					::cho::error_t									drawRectangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SRectangle2D<_tCoord>& rectangle)		{
-		for(int32_t y = (int32_t)::cho::max(0, rectangle.Offset.y), yStop = (int32_t)::cho::min(rectangle.Offset.y + rectangle.Size.y, (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
-		for(int32_t x = (int32_t)::cho::max(0, rectangle.Offset.x), xStop = (int32_t)::cho::min(rectangle.Offset.x + rectangle.Size.x, (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) 	
-			bitmapTarget.Colors		[y][x]											= value;
+		int32_t																		yStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.y);
+		int32_t																		yStop										= ::cho::min((int32_t)rectangle.Offset.y + (int32_t)rectangle.Size.y, (int32_t)bitmapTarget.Colors.height());
+		int32_t																		xStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.x);
+		int32_t																		xStop										= ::cho::min((int32_t)rectangle.Offset.x + (int32_t)rectangle.Size.x, (int32_t)bitmapTarget.Colors.width());
+		if(yStart >= yStop || xStart >= xStop)
+			return 0;
+		for(int32_t x = xStart; x < xStop; ++x) 	
+			bitmapTarget.Colors		[yStart][x]											= value;
+		for(int32_t y = yStart + 1; y < yStop; ++y)
+			memcpy(&bitmapTarget.Colors[y][xStart], &bitmapTarget.Colors[yStart][xStart], sizeof(typename _tTarget::TColor) * xStop - xStart);
 		return 0;
 	}
 
 	template<typename _tCoord, typename _tTarget>
 	static					::cho::error_t									drawCircle									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SCircle2D<_tCoord>& circle)			{
+		int32_t																		xStop										= ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.Colors.width	());
+		double																		radiusSquared								= circle.Radius * circle.Radius;
 		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
-		for(int32_t x = ::cho::max(0, (int32_t)(circle.Center.x - circle.Radius)), xStop = ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) {	
+		for(int32_t x = ::cho::max(0, (int32_t)(circle.Center.x - circle.Radius)); x < xStop; ++x) {	
 			::cho::SCoord2<int32_t>														cellCurrent									= {x, y};
-			double																		distance									= (cellCurrent - circle.Center).Length();
-			if(distance < circle.Radius) 
-				bitmapTarget.Colors		[y][x]											= value;
+			double																		distanceSquared								= (cellCurrent - circle.Center).LengthSquared();
+			if(distanceSquared < radiusSquared) {
+			 	for(const int32_t xLimit = circle.Center.x + (circle.Center.x - x); x < xLimit; ++x)
+					bitmapTarget.Colors		[y][x]											= value;
+				break;
+			}
 		}
 		return 0;
 	}
@@ -34,8 +47,9 @@ namespace cho
 	static					::cho::error_t									drawTriangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
 		::cho::SCoord2		<int32_t>												areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
 		::cho::SCoord2		<int32_t>												areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
-		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
-		for(int32_t x = ::cho::max(areaMin.x, 0), xStop = ::cho::min(areaMax.x, (int32_t)bitmapTarget.Colors.width	()); x < xStop; ++x) {	
+		const int32_t																xStop										= ::cho::min(areaMax.x, (int32_t)bitmapTarget.Colors.width());
+		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)bitmapTarget.Colors.height()); y < yStop; ++y)
+		for(int32_t x = ::cho::max(areaMin.x, 0); x < xStop; ++x) {	
 			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
 			int																			w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);

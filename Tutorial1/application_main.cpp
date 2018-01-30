@@ -197,14 +197,14 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundDay, dstOffsetDay)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundNight, dstOffsetNight)), "I believe this never fails.");
 	//error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
-	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), geometry0)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawRectangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED		]), ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawTriangle	(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_YELLOW	]), geometry2)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA	]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpTarget, ::cho::SColorRGBA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		], geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		], ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		], geometry1)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED			], ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawTriangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_YELLOW		], geometry2)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA		], ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		], ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	], ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 
 	static constexpr const ::cho::SCoord2<int32_t>									sizeCharCell							= {9, 16};
 	uint32_t																		lineOffset								= 0;

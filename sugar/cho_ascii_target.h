@@ -1,17 +1,15 @@
+#include "cho_array.h"
 #include "cho_ascii_color.h"
 #include "cho_grid_view.h"
-#include "cho_error.h"
-#include "cho_coord.h"
 #include "cho_color.h"
-#include "cho_array.h"
-#include <vector>
+#include <memory> // this is required for ::std::swap()
 
 #ifndef CHO_ASCII_TARGET_H_29874982734
 #define CHO_ASCII_TARGET_H_29874982734
 
 namespace cho
 {
-	typedef					::std::vector<::cho::SColorRGBA>				SPalette;
+	typedef					::cho::array_pod<::cho::SColorRGBA>				SPalette;
 
 	struct SASCIITarget {
 								::cho::grid_view<uint8_t>						Characters									= {};
@@ -100,7 +98,9 @@ namespace cho
 		int32_t																		y											= (int32_t)y1;
 		if(steep) {
 			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-				if(false == ::cho::in_range(x, 0, (int32_t)asciiTarget.Height()) || false == ::cho::in_range(y, 0, (int32_t)asciiTarget.Width()))
+				if( false == ::cho::in_range(x, 0, (int32_t)asciiTarget.Height()) 
+				 || false == ::cho::in_range(y, 0, (int32_t)asciiTarget.Width ())
+				 )
 					continue;
 				asciiTarget.Characters	[x][y]											= value.Character;
 				asciiTarget.Colors		[x][y]											= value.Color;
@@ -113,7 +113,9 @@ namespace cho
 		}
 		else {
 			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-				if(false == ::cho::in_range(y, 0, (int32_t)asciiTarget.Height()) || false == ::cho::in_range(x, 0, (int32_t)asciiTarget.Width()))
+				if( false == ::cho::in_range(y, 0, (int32_t)asciiTarget.Height()) 
+				 || false == ::cho::in_range(x, 0, (int32_t)asciiTarget.Width())
+				 )
 					continue;
 				asciiTarget.Characters	[y][x]											= value.Character;
 				asciiTarget.Colors		[y][x]											= value.Color;

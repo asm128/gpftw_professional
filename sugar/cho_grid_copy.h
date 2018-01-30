@@ -25,7 +25,7 @@ namespace cho
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcRect.Offset.x, 0, (int32_t)src.width());			// 
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, srcRect, xDstOffset, xSrcOffset);
-		if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
+		//if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
 	}
@@ -61,7 +61,7 @@ namespace cho
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcRect.Offset.x	, 0, (int32_t)src.width());			// 
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, srcRect, xDstOffset, xSrcOffset);
-		if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
+		//if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
 	}
@@ -86,7 +86,7 @@ namespace cho
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x	, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcOffset.x			, 0, (int32_t)src.width());			// 
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, xDstOffset, xSrcOffset);
-		if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
+		//if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
 	}
@@ -120,7 +120,7 @@ namespace cho
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, xDstOffset);	// 
-		if(xDstOffset < dst.width() && xCopyCells)
+		//if(xDstOffset < dst.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][0], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
 	}
@@ -147,7 +147,7 @@ namespace cho
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= ::cho::clamp((int32_t)srcOffset.x, 0, (int32_t)src.width());			// 
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, xDstOffset, xSrcOffset);	// 
-		if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
+		//if(xDstOffset < dst.width() && xSrcOffset < src.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][xSrcOffset], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
 	}
@@ -173,7 +173,7 @@ namespace cho
 		// Make sure everything is in range.
 		const uint32_t													xDstOffset					= ::cho::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.width());			// 
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, xDstOffset);	// 
-		if(xDstOffset < dst.width() && xCopyCells)
+		//if(xDstOffset < dst.width() && xCopyCells)
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][0], sizeof(_tCell) * xCopyCells);
 		return xCopyCells;
 	}
