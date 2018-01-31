@@ -231,7 +231,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 			int32_t																			coordTableY								= testText0[iChar] / 32;
 			const ::cho::SCoord2<int32_t>													coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
 			const ::cho::SCoord2<int32_t>													dstOffset1								= {sizeCharCell.x * iChar, (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y)};
-			const ::cho::SRectangle2D<int32_t>												srcRect0								= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)applicationInstance.ViewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
+			const ::cho::SRectangle2D<int32_t>												srcRect0								= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)applicationInstance.ViewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};					
 			error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
 		}
 	}
