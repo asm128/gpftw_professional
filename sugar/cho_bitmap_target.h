@@ -10,32 +10,75 @@ namespace cho
 {
 	struct SBitmapTargetBGRA	{ typedef SColorBGRA	TColor; ::cho::grid_view<TColor>	Colors; };
 	
-	template<typename _tCoord, typename _tTarget>
-	static					::cho::error_t									drawRectangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SRectangle2D<_tCoord>& rectangle)		{
-		int32_t																		yStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.y);
-		int32_t																		yStop										= ::cho::min((int32_t)rectangle.Offset.y + (int32_t)rectangle.Size.y, (int32_t)bitmapTarget.Colors.height());
-		int32_t																		xStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.x);
-		int32_t																		xStop										= ::cho::min((int32_t)rectangle.Offset.x + (int32_t)rectangle.Size.x, (int32_t)bitmapTarget.Colors.width());
-		if(yStart >= yStop || xStart >= xStop)
-			return 0;
-		for(int32_t x = xStart; x < xStop; ++x) 	
-			bitmapTarget.Colors		[yStart][x]											= value;
-		for(int32_t y = yStart + 1; y < yStop; ++y)
-			memcpy(&bitmapTarget.Colors[y][xStart], &bitmapTarget.Colors[yStart][xStart], sizeof(typename _tTarget::TColor) * xStop - xStart);
+	template<typename _tElement>
+						::cho::error_t										updateSizeDependentTarget					(::cho::array_pod<_tElement>& out_colors, ::cho::grid_view<_tElement>& out_view, const ::cho::SCoord2<uint32_t>& newSize)											{ 
+		// Update size-dependent resources.
+		ree_if(errored(out_colors.resize(newSize.x * newSize.y)), "Out of memory?");
+		if( out_view.width () != newSize.x
+		 || out_view.height() != newSize.y
+		 ) 
+			out_view																= {out_colors.begin(), newSize.x, newSize.y};
 		return 0;
 	}
 
-	template<typename _tCoord, typename _tTarget>
-	static					::cho::error_t									drawCircle									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SCircle2D<_tCoord>& circle)			{
-		int32_t																		xStop										= ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.Colors.width	());
+	template<typename _tElement>
+						::cho::error_t										updateSizeDependentTexture					(::cho::array_pod<_tElement>& out_scaled, ::cho::grid_view<_tElement>& out_view, const ::cho::grid_view<_tElement>& in_view, const ::cho::SCoord2<uint32_t>& newSize)											{ 
+		// Update size-dependent resources.
+		ree_if(errored(out_scaled.resize(newSize.x * newSize.y)), "Out of memory?");
+		if( out_view.width () != newSize.x
+		 || out_view.height() != newSize.y
+		 ) { 
+			out_view																= {out_scaled.begin(), newSize.x, newSize.y};
+			if(in_view.size())
+				error_if(errored(::cho::grid_scale(out_view, in_view)), "I believe this never fails.");
+		}
+		return 0;
+	}
+
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawRectangleBorder							(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SRectangle2D<_tCoord>& rectangle)		{
+		int32_t																		yStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.y);
+		int32_t																		yStop										= ::cho::min((int32_t)rectangle.Offset.y + (int32_t)rectangle.Size.y, (int32_t)bitmapTarget.height());
+		int32_t																		xStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.x);
+		int32_t																		xStop										= ::cho::min((int32_t)rectangle.Offset.x + (int32_t)rectangle.Size.x, (int32_t)bitmapTarget.width());
+		if(yStart >= yStop || xStart >= xStop)
+			return 0;
+		for(int32_t x = xStart; x < xStop; ++x) 	
+			bitmapTarget[yStart][x]											= value;
+		memcpy(&bitmapTarget[yStop - 1][xStart], &bitmapTarget[yStart][xStart], sizeof(_tColor) * xStop - xStart);
+		for(int32_t y = yStart + 1, yMax = (yStop - 1); y < yMax; ++y) {
+			bitmapTarget[y][0]											= value;
+			bitmapTarget[y][xStop - 1]									= value;
+		}
+		return 0;
+	}
+
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawRectangle								(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SRectangle2D<_tCoord>& rectangle)		{
+		int32_t																		yStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.y);
+		int32_t																		yStop										= ::cho::min((int32_t)rectangle.Offset.y + (int32_t)rectangle.Size.y, (int32_t)bitmapTarget.height());
+		int32_t																		xStart										= (int32_t)::cho::max(0, (int32_t)rectangle.Offset.x);
+		int32_t																		xStop										= ::cho::min((int32_t)rectangle.Offset.x + (int32_t)rectangle.Size.x, (int32_t)bitmapTarget.width());
+		if(yStart >= yStop || xStart >= xStop)
+			return 0;
+		for(int32_t x = xStart; x < xStop; ++x) 	
+			bitmapTarget[yStart][x]													= value;
+		for(int32_t y = yStart + 1; y < yStop; ++y)
+			memcpy(&bitmapTarget[y][xStart], &bitmapTarget[yStart][xStart], sizeof(_tColor) * xStop - xStart);
+		return 0;
+	}
+
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawCircle									(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SCircle2D<_tCoord>& circle)			{
+		int32_t																		xStop										= ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.width	());
 		double																		radiusSquared								= circle.Radius * circle.Radius;
-		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)bitmapTarget.Colors.height	()); y < yStop; ++y)
+		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)bitmapTarget.height()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(0, (int32_t)(circle.Center.x - circle.Radius)); x < xStop; ++x) {	
 			::cho::SCoord2<int32_t>														cellCurrent									= {x, y};
 			double																		distanceSquared								= (cellCurrent - circle.Center).LengthSquared();
 			if(distanceSquared < radiusSquared) {
 			 	for(const int32_t xLimit = circle.Center.x + (circle.Center.x - x); x < xLimit; ++x)
-					bitmapTarget.Colors		[y][x]											= value;
+					bitmapTarget[y][x]											= value;
 				break;
 			}
 		}
@@ -43,12 +86,12 @@ namespace cho
 	}
 
 	// A good article on this kind of triangle rasterization: https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/ 
-	template<typename _tCoord, typename _tTarget>
-	static					::cho::error_t									drawTriangle								(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawTriangle								(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
 		::cho::SCoord2		<int32_t>												areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
 		::cho::SCoord2		<int32_t>												areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
-		const int32_t																xStop										= ::cho::min(areaMax.x, (int32_t)bitmapTarget.Colors.width());
-		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)bitmapTarget.Colors.height()); y < yStop; ++y)
+		const int32_t																xStop										= ::cho::min(areaMax.x, (int32_t)bitmapTarget.width());
+		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)bitmapTarget.height()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(areaMin.x, 0); x < xStop; ++x) {	
 			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
@@ -56,14 +99,14 @@ namespace cho
 			int																			w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
 			int																			w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0)  // If p is on or inside all edges, render pixel.
-				bitmapTarget.Colors		[y][x]											= value;
+				bitmapTarget[y][x]											= value;
 		}
 		return 0;
 	}
 
 	// Bresenham's line algorithm
-	template<typename _tCoord, typename _tTarget>
-	static					::cho::error_t									drawLine									(_tTarget& bitmapTarget, const typename _tTarget::TColor& value, const ::cho::SLine2D<_tCoord>& line)				{
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawLine									(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SLine2D<_tCoord>& line)				{
 		float																		x1											= (float)line.A.x
 			,																		y1											= (float)line.A.y
 			,																		x2											= (float)line.B.x
@@ -85,9 +128,9 @@ namespace cho
 		int32_t																		y											= (int32_t)y1;
 		if(steep) {
 			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-				if(false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.Colors.height()) || false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.Colors.width()))
+				if(false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.width()))
 					continue;
-				bitmapTarget.Colors		[x][y]											= value;
+				bitmapTarget[x][y]														= value;
 				error																	-= dy;
 				if(error < 0) {
 					y																		+= ystep;
@@ -97,9 +140,9 @@ namespace cho
 		}
 		else {
 			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-				if(false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.Colors.height()) || false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.Colors.width()))
+				if(false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.width()))
 					continue;
-				bitmapTarget.Colors		[y][x]											= value;
+				bitmapTarget[y][x]														= value;
 				error																	-= dy;
 				if(error < 0) {
 					y																		+= ystep;

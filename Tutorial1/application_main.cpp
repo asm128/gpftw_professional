@@ -17,30 +17,12 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 					::SApplication										* g_ApplicationInstance						= 0;
 
-static				::cho::error_t										updateOffscreen								(::SApplication& applicationInstance)											{ 
-	::cho::array_pod<::cho::SColorBGRA>											& bmpOffscreen								= applicationInstance.BitmapOffsceen;
-	uint32_t																	linearScreenSize							= applicationInstance.MainDisplay.Size.x * applicationInstance.MainDisplay.Size.y;
-	if(bmpOffscreen.size() < linearScreenSize)
-		ree_if(errored(bmpOffscreen.resize(linearScreenSize)), "Out of memory?");
-
-	// Update size-dependent resources.
-	if(applicationInstance.TextureBackgroundScaledDay.size() < bmpOffscreen.size())
-		ree_if(errored(applicationInstance.TextureBackgroundScaledDay.resize(bmpOffscreen.size())), "Out of memory?");;
-	if(applicationInstance.ViewTextureBackgroundScaledDay.size() != linearScreenSize) {
-		applicationInstance.ViewTextureBackgroundScaledDay						= {applicationInstance.TextureBackgroundScaledDay.begin(), applicationInstance.MainDisplay.Size.x, applicationInstance.MainDisplay.Size.y};
-		error_if(errored(::cho::grid_scale(applicationInstance.ViewTextureBackgroundScaledDay, applicationInstance.ViewTextureBackgroundDay)), "I believe this never fails.");
-	}
-
-	if(applicationInstance.TextureBackgroundScaledNight.size() < bmpOffscreen.size())
-		ree_if(errored(applicationInstance.TextureBackgroundScaledNight.resize(bmpOffscreen.size())), "Out of memory?");;
-	if(applicationInstance.ViewTextureBackgroundScaledNight.size() != linearScreenSize) {
-		applicationInstance.ViewTextureBackgroundScaledNight					= {applicationInstance.TextureBackgroundScaledNight.begin(), applicationInstance.MainDisplay.Size.x, applicationInstance.MainDisplay.Size.y};
-		error_if(errored(::cho::grid_scale(applicationInstance.ViewTextureBackgroundScaledNight, applicationInstance.ViewTextureBackgroundNight)), "I believe this never fails.");
-	}
-
+static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
+	::cho::updateSizeDependentTarget	(applicationInstance.BitmapOffsceen						, applicationInstance.ViewBitmapOffsceen					, applicationInstance.MainDisplay.Size);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.ViewTextureBackgroundScaledDay		, applicationInstance.ViewTextureBackgroundDay		, applicationInstance.MainDisplay.Size);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundNight	, applicationInstance.MainDisplay.Size);
 	return 0;
 }
-
 // --- Cleanup application resources.
 					::cho::error_t										cleanup										(::SApplication& applicationInstance)											{
 	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
@@ -65,51 +47,12 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	error_if(errored(::cho::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT)						), "This should never happen and usually indicates memory corruption or lack of system resources.");
 	error_if(errored(::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height())				), "Not sure why this would fail at this point.");
 	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
-	FILE																		* source									= 0; 
-	{
-		static constexpr	const char												bmpFileName	[]								= "Codepage-437-24.bmp";
-		fopen_s(&source, bmpFileName, "rb");
-		if(source) {
-			if errored(::cho::bmpFileLoad(source, applicationInstance.TextureFont, applicationInstance.ViewTextureFont)) {
-				error_printf("Failed to load file: '%s'. File not found?", bmpFileName);
-				fclose(source);
-				return -1;
-			}
-			fclose(source);
-		}
-		else
-			info_printf("Failed to open file %s.", bmpFileName);
-	}
-	{ // 
-		static constexpr	const char												bmpFileName	[]									= "earth_color.bmp";
-		source																	= 0; 
-		fopen_s(&source, bmpFileName, "rb");
-		if(source) {
-			if errored(::cho::bmpFileLoad(source, applicationInstance.TextureBackgroundDay, applicationInstance.ViewTextureBackgroundDay)) {
-				error_printf("Failed to load file: '%s'. File not found?", bmpFileName);
-				fclose(source);
-				return -1;
-			}
-			fclose(source);
-		}
-		else
-			info_printf("Failed to open file %s.", bmpFileName);
-	}
-	{ // 
-		static constexpr	const char												bmpFileName	[]									= "earth_light.bmp";
-		source																	= 0; 
-		fopen_s(&source, bmpFileName, "rb");
-		if(source) {
-			if errored(::cho::bmpFileLoad(source, applicationInstance.TextureBackgroundNight, applicationInstance.ViewTextureBackgroundNight)) {
-				error_printf("Failed to load file: '%s'. File not found?", bmpFileName);
-				fclose(source);
-				return -1;
-			}
-			fclose(source);
-		}
-		else
-			info_printf("Failed to open file %s.", bmpFileName);
-	}
+	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
+	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
+	static constexpr	const char												bmpFileName2	[]									= "Codepage-437-24.bmp";
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureBackgroundDay	, applicationInstance.ViewTextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TextureBackgroundNight	, applicationInstance.ViewTextureBackgroundNight)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureFont				, applicationInstance.ViewTextureFont			)), "Failed to load bitmap from file: %s.", bmpFileName2);
 
 	{
 		uint8_t																		testBitfield[]									= {1,3,7,15,31,63,127,255};
@@ -158,7 +101,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
 	::cho::SDisplay																& mainWindow								= applicationInstance.MainDisplay;
 	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
-	ree_if(errored(::updateOffscreen(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
+	ree_if(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
 	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffsceen)), "Unknown error.");
 
@@ -183,14 +126,14 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	return 0;
 }
 
-					::cho::error_t										drawTextFixedSize						(::cho::SBitmapTargetBGRA& bmpTarget, ::cho::grid_view<::cho::SColorBGRA> viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+static				::cho::error_t										drawTextFixedSize						(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::grid_view<::cho::SColorBGRA>& viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
 		int32_t																	coordTableX								= text0[iChar] % characterCellsX;
 		int32_t																	coordTableY								= text0[iChar] / characterCellsX;
 		const ::cho::SCoord2<int32_t>											coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
 		const ::cho::SCoord2<int32_t>											dstOffset1								= {sizeCharCell.x * iChar, dstOffsetY};
 		const ::cho::SRectangle2D<int32_t>										srcRect0								= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
-		error_if(errored(::cho::grid_copy(bmpTarget.Colors, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
+		error_if(errored(::cho::grid_copy(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
 	}
 	return 0;
 }
@@ -216,14 +159,14 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledDay)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledNight, rectangle, rectangle)), "I believe this never fails.");
 	//error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
-	error_if(errored(::cho::drawRectangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		], geometry0)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawRectangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		], ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		], geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED			], ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawTriangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_YELLOW		], geometry2)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA		], ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		], ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	], ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED		]), ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawTriangle	(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_YELLOW		]), geometry2)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA	]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(bmpTarget.Colors, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 
 	static constexpr const ::cho::SCoord2<int32_t>									sizeCharCell							= {9, 16};
 	uint32_t																		lineOffset								= 0;
@@ -231,28 +174,16 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		static constexpr const char														testText0	[]							= "Some";
 		static constexpr const uint32_t													sizeLine								= sizeCharCell.x * (::cho::size(testText0) - 1);
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
-		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
-			int32_t																			coordTableX								= testText0[iChar] % 32;
-			int32_t																			coordTableY								= testText0[iChar] / 32;
-			const ::cho::SCoord2<int32_t>													coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
-			const ::cho::SRectangle2D<int32_t>												dstRect0								= ::cho::SRectangle2D<int32_t>{{sizeCharCell.x * iChar, (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y)}, sizeCharCell};
-			const ::cho::SRectangle2D<int32_t>												srcRect0								= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)applicationInstance.ViewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
-			error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont, {dstTextOffset + dstRect0.Offset, dstRect0.Size}, srcRect0)), "I believe this never fails.");
-		}
+		uint32_t																		dstOffsetY								= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
+		drawTextFixedSize(bmpTarget.Colors, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 	{
 		static constexpr const char														testText0	[]							= "Text";
 		const uint32_t																	sizeLine								= sizeCharCell.x * (::cho::size(testText0) - 1);
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
-		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
-			int32_t																			coordTableX								= testText0[iChar] % 32;
-			int32_t																			coordTableY								= testText0[iChar] / 32;
-			const ::cho::SCoord2<int32_t>													coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
-			const ::cho::SCoord2<int32_t>													dstOffset1								= {sizeCharCell.x * iChar, (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y)};
-			const ::cho::SRectangle2D<int32_t>												srcRect0								= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)applicationInstance.ViewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};					
-			error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
-		}
+		uint32_t																		dstOffsetY								= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
+		drawTextFixedSize(bmpTarget.Colors, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 	{
@@ -260,7 +191,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		const uint32_t																	sizeLine								= sizeCharCell.x * (::cho::size(testText0) - 1);
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
 		uint32_t																		dstOffsetY								= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		drawTextFixedSize(bmpTarget, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
+		drawTextFixedSize(bmpTarget.Colors, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 

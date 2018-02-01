@@ -7,8 +7,9 @@
 
 namespace cho
 {
-						::cho::error_t							bmpFileLoad							(byte_t	* source, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView);
-						::cho::error_t							bmpFileLoad							(FILE	* source, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView);
+						::cho::error_t							bmpFileLoad							(const byte_t					* source	, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView);
+						::cho::error_t							bmpFileLoad							(FILE							* source	, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView);
+						::cho::error_t							bmpFileLoad							(const ::cho::view_const_string	& filename	, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView);
 }
 
 #endif // CHO_BITMAP_FILE_H_236544263544352344

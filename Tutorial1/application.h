@@ -12,19 +12,20 @@
 
 struct SApplication {
 						::cho::SDisplay								MainDisplay									= {};
-						::cho::array_pod<::cho::SColorBGRA>			BitmapOffsceen								= {};
 						::cho::SRuntimeValues						RuntimeValues								= {};
 						::cho::SInput								SystemInput									= {};
 						::cho::STimer								Timer										= {};
 						::cho::SFrameInfo							FrameInfo									= {};
 						::cho::SGUI									GUI											= {};
 
+						::cho::array_pod<::cho::SColorBGRA>			BitmapOffsceen								= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureFont									= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundDay						= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundNight						= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledDay					= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledNight				= {};
 
+						::cho::grid_view<::cho::SColorBGRA>			ViewBitmapOffsceen							= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureFont								= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundDay					= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundNight					= {};
