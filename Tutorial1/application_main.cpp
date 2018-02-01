@@ -206,12 +206,12 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	geometry2.B															+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	geometry2.C															+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
-	::cho::SBitmapTargetBGRA													bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
-	::cho::SRectangle2D<uint32_t>												rectangle									= {};
-	rectangle.Offset.x									= mainWindow.Size.x / 4;
-	rectangle.Offset.y									= mainWindow.Size.y / 4;
-	rectangle.Size	.x									= mainWindow.Size.x - rectangle.Offset.x * 2;
-	rectangle.Size	.y									= mainWindow.Size.y - rectangle.Offset.y * 2;
+	::cho::SBitmapTargetBGRA												bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
+	::cho::SRectangle2D	<uint32_t>											rectangle									= {};
+	rectangle.Offset.x													= mainWindow.Size.x / 4;
+	rectangle.Offset.y													= mainWindow.Size.y / 4;
+	rectangle.Size	.x													= mainWindow.Size.x - rectangle.Offset.x * 2;
+	rectangle.Size	.y													= mainWindow.Size.y - rectangle.Offset.y * 2;
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());	// Clear target.
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledDay)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledNight, rectangle, rectangle)), "I believe this never fails.");
