@@ -22,9 +22,14 @@ struct SApplication {
 						::cho::array_pod<::cho::SColorBGRA>			TextureFont									= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundDay						= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundNight						= {};
+						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledDay					= {};
+						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledNight				= {};
+
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureFont								= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundDay					= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundNight					= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundScaledDay				= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundScaledNight			= {};
 
 						::cho::SASCIITarget							ASCIIRenderTarget							= {};
 						::cho::SPalette								ASCIIPalette								= 

@@ -5,6 +5,7 @@
 #include "cho_bitmap_target.h"
 #include "cho_bitmap_file.h"
 #include "cho_grid_copy.h"
+#include "cho_grid_scale.h"
 #include "cho_bit_array_view.h"
 
 #include "cho_app_impl.h"
@@ -21,6 +22,22 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	uint32_t																	linearScreenSize							= applicationInstance.MainDisplay.Size.x * applicationInstance.MainDisplay.Size.y;
 	if(bmpOffscreen.size() < linearScreenSize)
 		ree_if(errored(bmpOffscreen.resize(linearScreenSize)), "Out of memory?");
+
+	// Update size-dependent resources.
+	if(applicationInstance.TextureBackgroundScaledDay.size() < bmpOffscreen.size())
+		ree_if(errored(applicationInstance.TextureBackgroundScaledDay.resize(bmpOffscreen.size())), "Out of memory?");;
+	if(applicationInstance.ViewTextureBackgroundScaledDay.size() != linearScreenSize) {
+		applicationInstance.ViewTextureBackgroundScaledDay						= {applicationInstance.TextureBackgroundScaledDay.begin(), applicationInstance.MainDisplay.Size.x, applicationInstance.MainDisplay.Size.y};
+		error_if(errored(::cho::grid_scale(applicationInstance.ViewTextureBackgroundScaledDay, applicationInstance.ViewTextureBackgroundDay)), "I believe this never fails.");
+	}
+
+	if(applicationInstance.TextureBackgroundScaledNight.size() < bmpOffscreen.size())
+		ree_if(errored(applicationInstance.TextureBackgroundScaledNight.resize(bmpOffscreen.size())), "Out of memory?");;
+	if(applicationInstance.ViewTextureBackgroundScaledNight.size() != linearScreenSize) {
+		applicationInstance.ViewTextureBackgroundScaledNight						= {applicationInstance.TextureBackgroundScaledNight.begin(), applicationInstance.MainDisplay.Size.x, applicationInstance.MainDisplay.Size.y};
+		error_if(errored(::cho::grid_scale(applicationInstance.ViewTextureBackgroundScaledNight, applicationInstance.ViewTextureBackgroundNight)), "I believe this never fails.");
+	}
+
 	return 0;
 }
 
@@ -179,23 +196,21 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 }
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	const ::cho::SDisplay														& mainWindow								= applicationInstance.MainDisplay;
-	::cho::array_pod	<::cho::SColorBGRA>										& bmpOffscreen								= applicationInstance.BitmapOffsceen;
-	::cho::SCoord2		<int32_t>												screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
-	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
-	::cho::SCircle2D	<int32_t>												geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	
-	::cho::STriangle2D	<int32_t>												geometry2									= {{0, 0}, {15, 15}, {-5, 10}};	
-	geometry2.A																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
-	geometry2.B																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
-	geometry2.C																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
-
-	const ::cho::SCoord2<uint32_t>													dstOffsetNight								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundNight.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundNight.height() / 2};
-	const ::cho::SCoord2<uint32_t>													dstOffsetDay								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundDay.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundDay.height() / 2};
+	const ::cho::SDisplay													& mainWindow								= applicationInstance.MainDisplay;
+	::cho::array_pod	<::cho::SColorBGRA>									& bmpOffscreen								= applicationInstance.BitmapOffsceen;
+	const::cho::SCoord2	<int32_t>											screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
+	::cho::SRectangle2D	<int32_t>											geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
+	::cho::SCircle2D	<int32_t>											geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	
+	::cho::STriangle2D	<int32_t>											geometry2									= {{0, 0}, {15, 15}, {-5, 10}};	
+	geometry2.A															+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
+	geometry2.B															+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
+	geometry2.C															+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
 	::cho::SBitmapTargetBGRA													bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
+	const ::cho::SRectangle2D<uint32_t>											rectangle									= {256, 256, mainWindow.Size.x - 256 - 256, mainWindow.Size.y - 256 - 256};
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());	// Clear target.
-	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundDay, dstOffsetDay)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundNight, dstOffsetNight)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledDay)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledNight, rectangle, rectangle)), "I believe this never fails.");
 	//error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		], geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(bmpTarget, applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		], ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");

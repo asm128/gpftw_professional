@@ -108,7 +108,7 @@ namespace cho
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, xDstOffset);	// 
 		uint32_t														elementsCopied				= 0;
 		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
-			const int32_t													yDst						= y + (int32_t)dstRect.Offset.y;
+			const int32_t													yDst						= ySrc + (int32_t)dstRect.Offset.y;
 			if(yDst < 0)
 				continue;
 			if(yDst >= yDstLimit) 
