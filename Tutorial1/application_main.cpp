@@ -34,7 +34,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	if(applicationInstance.TextureBackgroundScaledNight.size() < bmpOffscreen.size())
 		ree_if(errored(applicationInstance.TextureBackgroundScaledNight.resize(bmpOffscreen.size())), "Out of memory?");;
 	if(applicationInstance.ViewTextureBackgroundScaledNight.size() != linearScreenSize) {
-		applicationInstance.ViewTextureBackgroundScaledNight						= {applicationInstance.TextureBackgroundScaledNight.begin(), applicationInstance.MainDisplay.Size.x, applicationInstance.MainDisplay.Size.y};
+		applicationInstance.ViewTextureBackgroundScaledNight					= {applicationInstance.TextureBackgroundScaledNight.begin(), applicationInstance.MainDisplay.Size.x, applicationInstance.MainDisplay.Size.y};
 		error_if(errored(::cho::grid_scale(applicationInstance.ViewTextureBackgroundScaledNight, applicationInstance.ViewTextureBackgroundNight)), "I believe this never fails.");
 	}
 
@@ -131,18 +131,18 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 		uint8_t																		testBitfield2[]									= {1,3,7,15,31,63,127,255};
 		::cho::bit_array_view<uint8_t>												testView2										= testBitfield2;
 		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); item++) {
-			bool value = item;
+			bool																		value											= item;
 			printf("%X", (uint32_t)value);
 		}
 		printf("\n");
 		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
 			item																	= 1;
-			bool value = item;
+			bool																		value											= item;
 			printf("%X", (uint32_t)value);
 		}
 		printf("\n");
 		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
-			bool value = item;
+			bool																		value											= item;
 			printf("%X", (uint32_t)value);
 		}
 		printf("\n");
@@ -207,7 +207,11 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	geometry2.C															+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
 	::cho::SBitmapTargetBGRA													bmpTarget									= {{&bmpOffscreen[0], mainWindow.Size.x, mainWindow.Size.y},};
-	const ::cho::SRectangle2D<uint32_t>											rectangle									= {256, 256, mainWindow.Size.x - 256 - 256, mainWindow.Size.y - 256 - 256};
+	::cho::SRectangle2D<uint32_t>												rectangle									= {};
+	rectangle.Offset.x									= mainWindow.Size.x / 4;
+	rectangle.Offset.y									= mainWindow.Size.y / 4;
+	rectangle.Size	.x									= mainWindow.Size.x - rectangle.Offset.x * 2;
+	rectangle.Size	.y									= mainWindow.Size.y - rectangle.Offset.y * 2;
 	::memset(&bmpOffscreen[0], 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());	// Clear target.
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledDay)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureBackgroundScaledNight, rectangle, rectangle)), "I believe this never fails.");
@@ -225,7 +229,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	uint32_t																		lineOffset								= 0;
 	{
 		static constexpr const char														testText0	[]							= "Some";
-		static constexpr const uint32_t													sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
+		static constexpr const uint32_t													sizeLine								= sizeCharCell.x * (::cho::size(testText0) - 1);
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
 		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
 			int32_t																			coordTableX								= testText0[iChar] % 32;
@@ -239,7 +243,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	++lineOffset;
 	{
 		static constexpr const char														testText0	[]							= "Text";
-		const uint32_t																	sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
+		const uint32_t																	sizeLine								= sizeCharCell.x * (::cho::size(testText0) - 1);
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
 		for(int32_t iChar = 0; iChar < (int32_t)::cho::size(testText0) - 1; ++iChar) {
 			int32_t																			coordTableX								= testText0[iChar] % 32;
@@ -253,7 +257,7 @@ static				::cho::error_t										updateOffscreen								(::SApplication& applic
 	++lineOffset;
 	{
 		static constexpr const char														testText0	[]							= "Lines";
-		const uint32_t																	sizeLine								= sizeCharCell.x * ::cho::size(testText0) - 1;
+		const uint32_t																	sizeLine								= sizeCharCell.x * (::cho::size(testText0) - 1);
 		const ::cho::SCoord2<int32_t>													dstTextOffset							= {(int32_t)mainWindow.Size.x / 2 - (int32_t)sizeLine / 2, };
 		uint32_t																		dstOffsetY								= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
 		drawTextFixedSize(bmpTarget, applicationInstance.ViewTextureFont, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
