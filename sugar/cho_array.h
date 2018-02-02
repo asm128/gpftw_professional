@@ -215,7 +215,7 @@ namespace cho
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
 				::cho::array_view<_tPOD>							viewSafe									= {newData, newSize};
 				for(uint32_t i = 0					, maxCount = ::cho::min(index, Count)				; i <	maxCount; ++i)	viewSafe[i			]	= oldData[i];
-				for(uint32_t i = 0					, maxCount = ::cho::min(chainLength, newSize-index); i <	maxCount; ++i)	viewSafe[i + index	]	= chainToInsert[i];
+				for(uint32_t i = 0					, maxCount = ::cho::min(chainLength, newSize-index)	; i <	maxCount; ++i)	viewSafe[i + index	]	= chainToInsert[i];
 				for(uint32_t i = index + chainLength, maxCount = ::cho::min(index + 1, Count)			; i <	maxCount; ++i)	viewSafe[i + 1		]	= oldData[i];
 				Data											= newData;
 				safeguard.Handle								= 0;

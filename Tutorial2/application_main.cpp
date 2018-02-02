@@ -55,7 +55,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
-					::cho::error_t										updateInput									(::SApplication& applicationInstance)					{ 
+					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	if(applicationInstance.SystemInput.KeyUp	('W')) ::Beep(440, 100);
 	if(applicationInstance.SystemInput.KeyUp	('A')) ::Beep(520, 100);
 	if(applicationInstance.SystemInput.KeyUp	('S')) ::Beep(600, 100);
@@ -94,11 +94,11 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 					::cho::error_t										drawTextFixedSize							(::cho::SBitmapTargetBGRA& bmpTarget, ::cho::grid_view<::cho::SColorBGRA> viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
-		int32_t																	coordTableX									= text0[iChar] % characterCellsX;
-		int32_t																	coordTableY									= text0[iChar] / characterCellsX;
-		const ::cho::SCoord2<int32_t>											coordCharTable								= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
-		const ::cho::SCoord2<int32_t>											dstOffset1									= {sizeCharCell.x * iChar, dstOffsetY};
-		const ::cho::SRectangle2D<int32_t>										srcRect0									= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
+		int32_t																		coordTableX									= text0[iChar] % characterCellsX;
+		int32_t																		coordTableY									= text0[iChar] / characterCellsX;
+		const ::cho::SCoord2<int32_t>												coordCharTable								= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
+		const ::cho::SCoord2<int32_t>												dstOffset1									= {sizeCharCell.x * iChar, dstOffsetY};
+		const ::cho::SRectangle2D<int32_t>											srcRect0									= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
 		error_if(errored(::cho::grid_copy(bmpTarget.Colors, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
 	}
 	return 0;
@@ -130,7 +130,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED			]), ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED			]), ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawTriangle	(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_YELLOW		]), geometry2)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA		]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
