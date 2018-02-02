@@ -1,6 +1,6 @@
 #include "cho_coord.h"
 #include "cho_color.h"
-#include "cho_array.h"
+#include "cho_grid_view.h"
 
 #if defined(CHO_WINDOWS)
 #	include <windows.h>
@@ -39,7 +39,7 @@ namespace cho
 		{}
 	};
 
-		::cho::error_t																displayPresentTarget						(::cho::SDisplay& displayInstance, const ::cho::array_pod<::cho::SColorBGRA>& targetToPresent);
+		::cho::error_t																displayPresentTarget						(::cho::SDisplay& displayInstance, const ::cho::grid_view<::cho::SColorBGRA>& targetToPresent);
 		::cho::error_t																displayUpdate								(::cho::SDisplay& applicationInstance);
 } // namespace
 

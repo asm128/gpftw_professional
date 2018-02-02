@@ -77,7 +77,7 @@ namespace cho
 			::cho::SCoord2<int32_t>														cellCurrent									= {x, y};
 			double																		distanceSquared								= (cellCurrent - circle.Center).LengthSquared();
 			if(distanceSquared < radiusSquared) {
-			 	for(const int32_t xLimit = circle.Center.x + (circle.Center.x - x); x < xLimit; ++x)
+			 	for(const int32_t xLimit = ::cho::min((int32_t)circle.Center.x + ((int32_t)circle.Center.x - x), (int32_t)bitmapTarget.width()); x < xLimit; ++x)
 					bitmapTarget[y][x]											= value;
 				break;
 			}

@@ -27,9 +27,10 @@ static	::cho::error_t												getSystemErrorAsString						(const uint64_t las
 	lastSystemError														= errno;
 	if(lastSystemError) {
 		::strerror_s(bufferError, (int)lastSystemError);
-		size_t																	stringLength								= ::sprintf_s(bufferError, "Last system error: 0x%llX '%s'.", lastSystemError, bufferError);
+		char																	bufferError2[4096]							= {};
+		size_t																	stringLength								= ::sprintf_s(bufferError2, "Last system error: 0x%llX '%s'.", lastSystemError, bufferError);
 		base_debug_print(prefix, prefixLen);
-		base_debug_print(bufferError, stringLength);
+		base_debug_print(bufferError2, stringLength);
 		base_debug_print("\n", 1);
 	}
 }

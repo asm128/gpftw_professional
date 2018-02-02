@@ -18,9 +18,10 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 					::SApplication										* g_ApplicationInstance						= 0;
 					
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
-	::cho::updateSizeDependentTarget	(applicationInstance.BitmapOffscreen					, applicationInstance.ViewBitmapOffscreen					, applicationInstance.MainDisplay.Size);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.ViewTextureBackgroundScaledDay		, applicationInstance.ViewTextureBackgroundDay		, applicationInstance.MainDisplay.Size);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundNight	, applicationInstance.MainDisplay.Size);
+	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.MainDisplay.Size / 2;
+	::cho::updateSizeDependentTarget	(applicationInstance.BitmapOffscreen					, applicationInstance.ViewBitmapOffscreen					, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.ViewTextureBackgroundScaledDay		, applicationInstance.ViewTextureBackgroundDay		, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundNight	, newSize);
 	return 0;
 }
 
@@ -80,7 +81,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
 	ree_if(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffscreen)), "Unknown error.");
+	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.ViewBitmapOffscreen)), "Unknown error.");
 
 	::updateInput(applicationInstance);
 	::cho::updateGUI(applicationInstance.GUI, applicationInstance.SystemInput);
@@ -105,9 +106,9 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 }
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	const ::cho::SDisplay														& mainWindow								= applicationInstance.MainDisplay;
-	const::cho::SCoord2	<int32_t>												screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
-	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber) % (mainWindow.Size.x - 2)), 5}};
+	const ::cho::grid_view<::cho::SColorBGRA>									& viewOffscreen								= applicationInstance.ViewBitmapOffscreen;
+	const::cho::SCoord2	<int32_t>												screenCenter								= {(int32_t)viewOffscreen.width() / 2, (int32_t)viewOffscreen.height() / 2};
+	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber) % (viewOffscreen.width() - 2)), 5}};
 	::cho::SCircle2D	<int32_t>												geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	
 	::cho::STriangle2D	<int32_t>												geometry2									= {{0, 0}, {15, 15}, {-5, 10}};	
 	geometry2.A																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};

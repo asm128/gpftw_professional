@@ -58,7 +58,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
 	ree_if(errored(::cho::updateSizeDependentTarget(applicationInstance.BitmapOffscreen, applicationInstance.ViewBitmapOffscreen, applicationInstance.MainDisplay.Size)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffscreen)), "Unknown error.");
+	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.ViewBitmapOffscreen)), "Unknown error.");
 
 	if(applicationInstance.SystemInput.KeyUp	('W')) ::Beep(440, 100);
 	if(applicationInstance.SystemInput.KeyUp	('A')) ::Beep(520, 100);

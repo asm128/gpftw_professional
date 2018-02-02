@@ -11,7 +11,7 @@
 	return 0;
 }
 
-		::cho::error_t																			drawBuffer									(::HDC hdc, int width, int height, const ::cho::SColorBGRA *colorArray)				{
+		::cho::error_t																			drawBuffer									(::HDC hdc, int width, int height, const ::cho::grid_view<::cho::SColorBGRA>& colorArray)				{
 	struct SOffscreenPlatformDetail { // raii destruction of resources
 		uint32_t																							BitmapInfoSize								= 0;
 		::BITMAPINFO																						* BitmapInfo								= 0;
@@ -25,17 +25,17 @@
 		}
 	}																									offscreenDetail								= {};
 
-	const uint32_t																						bytesToCopy									= sizeof(::RGBQUAD) * width * height;
+	const uint32_t																						bytesToCopy									= sizeof(::RGBQUAD) * colorArray.size();
 	offscreenDetail.BitmapInfoSize																	= sizeof(::BITMAPINFO) + bytesToCopy;
 	ree_if(0 == (offscreenDetail.BitmapInfo = (::BITMAPINFO*)::malloc(offscreenDetail.BitmapInfoSize)), "malloc(%u) failed! Out of memory?", offscreenDetail.BitmapInfoSize);
-	memcpy(offscreenDetail.BitmapInfo->bmiColors, colorArray, width * height * sizeof(::cho::SColorBGRA));
+	memcpy(offscreenDetail.BitmapInfo->bmiColors, colorArray.begin(), colorArray.size() * sizeof(::cho::SColorBGRA));
 	offscreenDetail.BitmapInfo->bmiHeader.biSize													= sizeof(::BITMAPINFO);
-	offscreenDetail.BitmapInfo->bmiHeader.biWidth													= width;
-	offscreenDetail.BitmapInfo->bmiHeader.biHeight													= height;
+	offscreenDetail.BitmapInfo->bmiHeader.biWidth													= colorArray.width();
+	offscreenDetail.BitmapInfo->bmiHeader.biHeight													= colorArray.height();
 	offscreenDetail.BitmapInfo->bmiHeader.biPlanes													= 1;
 	offscreenDetail.BitmapInfo->bmiHeader.biBitCount												= 32;
 	offscreenDetail.BitmapInfo->bmiHeader.biCompression												= BI_RGB;
-	offscreenDetail.BitmapInfo->bmiHeader.biSizeImage												= width * height * sizeof(::RGBQUAD);
+	offscreenDetail.BitmapInfo->bmiHeader.biSizeImage												= bytesToCopy;
 	offscreenDetail.BitmapInfo->bmiHeader.biXPelsPerMeter											= 0x0ec4; // Paint and PSP use these values.
 	offscreenDetail.BitmapInfo->bmiHeader.biYPelsPerMeter											= 0x0ec4; // Paint and PSP use these values.
 	offscreenDetail.BitmapInfo->bmiHeader.biClrUsed													= 0; 
@@ -46,17 +46,19 @@
 	reterr_error_if(0 == (offscreenDetail.IntermediateBitmap = ::CreateDIBSection(offscreenDetail.IntermediateDeviceContext, offscreenDetail.BitmapInfo, DIB_RGB_COLORS, (void**) &ppvBits, NULL, 0)), "Failed to create intermediate dib section.");
 	reterr_error_if(0 == ::SetDIBits(NULL, offscreenDetail.IntermediateBitmap, 0, height, offscreenDetail.BitmapInfo->bmiColors, offscreenDetail.BitmapInfo, DIB_RGB_COLORS), "Cannot copy bits into dib section.");
 	::HBITMAP																							hBmpOld										= (::HBITMAP)::SelectObject(offscreenDetail.IntermediateDeviceContext, offscreenDetail.IntermediateBitmap);    // <- altering state
-	error_if(FALSE == ::BitBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
+	//error_if(FALSE == ::BitBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
+	::SetStretchBltMode(hdc, COLORONCOLOR);
+	error_if(FALSE == ::StretchBlt(hdc, 0, 0, width, height, offscreenDetail.IntermediateDeviceContext, 0, 0, colorArray.width(), colorArray.height(), SRCCOPY), "Not sure why would this happen but probably due to mismanagement of the target size or the system resources. I've had it failing when I acquired the device too much and never released it.");
 	::SelectObject(hdc, hBmpOld);	// put the old bitmap back in the DC (restore state)
 	return 0;
 }
 
-		::cho::error_t																			cho::displayPresentTarget					(::cho::SDisplay& displayInstance, const ::cho::array_pod<::cho::SColorBGRA>& targetToPresent)		{ 
+		::cho::error_t																			cho::displayPresentTarget					(::cho::SDisplay& displayInstance, const ::cho::grid_view<::cho::SColorBGRA>& targetToPresent)		{ 
 	::HWND																								windowHandle								= displayInstance.PlatformDetail.WindowHandle;
 	retwarn_warn_if(0 == windowHandle, "presentTarget called without a valid window handle set for the main window.");
 	::HDC																								dc											= ::GetDC(windowHandle);
 	reterr_error_if(0 == dc, "Failed to retrieve device context from the provided window handle.");
-	error_if(errored(::drawBuffer(dc, displayInstance.Size.x, displayInstance.Size.y, &targetToPresent[0])), "Not sure why this would happen.");
+	error_if(errored(::drawBuffer(dc, displayInstance.Size.x, displayInstance.Size.y, targetToPresent)), "Not sure why this would happen.");
 	::ReleaseDC(windowHandle, dc);
 	return 0;
 }
