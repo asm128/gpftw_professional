@@ -277,6 +277,8 @@ namespace cho
 #define ci_if													continue_info_if
 
 #define rve_if													retval_error_if
+#define rvw_if													retval_warn_if
+#define rvi_if													retval_info_if
 
 #define rne_if													retnul_error_if
 #define rnw_if													retnul_warn_if 

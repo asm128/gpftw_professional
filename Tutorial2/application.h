@@ -18,13 +18,15 @@ struct SApplication {
 						::cho::SFrameInfo							FrameInfo									= {};
 						::cho::SGUI									GUI											= {};
 
-						::cho::array_pod<::cho::SColorBGRA>			BitmapOffscreen								= {};
+						::cho::array_pod<::cho::SColorBGRA>			OffscreenBitmap								= {};
+						::cho::array_pod<uint8_t>					OffscreenStencil							= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundDay						= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundNight						= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledDay					= {};
 						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledNight				= {};
 
-						::cho::grid_view<::cho::SColorBGRA>			ViewBitmapOffscreen							= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewOffscreenBitmap							= {};
+						::cho::grid_view<::cho::SColorBGRA>			ViewOffscreenStencil						= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundDay					= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundNight					= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundScaledDay				= {};

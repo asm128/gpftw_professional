@@ -238,6 +238,28 @@ namespace cho
 			return Count;
 		}
 
+		// returns the new array size or -1 if failed.
+		template<typename _tObj>
+		inline				int32_t						erase										(const _tObj* address)																	{ 
+			ree_if(0 == Data, "Uninitialized array pointer!");
+			const ptrdiff_t										ptrDiff										= ptrdiff_t(address) - (ptrdiff_t)Data;
+			const uint32_t										index										= (uint32_t)(ptrDiff / (ptrdiff_t)sizeof(_tObj));
+			ree_if(index >= Count, "Invalid index: %u.", index);
+			return remove(index); 
+		}
+
+		// returns the new array size or -1 if failed.
+							int32_t						remove										(uint32_t index)																		{ 
+			ree_if(0 == Data, "Uninitialized array pointer!");
+			ree_if(index >= Count, "Invalid index: %u.", index);
+			--Count;
+			while(index < Count) {
+				memcpy(&Data[index], &Data[index + 1], sizeof(_tPOD));		// Placement new
+				++index;
+			}
+			return Count;
+		}
+
 		// Returns the index of the argument if found or -1 if not.
 		inline				int32_t						find										(const _tPOD& valueToLookFor)										const				{
 			for(uint32_t i = 0; i < Count; ++i) 

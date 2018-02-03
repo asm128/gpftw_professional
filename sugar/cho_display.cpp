@@ -28,7 +28,7 @@
 	const uint32_t																						bytesToCopy									= sizeof(::RGBQUAD) * colorArray.size();
 	offscreenDetail.BitmapInfoSize																	= sizeof(::BITMAPINFO) + bytesToCopy;
 	ree_if(0 == (offscreenDetail.BitmapInfo = (::BITMAPINFO*)::malloc(offscreenDetail.BitmapInfoSize)), "malloc(%u) failed! Out of memory?", offscreenDetail.BitmapInfoSize);
-	memcpy(offscreenDetail.BitmapInfo->bmiColors, colorArray.begin(), colorArray.size() * sizeof(::cho::SColorBGRA));
+	memcpy(offscreenDetail.BitmapInfo->bmiColors, colorArray.begin(), bytesToCopy);
 	offscreenDetail.BitmapInfo->bmiHeader.biSize													= sizeof(::BITMAPINFO);
 	offscreenDetail.BitmapInfo->bmiHeader.biWidth													= colorArray.width();
 	offscreenDetail.BitmapInfo->bmiHeader.biHeight													= colorArray.height();
