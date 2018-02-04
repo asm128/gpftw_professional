@@ -31,7 +31,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Tutorial1__GUI_</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
-    <ProjectName>Tutorial1 (GUI)</ProjectName>
+    <ProjectName>Tutorial1 (Scaling)</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -6,6 +6,7 @@
 #include "cho_bitmap_file.h"
 #include "cho_grid_copy.h"
 
+
 #include "cho_app_impl.h"
 
 static constexpr	const uint32_t										ASCII_SCREEN_WIDTH							= 132	;
@@ -23,8 +24,6 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 		error_if(errored(::cho::displayUpdate(applicationInstance.MainDisplay)), "Not sure why this would fail");
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
-	error_if(errored(::cho::asciiDisplayDestroy	()), "Failed to close ASCII display!");
-	error_if(errored(::cho::asciiTargetDestroy	(applicationInstance.ASCIIRenderTarget)), "No known reasons for this to fail. It may mean a mismamagement of the target array pointers!");
 
 	g_ApplicationInstance													= 0;
 	//error_printf("Error message test. Press F5 to continue if the debugger breaks execution at this point.");
@@ -36,8 +35,6 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
-	error_if(errored(::cho::asciiTargetCreate	(applicationInstance.ASCIIRenderTarget, ::ASCII_SCREEN_WIDTH, ::ASCII_SCREEN_HEIGHT)						), "This should never happen and usually indicates memory corruption or lack of system resources.");
-	error_if(errored(::cho::asciiDisplayCreate	(applicationInstance.ASCIIRenderTarget.Width(), applicationInstance.ASCIIRenderTarget.Height())				), "Not sure why this would fail at this point.");
 	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
 	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
@@ -50,8 +47,6 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
-	error_if(errored(::cho::asciiDisplayPresent	(applicationInstance.ASCIIRenderTarget)), "Could this fail if the console isn't properly initialized?");
-	error_if(errored(::cho::asciiTargetClear	(applicationInstance.ASCIIRenderTarget)), "This shouldn't fail either unless memory corruption happened.");
 	applicationInstance.Timer		.Frame();
 	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
 	::cho::SDisplay																& mainWindow								= applicationInstance.MainDisplay;
@@ -103,19 +98,17 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 	const ::cho::SCoord2<uint32_t>												dstOffsetNight								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundNight.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundNight.height() / 2};
 	const ::cho::SCoord2<uint32_t>												dstOffsetDay								= {mainWindow.Size.x / 2 - applicationInstance.ViewTextureBackgroundDay.width() / 2, mainWindow.Size.y / 2 - applicationInstance.ViewTextureBackgroundDay.height() / 2};
-
-	::memset(&applicationInstance.BitmapOffscreen[0], 0, sizeof(::cho::SColorBGRA) * applicationInstance.BitmapOffscreen.size());	// Clear target.
 	error_if(errored(::cho::grid_copy		(applicationInstance.ViewBitmapOffscreen, applicationInstance.ViewTextureBackgroundDay, dstOffsetDay)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy		(applicationInstance.ViewBitmapOffscreen, applicationInstance.ViewTextureBackgroundNight, dstOffsetNight)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy		(applicationInstance.ViewBitmapOffscreen, applicationInstance.ViewTextureFont, dstOffsetNight, ::cho::SRectangle2D<uint32_t>{{0,0}, {9, 128}})), "I believe this never fails.");
-	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), geometry0)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_BLUE		]), ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_GREEN		]), geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_RED		]), ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})															), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawTriangle	(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_YELLOW	]), geometry2)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_MAGENTA	]), ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_WHITE		]), ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, ::cho::SColorBGRA(applicationInstance.ASCIIPalette[::cho::ASCII_COLOR_LIGHTGREY	]), ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::BLUE		, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::GREEN		, geometry1)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::RED			, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawTriangle	(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::YELLOW		, geometry2)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::MAGENTA		, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::WHITE		, ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(applicationInstance.ViewBitmapOffscreen, (::cho::SColorBGRA)::cho::LIGHTGREEN	, ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
 	uint32_t																	lineOffset									= 0;

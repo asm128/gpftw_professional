@@ -44,10 +44,7 @@ void																		setupParticles													()														{
 					
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
 	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.MainDisplay.Size;// / 2;
-	//const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.MainDisplay.Size + applicationInstance.MainDisplay.Size ;
 	::cho::updateSizeDependentTarget	(applicationInstance.OffscreenBitmap					, applicationInstance.ViewOffscreenBitmap					, newSize);
-	//::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.ViewTextureBackgroundScaledDay		, applicationInstance.ViewTextureBackgroundDay		, newSize);
-	//::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundNight	, newSize);
 	return 0;
 }
 
@@ -71,10 +68,6 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
-	//static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
-	//static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
-	//error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureBackgroundDay	, applicationInstance.ViewTextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
-	//error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TextureBackgroundNight	, applicationInstance.ViewTextureBackgroundNight)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	::setupParticles();
 	return 0;
 }
@@ -134,7 +127,6 @@ void																		addParticle
 	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.ViewOffscreenBitmap)), "Unknown error.");
 
 	::updateInput(applicationInstance);
-	::cho::updateGUI(applicationInstance.GUI, applicationInstance.SystemInput);
 
 	static float																	windDirection													= 0.1f;
 	::cho::SParticle2Engine<float>													& particleEngine												= applicationInstance.ParticleEngine;

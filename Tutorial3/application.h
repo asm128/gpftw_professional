@@ -10,6 +10,7 @@
 
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
+
 enum PARTICLE_TYPE : int8_t
 	{	PARTICLE_TYPE_SNOW		= 0
 	,	PARTICLE_TYPE_FIRE
@@ -30,11 +31,9 @@ struct SApplication {
 						::cho::SInput								SystemInput									= {};
 						::cho::STimer								Timer										= {};
 						::cho::SFrameInfo							FrameInfo									= {};
-						::cho::SGUI									GUI											= {};
 
 						::cho::SParticle2Engine<float>				ParticleEngine								= {};
 						::cho::array_pod<SParticleInstance>			ParticleInstances							= {};
-
 
 						::cho::array_pod<::cho::SColorBGRA>			OffscreenBitmap								= {};
 						::cho::grid_view<::cho::SColorBGRA>			ViewOffscreenBitmap							= {};
