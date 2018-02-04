@@ -1,5 +1,6 @@
 // Original file created on: 2002/08/30 19:33 by Andreas Hartl. Visit http://www.runicsoft.com for updates and more information
 #include "cho_bitmap_file.h"
+#include <Windows.h>
 
 #pragma pack(push, 1)
 

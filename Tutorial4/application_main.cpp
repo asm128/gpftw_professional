@@ -15,36 +15,35 @@ static constexpr	const uint32_t										ASCII_SCREEN_HEIGHT							= 50	;
 
 CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
 
-static ::cho::SParticle2<float>											particleDefinitions	[::PARTICLE_TYPE_COUNT]				= {};
+static ::cho::SParticle2<float>											particleDefinitions	[::PARTICLE_TYPE_COUNT]	= {};
 
-void																		setupParticles													()														{
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].Position					= 
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Position					= 
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].Position					= 
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].Position					= {};
+void																	setupParticles								()																				{
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].Position						= {};
 
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].SetMass					( 2);
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].SetMass					(-1);
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].SetMass					( 1);
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].SetMass					( 1);
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].SetMass						( 2);
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].SetMass						(-1);
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].SetMass						( 1);
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].SetMass						( 1);
 
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].Damping					= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Damping					= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].Damping					= 1.0f;
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].Damping					= 0.99f;
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].Damping						= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].Damping						= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].Damping						= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].Damping						= 0.99f;
 
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].Forces.Velocity			= {};
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Forces.Velocity			= {(float)0, (float)(rand() % 40)};
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].Forces.Velocity			= {};
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].Forces.Velocity			= {(float)0, (float)(rand() % 100)+20};
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].Forces.Velocity				= {};
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].Forces.Velocity				= {(float)0, (float)(rand() % 40)};
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].Forces.Velocity				= {};
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].Forces.Velocity				= {(float)0, (float)(rand() % 100)+20};
 }
 
-
 					::SApplication										* g_ApplicationInstance						= 0;
-					
+
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
 	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.MainDisplay.Size;// / 2;
-	::cho::updateSizeDependentTarget(applicationInstance.BitmapOffscreen, newSize);
+	::cho::updateSizeDependentTarget(applicationInstance.Offscreen.Texels, applicationInstance.Offscreen.View, newSize);
 	return 0;
 }
 
@@ -84,7 +83,7 @@ void																		addParticle
 	newInstance.ParticleIndex													= particleEngine.AddParticle(particleDefinitions[newInstance.Type]); 
 	particleEngine.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
 	switch(particleType) {
-	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 2 + targetSize.y / 4)}; break;
+	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 4)}; break;
 	case ::PARTICLE_TYPE_LAVA:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= 0; break;
 	case ::PARTICLE_TYPE_RAIN:
 	case ::PARTICLE_TYPE_SNOW:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleEngine.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
@@ -106,14 +105,11 @@ void																		addParticle
 	applicationInstance.SystemInput.MousePrevious							= applicationInstance.SystemInput.MouseCurrent;
 	::cho::array_pod<SParticleInstance>												& particleInstances												= applicationInstance.ParticleInstances;
 	::cho::SParticle2Engine<float>													& particleEngine												= applicationInstance.ParticleEngine;
-	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-
-
+	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
+	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
+	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
+	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
 	return 0;
-
 }
 
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
@@ -124,40 +120,39 @@ void																		addParticle
 	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
 	ree_if(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	rvi_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffscreen.View)), "Unknown error.");
+	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.Offscreen.View)), "Unknown error.");
 
 	::updateInput(applicationInstance);
 
-	static float																windDirection								= 0.1f;
 	::cho::SParticle2Engine<float>												& particleEngine							= applicationInstance.ParticleEngine;
 	const float																	lastFrameSeconds							= (float)applicationInstance.FrameInfo.Seconds.LastFrame;
 	particleEngine.Integrate(lastFrameSeconds, applicationInstance.FrameInfo.Seconds.LastFrameHalfSquared);
 
-	windDirection															= (float)sin(applicationInstance.FrameInfo.Seconds.Total/5.0f) * .25f;
+	const float																	windDirection								= (float)sin(applicationInstance.FrameInfo.Seconds.Total/3.0f) * .025f;
 
-	::cho::array_pod<SParticleInstance>												& particleInstances							= applicationInstance.ParticleInstances;
+	::cho::array_pod<SParticleInstance>											& particleInstances							= applicationInstance.ParticleInstances;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		SParticleInstance																& particleInstance							= particleInstances[iParticle];
-		int32_t																			physicsId									= particleInstance.ParticleIndex;
-		::cho::SParticle2<float>														& particleNext								= particleEngine.ParticleNext[physicsId];
-		if( particleNext.Position.x < 0 || particleNext.Position.x >= applicationInstance.BitmapOffscreen.View.width	()
-		 || particleNext.Position.y < 0 || particleNext.Position.y >= applicationInstance.BitmapOffscreen.View.height	()
+		SParticleInstance															& particleInstance							= particleInstances[iParticle];
+		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		::cho::SParticle2<float>													& particleNext								= particleEngine.ParticleNext[physicsId];
+		if( particleNext.Position.x < 0 || particleNext.Position.x >= applicationInstance.Offscreen.View.width	()
+		 || particleNext.Position.y < 0 || particleNext.Position.y >= applicationInstance.Offscreen.View.height	()
 		 ) { // Remove the particle instance and related information.
-			particleEngine.ParticleState[physicsId].Unused								= true;
+			particleEngine.ParticleState[physicsId].Unused							= true;
 			particleInstances.erase(particleInstances.begin()+iParticle);
 			--iParticle;
 		}
 		else { // Apply forces from wind and gravity.
-			static constexpr	const double												gravity										= 9.8;
-			::cho::SParticle2<float>														& particleCurrent							= particleEngine.Particle[physicsId];
-			particleCurrent																= particleEngine.ParticleNext[physicsId];
-			particleCurrent.Forces.AccumulatedForce										= {0, float(gravity * lastFrameSeconds) * -1};
-			particleCurrent.Forces.AccumulatedForce.x									+= float(windDirection * abs(particleCurrent.Forces.Velocity.y) * .5) + float((rand() % 100) / 100.0 - .5) / 2.0f;
+			static constexpr	const double											gravity										= 9.8;
+			::cho::SParticle2<float>													& particleCurrent							= particleEngine.Particle[physicsId];
+			particleCurrent															= particleEngine.ParticleNext[physicsId];
+			particleCurrent.Forces.AccumulatedForce									= {0, float(gravity * lastFrameSeconds) * -1};
+			particleCurrent.Forces.AccumulatedForce.x								+= float(windDirection * abs(particleCurrent.Forces.Velocity.y) * .5) + float((rand() % 100) / 100.0 - .5) / 2.0f;
 		}
 	}
 
 	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / applicationInstance.Timer.LastTimeSeconds, applicationInstance.Timer.LastTimeSeconds);
+	sprintf_s(buffer, "[%u x %u]. Particle count: %u. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, particleInstances.size(), 1 / applicationInstance.Timer.LastTimeSeconds, applicationInstance.Timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 	return 0;
@@ -176,12 +171,13 @@ void																		addParticle
 }
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.BitmapOffscreen.View;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Offscreen.View;
 	::cho::array_pod<SParticleInstance>											& particleInstances							= applicationInstance.ParticleInstances;
+	memset(applicationInstance.Offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * applicationInstance.Offscreen.View.size());
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
-		SParticleInstance															& particleInstance							= particleInstances[iParticle];
-		const int32_t																physicsId									= particleInstance.ParticleIndex;
-		const ::cho::SCoord2<float>													particlePosition							= applicationInstance.ParticleEngine.Particle[physicsId].Position;
+		SParticleInstance																& particleInstance						= particleInstances[iParticle];
+		const int32_t																	physicsId								= particleInstance.ParticleIndex;
+		const ::cho::SCoord2<float>														particlePosition						= applicationInstance.ParticleEngine.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (PARTICLE_TYPE_SNOW == particleInstance.Type) ? ::cho::SColorBGRA(::cho::CYAN)
 			: (PARTICLE_TYPE_FIRE == particleInstance.Type) ? ::cho::SColorBGRA(::cho::RED )

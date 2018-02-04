@@ -36,7 +36,7 @@ struct SApplication {
 						::cho::SParticle2Engine<float>				ParticleEngine								= {};
 						::cho::array_pod<SParticleInstance>			ParticleInstances							= {};
 
-						::cho::STexture<::cho::SColorBGRA>			BitmapOffscreen								= {};
+						::cho::STexture<::cho::SColorBGRA>			Offscreen									= {};
 
 																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 };

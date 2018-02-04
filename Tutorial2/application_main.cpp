@@ -19,9 +19,9 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 					
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
 	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.MainDisplay.Size / 2;
-	::cho::updateSizeDependentTarget	(applicationInstance.OffscreenBitmap					, applicationInstance.ViewOffscreenBitmap					, newSize);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.ViewTextureBackgroundScaledDay		, applicationInstance.ViewTextureBackgroundDay		, newSize);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundScaledNight		, applicationInstance.ViewTextureBackgroundNight	, newSize);
+	::cho::updateSizeDependentTarget	(applicationInstance.BitmapOffscreen					, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.TextureBackgroundDay		.View, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.TextureBackgroundNight	.View, newSize);
 	return 0;
 }
 
@@ -46,8 +46,8 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
 	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureBackgroundDay	, applicationInstance.ViewTextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TextureBackgroundNight	, applicationInstance.ViewTextureBackgroundNight)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	return 0;
 }
 
@@ -75,7 +75,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
 	ree_if(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	rvi_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.ViewOffscreenBitmap)), "Unknown error.");
+	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffscreen.View)), "Unknown error.");
 
 	::updateInput(applicationInstance);
 
@@ -86,20 +86,20 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
-					::cho::error_t										drawTextFixedSize							(::cho::SBitmapTargetBGRA& bmpTarget, ::cho::grid_view<::cho::SColorBGRA> viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+					::cho::error_t										drawTextFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, ::cho::grid_view<::cho::SColorBGRA> viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
 		int32_t																		coordTableX									= text0[iChar] % characterCellsX;
 		int32_t																		coordTableY									= text0[iChar] / characterCellsX;
 		const ::cho::SCoord2<int32_t>												coordCharTable								= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
 		const ::cho::SCoord2<int32_t>												dstOffset1									= {sizeCharCell.x * iChar, dstOffsetY};
 		const ::cho::SRectangle2D<int32_t>											srcRect0									= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
-		error_if(errored(::cho::grid_copy(bmpTarget.Colors, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
+		error_if(errored(::cho::grid_copy(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
 	}
 	return 0;
 }
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	const ::cho::grid_view<::cho::SColorBGRA>									& viewOffscreen								= applicationInstance.ViewOffscreenBitmap;
+	const ::cho::grid_view<::cho::SColorBGRA>									& viewOffscreen								= applicationInstance.BitmapOffscreen.View;
 	const::cho::SCoord2	<int32_t>												screenCenter								= {(int32_t)viewOffscreen.width() / 2, (int32_t)viewOffscreen.height() / 2};
 	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber) % (viewOffscreen.width() - 2)), 5}};
 	::cho::SCircle2D	<int32_t>												geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	
@@ -109,24 +109,24 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	geometry2.C																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
 	::cho::SRectangle2D	<uint32_t>												rectangle									= {};
-	rectangle.Offset.x														= applicationInstance.ViewTextureBackgroundScaledNight.width() / 4;
+	rectangle.Offset.x														= applicationInstance.TextureBackgroundScaledNight.View.width() / 4;
 	rectangle.Offset.y														= 0; 
 	rectangle.Size	.x														= rectangle.Offset.x * 2;
-	rectangle.Size	.y														= applicationInstance.ViewTextureBackgroundScaledNight.height(); // - rectangle.Offset.y * 2;
+	rectangle.Size	.y														= applicationInstance.TextureBackgroundScaledNight.View.height(); // - rectangle.Offset.y * 2;
 
 	rectangle.Offset.x														+= (uint32_t)applicationInstance.FrameInfo.FrameNumber ;
-	rectangle.Offset.x														%= applicationInstance.ViewTextureBackgroundScaledNight.width();
+	rectangle.Offset.x														%= applicationInstance.TextureBackgroundScaledNight.View.width();
 
-	error_if(errored(::cho::grid_copy(applicationInstance.ViewOffscreenBitmap, applicationInstance.ViewTextureBackgroundScaledDay)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(applicationInstance.ViewOffscreenBitmap, applicationInstance.ViewTextureBackgroundScaledNight, rectangle, rectangle)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(applicationInstance.BitmapOffscreen.View, applicationInstance.TextureBackgroundScaledDay.View)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(applicationInstance.BitmapOffscreen.View, applicationInstance.TextureBackgroundScaledNight.View, rectangle, rectangle)), "I believe this never fails.");
 
-	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawRectangle	(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::BLUE		, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::GREEN		, geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::RED			, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawTriangle	(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::YELLOW		, geometry2)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::MAGENTA		, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::WHITE		, ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(applicationInstance.ViewOffscreenBitmap, (::cho::SColorBGRA)::cho::LIGHTGREEN	, ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::BLUE		, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::GREEN		, geometry1)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::RED			, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawTriangle	(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::YELLOW		, geometry2)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::MAGENTA		, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::WHITE		, ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(applicationInstance.BitmapOffscreen.View, (::cho::SColorBGRA)::cho::LIGHTGREEN	, ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 	return 0;
 }

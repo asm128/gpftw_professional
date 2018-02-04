@@ -4,36 +4,28 @@
 
 #include <cstdio>
 
-#if defined(CHO_WINDOWS)
-#	include <crtdbg.h>
-#	include <Windows.h>
-#endif
-
 #ifndef CHO_LOG_H_8927349654687654365
 #define CHO_LOG_H_8927349654687654365
 
-//#ifndef NULLIFY_CHO_NECALL
-//#	define NULLIFY_CHO_NECALL
-//#endif
-//#ifndef NULLIFY_CONDITIONAL_RETERR
-//#	define NULLIFY_CONDITIONAL_RETERR
-//#endif
-//#ifndef NULLIFY_CONDITIONAL_LOG
-//#	define NULLIFY_CONDITIONAL_LOG
-//#endif
-//#ifndef NULLIFY_CONDITIONAL_THROW
-//#	define NULLIFY_CONDITIONAL_THROW
-//#endif
-
-#if defined CHO_WINDOWS
-#	define base_debug_print(text, charCount)						OutputDebugStringA(text); charCount
-#else
-#	define base_debug_print(text, charCount)						printf("%s", text); charCount
-#endif 
+#ifndef NULLIFY_CHO_NECALL
+#	define NULLIFY_CHO_NECALL
+#endif
+#ifndef NULLIFY_CONDITIONAL_RETERR
+#	define NULLIFY_CONDITIONAL_RETERR
+#endif
+#ifndef NULLIFY_CONDITIONAL_LOG
+#	define NULLIFY_CONDITIONAL_LOG
+#endif
+#ifndef NULLIFY_CONDITIONAL_THROW
+#	define NULLIFY_CONDITIONAL_THROW
+#endif
 
 namespace cho
 {
 	void															_cho_print_system_errors			(const char* prefix, uint32_t prefixLen);
+	void															_base_debug_print					(const char* prefix, uint32_t prefixLen);
+
+#define base_debug_print(prefix, prefixLen)	_base_debug_print(prefix, prefixLen)
 
 	template<const size_t _sizePrefix, typename... TArgs>		
 	void															_cho_debug_printf					(int severity, const char (&prefix)[_sizePrefix], uint32_t prefixLength, const char* format, const TArgs... args)			{

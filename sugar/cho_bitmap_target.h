@@ -1,4 +1,4 @@
-#include "cho_grid_view.h"
+#include "cho_texture.h"
 #include "cho_color.h"
 #include "cho_coord.h"
 #include <memory> // this is required for ::std::swap()
@@ -8,12 +8,9 @@
 
 namespace cho
 {
-	struct SBitmapTargetBGRA	{ typedef SColorBGRA	TColor; ::cho::grid_view<TColor>	Colors; };
-	
 	template<typename _tElement>
 						::cho::error_t										updateSizeDependentTarget					(::cho::array_pod<_tElement>& out_colors, ::cho::grid_view<_tElement>& out_view, const ::cho::SCoord2<uint32_t>& newSize)											{ 
-		// Update size-dependent resources.
-		ree_if(errored(out_colors.resize(newSize.x * newSize.y)), "Out of memory?");
+		ree_if(errored(out_colors.resize(newSize.x * newSize.y)), "Out of memory?");		// Update size-dependent resources.
 		if( out_view.width () != newSize.x
 		 || out_view.height() != newSize.y
 		 ) 
@@ -22,9 +19,12 @@ namespace cho
 	}
 
 	template<typename _tElement>
+	static inline		::cho::error_t										updateSizeDependentTarget					(::cho::STexture<_tElement>& out_texture, const ::cho::SCoord2<uint32_t>& newSize)																					{ 
+		return updateSizeDependentTarget(out_texture.Texels, out_texture.View, newSize);
+	}
+	template<typename _tElement>
 						::cho::error_t										updateSizeDependentTexture					(::cho::array_pod<_tElement>& out_scaled, ::cho::grid_view<_tElement>& out_view, const ::cho::grid_view<_tElement>& in_view, const ::cho::SCoord2<uint32_t>& newSize)											{ 
-		// Update size-dependent resources.
-		ree_if(errored(out_scaled.resize(newSize.x * newSize.y)), "Out of memory?");
+		ree_if(errored(out_scaled.resize(newSize.x * newSize.y)), "Out of memory?");		// Update size-dependent resources.
 		if( out_view.width () != newSize.x
 		 || out_view.height() != newSize.y
 		 ) { 
@@ -33,6 +33,11 @@ namespace cho
 				error_if(errored(::cho::grid_scale(out_view, in_view)), "I believe this never fails.");
 		}
 		return 0;
+	}
+
+	template<typename _tElement>
+	static inline		::cho::error_t										updateSizeDependentTexture					(::cho::STexture<_tElement>& out_texture, const ::cho::grid_view<_tElement>& in_view, const ::cho::SCoord2<uint32_t>& newSize)																					{ 
+		return updateSizeDependentTexture(out_texture.Texels, out_texture.View, in_view, newSize);
 	}
 
 	template<typename _tCoord, typename _tColor>
@@ -88,8 +93,8 @@ namespace cho
 	// A good article on this kind of triangle rasterization: https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/ 
 	template<typename _tCoord, typename _tColor>
 	static					::cho::error_t									drawTriangle								(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
-		::cho::SCoord2		<int32_t>												areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
-		::cho::SCoord2		<int32_t>												areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::cho::SCoord2	<int32_t>													areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::cho::SCoord2	<int32_t>													areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
 		const int32_t																xStop										= ::cho::min(areaMax.x, (int32_t)bitmapTarget.width());
 		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)bitmapTarget.height()); y < yStop; ++y)
 		for(int32_t x = ::cho::max(areaMin.x, 0); x < xStop; ++x) {	

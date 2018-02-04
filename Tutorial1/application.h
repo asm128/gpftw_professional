@@ -6,6 +6,7 @@
 #include "cho_display.h"
 #include "cho_runtime.h"
 #include "cho_grid.h"
+#include "cho_texture.h"
 
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
@@ -17,19 +18,12 @@ struct SApplication {
 						::cho::STimer								Timer										= {};
 						::cho::SFrameInfo							FrameInfo									= {};
 
-						::cho::array_pod<::cho::SColorBGRA>			BitmapOffsceen								= {};
-						::cho::array_pod<::cho::SColorBGRA>			TextureFont									= {};
-						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundDay						= {};
-						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundNight						= {};
-						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledDay					= {};
-						::cho::array_pod<::cho::SColorBGRA>			TextureBackgroundScaledNight				= {};
-
-						::cho::grid_view<::cho::SColorBGRA>			ViewBitmapOffsceen							= {};
-						::cho::grid_view<::cho::SColorBGRA>			ViewTextureFont								= {};
-						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundDay					= {};
-						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundNight					= {};
-						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundScaledDay				= {};
-						::cho::grid_view<::cho::SColorBGRA>			ViewTextureBackgroundScaledNight			= {};
+						::cho::STexture<::cho::SColorBGRA>			BitmapOffscreen								= {};
+						::cho::STexture<::cho::SColorBGRA>			TextureFont									= {};
+						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundDay						= {};
+						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundNight						= {};
+						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundScaledDay					= {};
+						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundScaledNight				= {};
 
 																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 };

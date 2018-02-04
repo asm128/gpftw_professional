@@ -120,6 +120,9 @@
     <ClInclude Include="cho_particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cho_texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">

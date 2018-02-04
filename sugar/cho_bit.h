@@ -1,19 +1,16 @@
 /// Copyright 2010-2017 - asm128
 #include "cho_platform.h"
-#if defined(CHO_WINDOWS) && defined(_DEBUG)
-#	include <Windows.h>
-#	include <Windows.h>
-#endif
+
 #ifndef CHO_BIT_H_034792701397
 #define CHO_BIT_H_034792701397
 
 namespace cho
 {
 	template<typename _tField>		constexpr				_tField		bit_make	(uint8_t bitIndex)											noexcept	{ 
-#if defined(CHO_WINDOWS) && defined(_DEBUG)
-		if(bitIndex >= (sizeof(_tField) * 8), "")
-			OutputDebugString("Out of range bit.");
-#endif
+//#if defined(CHO_WINDOWS) && defined(_DEBUG)
+//		if(bitIndex >= (sizeof(_tField) * 8), "")
+//			OutputDebugString("Out of range bit.");
+//#endif
 		return 1 << bitIndex; 
 	}
 	template<typename _tBitField>	inline					_tBitField	bit_set		(_tBitField& inout_FlagVariable, _tBitField in_BitsToSet  )	noexcept	{ return ((inout_FlagVariable & in_BitsToSet) == in_BitsToSet)	? inout_FlagVariable					: inout_FlagVariable |= in_BitsToSet	;}
