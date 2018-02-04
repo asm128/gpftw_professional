@@ -21,24 +21,20 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID	= -1
 	};
 
-struct SParticleInstance {
-						PARTICLE_TYPE								Type										= PARTICLE_TYPE_INVALID;
-						int32_t										ParticleIndex								= -1;
-};
+typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>		TParticleSystem;
 
 struct SApplication {
-						::cho::SDisplay								MainDisplay									= {};
-						::cho::SRuntimeValues						RuntimeValues								= {};
-						::cho::SInput								SystemInput									= {};
-						::cho::STimer								Timer										= {};
-						::cho::SFrameInfo							FrameInfo									= {};
+						::cho::SDisplay										MainDisplay									= {};
+						::cho::SRuntimeValues								RuntimeValues								= {};
+						::cho::SInput										SystemInput									= {};
+						::cho::STimer										Timer										= {};
+						::cho::SFrameInfo									FrameInfo									= {};
 
-						::cho::SParticle2Engine<float>				ParticleEngine								= {};
-						::cho::array_pod<SParticleInstance>			ParticleInstances							= {};
+						::TParticleSystem									ParticleSystem								= {};
 
-						::cho::STexture<::cho::SColorBGRA>			BitmapOffscreen								= {};
+						::cho::STexture<::cho::SColorBGRA>					BitmapOffscreen								= {};
 
-																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
+																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 };
 
 #endif // APPLICATION_H_098273498237423

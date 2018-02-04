@@ -68,7 +68,7 @@ namespace cho
 	}
 
 	template<typename _tElement>
-	struct SParticle2Engine {
+	struct SParticle2Integrator {
 		typedef				::cho::SParticle2	<_tElement>						TParticle;
 		typedef				::cho::SCoord2		<_tElement>						TCoord;
 
@@ -114,6 +114,47 @@ namespace cho
 			return particleCount;
 		}
 	};
+
+	template<typename _tParticleType>
+	struct SParticleInstance {
+		typedef					_tParticleType									TParticleType;
+
+								TParticleType									Type										= (TParticleType)-1;
+								int32_t											ParticleIndex								= -1;
+	};
+
+	template<typename _tParticleType, typename _tCoord>
+							::cho::error_t									addParticle														
+		(	_tParticleType												particleType
+		,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+		,	::cho::SParticle2Integrator<_tCoord>						& particleIntegrator
+		,	::cho::SParticle2<_tCoord>									& particleDefinition
+		)														
+	{
+		::cho::SParticleInstance<_tParticleType>									newInstance									= {}; 
+		newInstance.Type														= particleType; 
+		cho_necall(newInstance.ParticleIndex = particleIntegrator.AddParticle(particleDefinition), "Failed to add particle definition instance to integrator."); 
+		return particleInstances.push_back(newInstance);
+	}
+
+	template<typename _tParticleType, typename _tCoord>
+	struct SParticleSystem {
+		typedef					::cho::SParticleInstance<_tParticleType>		TParticleInstance;
+		typedef					::cho::SParticle2Integrator<_tCoord>			TIntegrator;
+
+								::cho::array_pod<TParticleInstance>				Instances									= {};
+								TIntegrator										Integrator									= {};
+	};
+
+	template<typename _tParticleType, typename _tCoord>
+	static inline			::cho::error_t									addParticle														
+		(	_tParticleType												particleType
+		,	::cho::SParticleSystem<_tParticleType, _tCoord>				& particleSystem
+		,	::cho::SParticle2<_tCoord>									& particleDefinition
+		)														
+	{
+		return addParticle(particleType, particleSystem.Instances, particleSystem.Integrator, particleDefinition);
+	}
 } // namespace
 
 #endif // CHO_PARTICLE_H_29384923874

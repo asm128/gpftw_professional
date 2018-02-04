@@ -21,24 +21,22 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID	= -1
 	};
 
-struct SParticleInstance {
-						PARTICLE_TYPE								Type										= PARTICLE_TYPE_INVALID;
-						int32_t										ParticleIndex								= -1;
-};
-
 struct SApplication {
-						::cho::SDisplay								MainDisplay									= {};
-						::cho::SRuntimeValues						RuntimeValues								= {};
-						::cho::SInput								SystemInput									= {};
-						::cho::STimer								Timer										= {};
-						::cho::SFrameInfo							FrameInfo									= {};
+	typedef				::cho::SParticle2Integrator<float>							TParticleIntegrator;
+	typedef				::cho::array_pod<::cho::SParticleInstance<::PARTICLE_TYPE>>	TParticleInstances;
 
-						::cho::SParticle2Engine<float>				ParticleEngine								= {};
-						::cho::array_pod<SParticleInstance>			ParticleInstances							= {};
+						::cho::SDisplay												MainDisplay									= {};
+						::cho::SRuntimeValues										RuntimeValues								= {};
+						::cho::SInput												SystemInput									= {};
+						::cho::STimer												Timer										= {};
+						::cho::SFrameInfo											FrameInfo									= {};
 
-						::cho::STexture<::cho::SColorBGRA>			Offscreen									= {};
+						TParticleIntegrator											ParticleEngine								= {};
+						TParticleInstances											ParticleInstances							= {};
 
-																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
+						::cho::STexture<::cho::SColorBGRA>							Offscreen									= {};
+
+																					SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: RuntimeValues(runtimeValues) {}
 };
 
 #endif // APPLICATION_H_098273498237423

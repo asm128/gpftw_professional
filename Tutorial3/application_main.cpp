@@ -17,26 +17,26 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 static ::cho::SParticle2<float>											particleDefinitions	[::PARTICLE_TYPE_COUNT]				= {};
 
-void																		setupParticles													()														{
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].Position					= 
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Position					= 
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].Position					= 
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].Position					= {};
+void																	setupParticles													()														{
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].Position						= {};
 
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].SetMass					( 2);
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].SetMass					(-1);
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].SetMass					( 1);
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].SetMass					( 1);
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].SetMass						( 2);
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].SetMass						(-1);
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].SetMass						( 1);
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].SetMass						( 1);
 
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].Damping					= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Damping					= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].Damping					= 1.0f;
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].Damping					= 0.99f;
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].Damping						= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].Damping						= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].Damping						= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].Damping						= 0.99f;
 
-	particleDefinitions	[::PARTICLE_TYPE_SNOW].Forces.Velocity			= {};
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Forces.Velocity			= {(float)0, (float)(rand() % 40)};
-	particleDefinitions	[::PARTICLE_TYPE_RAIN].Forces.Velocity			= {};
-	particleDefinitions	[::PARTICLE_TYPE_LAVA].Forces.Velocity			= {(float)0, (float)(rand() % 100)+20};
+	particleDefinitions	[::PARTICLE_TYPE_SNOW].Forces.Velocity				= {};
+	particleDefinitions	[::PARTICLE_TYPE_FIRE].Forces.Velocity				= {(float)0, (float)(rand() % 40)};
+	particleDefinitions	[::PARTICLE_TYPE_RAIN].Forces.Velocity				= {};
+	particleDefinitions	[::PARTICLE_TYPE_LAVA].Forces.Velocity				= {(float)0, (float)(rand() % 100)+20};
 }
 
 
@@ -72,16 +72,15 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
-void																		addParticle														
-	(	::PARTICLE_TYPE							particleType
-	,	::cho::array_pod<::SParticleInstance>	& particleInstances
-	,	::cho::SParticle2Engine<float>			& particleEngine
-	,	const ::cho::SCoord2<uint32_t>			& targetSize
+template<typename _tParticleType>
+void																	addParticle														
+	(	_tParticleType												particleType
+	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::SParticle2Integrator<float>							& particleEngine
+	,	const ::cho::SCoord2<uint32_t>								& targetSize
 	)														
 {
-	::SParticleInstance																newInstance														= {}; 
-	newInstance.Type															= particleType; 
-	newInstance.ParticleIndex													= particleEngine.AddParticle(particleDefinitions[newInstance.Type]); 
+	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleEngine, particleDefinitions[particleType])]; 
 	particleEngine.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
 	switch(particleType) {
 	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 2 + targetSize.y / 4)}; break;
@@ -104,16 +103,12 @@ void																		addParticle
 
 	applicationInstance.SystemInput.KeyboardPrevious						= applicationInstance.SystemInput.KeyboardCurrent;
 	applicationInstance.SystemInput.MousePrevious							= applicationInstance.SystemInput.MouseCurrent;
-	::cho::array_pod<SParticleInstance>												& particleInstances												= applicationInstance.ParticleInstances;
-	::cho::SParticle2Engine<float>													& particleEngine												= applicationInstance.ParticleEngine;
-	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-
-
+	::TParticleSystem															& particleSystem												= applicationInstance.ParticleSystem;
+	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
+	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
+	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
+	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
 	return 0;
-
 }
 
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
@@ -129,15 +124,15 @@ void																		addParticle
 	::updateInput(applicationInstance);
 
 	static float																windDirection								= 0.1f;
-	::cho::SParticle2Engine<float>												& particleEngine							= applicationInstance.ParticleEngine;
+	TParticleSystem::TIntegrator												& particleEngine							= applicationInstance.ParticleSystem.Integrator;
 	const float																	lastFrameSeconds							= (float)applicationInstance.FrameInfo.Seconds.LastFrame;
 	particleEngine.Integrate(lastFrameSeconds, applicationInstance.FrameInfo.Seconds.LastFrameHalfSquared);
 
 	windDirection															= (float)sin(applicationInstance.FrameInfo.Seconds.Total/5.0f) * .25f;
 
-	::cho::array_pod<SParticleInstance>												& particleInstances							= applicationInstance.ParticleInstances;
+	::cho::array_pod<TParticleSystem::TParticleInstance>						& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		SParticleInstance																& particleInstance							= particleInstances[iParticle];
+		::cho::SParticleInstance<PARTICLE_TYPE>											& particleInstance							= particleInstances[iParticle];
 		int32_t																			physicsId									= particleInstance.ParticleIndex;
 		::cho::SParticle2<float>														& particleNext								= particleEngine.ParticleNext[physicsId];
 		if( particleNext.Position.x < 0 || particleNext.Position.x >= applicationInstance.BitmapOffscreen.View.width	()
@@ -177,11 +172,11 @@ void																		addParticle
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.BitmapOffscreen.View;
-	::cho::array_pod<SParticleInstance>											& particleInstances							= applicationInstance.ParticleInstances;
+	::cho::array_pod<TParticleSystem::TParticleInstance>						& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
-		SParticleInstance															& particleInstance							= particleInstances[iParticle];
+		::cho::SParticleInstance<PARTICLE_TYPE>										& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.ParticleIndex;
-		const ::cho::SCoord2<float>													particlePosition							= applicationInstance.ParticleEngine.Particle[physicsId].Position;
+		const ::cho::SCoord2<float>													particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (PARTICLE_TYPE_SNOW == particleInstance.Type) ? ::cho::SColorBGRA(::cho::CYAN)
 			: (PARTICLE_TYPE_FIRE == particleInstance.Type) ? ::cho::SColorBGRA(::cho::RED )
@@ -189,6 +184,5 @@ void																		addParticle
 			: ::cho::SColorBGRA(::cho::ORANGE)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
 	}
-
 	return 0;
 }

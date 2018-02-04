@@ -71,16 +71,15 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
-void																		addParticle														
-	(	::PARTICLE_TYPE							particleType
-	,	::cho::array_pod<::SParticleInstance>	& particleInstances
-	,	::cho::SParticle2Engine<float>			& particleEngine
-	,	const ::cho::SCoord2<uint32_t>			& targetSize
+template<typename _tParticleType>
+::cho::error_t															addParticle														
+	(	::PARTICLE_TYPE												particleType
+	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::SParticle2Integrator<float>							& particleEngine
+	,	const ::cho::SCoord2<uint32_t>								& targetSize
 	)														
 {
-	::SParticleInstance																newInstance														= {}; 
-	newInstance.Type															= particleType; 
-	newInstance.ParticleIndex													= particleEngine.AddParticle(particleDefinitions[newInstance.Type]); 
+	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleEngine, particleDefinitions[particleType])]; 
 	particleEngine.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
 	switch(particleType) {
 	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 4)}; break;
@@ -88,8 +87,9 @@ void																		addParticle
 	case ::PARTICLE_TYPE_RAIN:
 	case ::PARTICLE_TYPE_SNOW:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleEngine.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
 	}
-	particleInstances.push_back(newInstance);
+	return particleInstances.push_back(newInstance);
 }
+
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	if(applicationInstance.SystemInput.KeyUp	('W')) ::Beep(440, 100);
@@ -103,8 +103,8 @@ void																		addParticle
 
 	applicationInstance.SystemInput.KeyboardPrevious						= applicationInstance.SystemInput.KeyboardCurrent;
 	applicationInstance.SystemInput.MousePrevious							= applicationInstance.SystemInput.MouseCurrent;
-	::cho::array_pod<SParticleInstance>												& particleInstances												= applicationInstance.ParticleInstances;
-	::cho::SParticle2Engine<float>													& particleEngine												= applicationInstance.ParticleEngine;
+	::cho::array_pod<::cho::SParticleInstance<::PARTICLE_TYPE>>						& particleInstances												= applicationInstance.ParticleInstances;
+	::cho::SParticle2Integrator<float>												& particleEngine												= applicationInstance.ParticleEngine;
 	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
 	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
 	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { applicationInstance.Offscreen.View.width(), applicationInstance.Offscreen.View.height() });
@@ -124,15 +124,15 @@ void																		addParticle
 
 	::updateInput(applicationInstance);
 
-	::cho::SParticle2Engine<float>												& particleEngine							= applicationInstance.ParticleEngine;
+	::cho::SParticle2Integrator<float>											& particleEngine							= applicationInstance.ParticleEngine;
 	const float																	lastFrameSeconds							= (float)applicationInstance.FrameInfo.Seconds.LastFrame;
 	particleEngine.Integrate(lastFrameSeconds, applicationInstance.FrameInfo.Seconds.LastFrameHalfSquared);
 
 	const float																	windDirection								= (float)sin(applicationInstance.FrameInfo.Seconds.Total/3.0f) * .025f;
 
-	::cho::array_pod<SParticleInstance>											& particleInstances							= applicationInstance.ParticleInstances;
+	::cho::array_pod<::cho::SParticleInstance<::PARTICLE_TYPE>>					& particleInstances							= applicationInstance.ParticleInstances;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		SParticleInstance															& particleInstance							= particleInstances[iParticle];
+		::cho::SParticleInstance<::PARTICLE_TYPE>									& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		::cho::SParticle2<float>													& particleNext								= particleEngine.ParticleNext[physicsId];
 		if( particleNext.Position.x < 0 || particleNext.Position.x >= applicationInstance.Offscreen.View.width	()
@@ -172,10 +172,10 @@ void																		addParticle
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Offscreen.View;
-	::cho::array_pod<SParticleInstance>											& particleInstances							= applicationInstance.ParticleInstances;
+	::cho::array_pod<::cho::SParticleInstance<::PARTICLE_TYPE>>					& particleInstances							= applicationInstance.ParticleInstances;
 	memset(applicationInstance.Offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * applicationInstance.Offscreen.View.size());
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
-		SParticleInstance																& particleInstance						= particleInstances[iParticle];
+		::cho::SParticleInstance<::PARTICLE_TYPE>										& particleInstance						= particleInstances[iParticle];
 		const int32_t																	physicsId								= particleInstance.ParticleIndex;
 		const ::cho::SCoord2<float>														particlePosition						= applicationInstance.ParticleEngine.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
