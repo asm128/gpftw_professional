@@ -21,6 +21,7 @@ struct SApplication {
 						TParticleSystem										ParticleSystem								= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		PSTarget									= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		Ship										= {};
+						::cho::SCoord2<int32_t>								ShipTextureCenter							= {};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
