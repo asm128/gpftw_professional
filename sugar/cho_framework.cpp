@@ -1,6 +1,8 @@
 #include "cho_framework.h"
 
 					::cho::error_t										cho::updateFramework						(::cho::SFramework& framework)													{
+	framework.SystemInput.KeyboardPrevious											= framework.SystemInput.KeyboardCurrent;
+	framework.SystemInput.MousePrevious												= framework.SystemInput.MouseCurrent;
 	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
 	::cho::STimer																& timer										= framework.Timer;
 	timer		.Frame();

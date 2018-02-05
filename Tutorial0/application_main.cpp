@@ -42,6 +42,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TextureBackgroundNight	)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureFont				)), "Failed to load bitmap from file: %s.", bmpFileName2);
+	ree_if	(errored(::cho::updateSizeDependentTarget(applicationInstance.Framework.Offscreen, applicationInstance.Framework.MainDisplay.Size)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	return 0;
 }
 
@@ -55,9 +56,6 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 	if(systemInput.KeyDown	('A')) ::Beep(840, 100);
 	if(systemInput.KeyDown	('S')) ::Beep(920, 100);
 	if(systemInput.KeyDown	('D')) ::Beep(1000, 100);
-
-	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
-	systemInput.MousePrevious												= systemInput.MouseCurrent;
 	return 0;
 
 }

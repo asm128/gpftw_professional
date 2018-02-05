@@ -71,6 +71,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	::cho::SCoord2<uint32_t>													effectTargetSize							= {64, 64};
 	error_if(errored(applicationInstance.PSTarget	.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
 	error_if(errored(applicationInstance.Ship		.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	return 0;
 }
 
@@ -105,9 +106,6 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 	if(inputSystem.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
 	if(inputSystem.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
 	if(inputSystem.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-
-	inputSystem.KeyboardPrevious						= applicationInstance.Framework.SystemInput.KeyboardCurrent;
-	inputSystem.MousePrevious							= applicationInstance.Framework.SystemInput.MouseCurrent;
 	return 0;
 }
 
@@ -152,9 +150,9 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	ree_if	(errored(frameworkResult), "Unknown error.");
 	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 
-	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
-	::updateInput(applicationInstance);
-	::updateParticles(applicationInstance);
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
 
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;

@@ -51,6 +51,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName2, applicationInstance.TextureFont				)), "Failed to load bitmap from file: %s.", bmpFileName2);
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 
 	applicationInstance.Rectangle.Offset.x									= mainWindow.Size.x / 4;
 	applicationInstance.Rectangle.Offset.y									= mainWindow.Size.y / 4;
@@ -105,9 +106,6 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD2	])	--applicationInstance.Rectangle.Size.y;
 	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD4	])	--applicationInstance.Rectangle.Size.x;
 	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD6	])	++applicationInstance.Rectangle.Size.x;
-
-	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
-	systemInput.MousePrevious												= systemInput.MouseCurrent;
 	return 0;
 
 }

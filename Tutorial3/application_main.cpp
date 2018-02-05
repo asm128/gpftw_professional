@@ -68,6 +68,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	::setupParticles();
 	return 0;
 }
@@ -99,9 +100,6 @@ void																	addParticle
 	if(systemInput.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
 	if(systemInput.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
 	if(systemInput.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
-
-	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
-	systemInput.MousePrevious												= systemInput.MouseCurrent;
 	return 0;
 }
 
