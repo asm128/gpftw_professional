@@ -10,9 +10,10 @@ extern				::SApplication														* g_ApplicationInstance						;
 	::SApplication																				& applicationInstance						= *g_ApplicationInstance;
 	static	const int																			adjustedMinRect								= ::AdjustWindowRectEx(&minClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 
-	::cho::SDisplay																				& mainDisplay								= applicationInstance.MainDisplay;
-	::cho::SInput																				& input										= applicationInstance.SystemInput;
-	::cho::SDisplayPlatformDetail																& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
+	::cho::SFramework																			& framework									= applicationInstance.Framework;
+	::cho::SDisplay																				& mainDisplay								= framework.MainDisplay;
+	::cho::SInput																				& input										= framework.SystemInput;
+	::cho::SDisplayPlatformDetail																& displayDetail								= framework.MainDisplay.PlatformDetail;
 	switch(uMsg) {
 	default: break;		
 	case WM_CLOSE			: ::DestroyWindow(hWnd); return 0;
@@ -30,7 +31,7 @@ extern				::SApplication														* g_ApplicationInstance						;
 				mainDisplay.Resized																		= true;
 				mainDisplay.Repaint																		= true; 
 				char																						buffer		[256]							= {};
-				sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g. ", (uint32_t)newMetrics.x, (uint32_t)newMetrics.y, applicationInstance.Timer.LastTimeSeconds);
+				sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g. ", (uint32_t)newMetrics.x, (uint32_t)newMetrics.y, framework.Timer.LastTimeSeconds);
 				SetWindowText(mainDisplay.PlatformDetail.WindowHandle, buffer);
 			}
 		}

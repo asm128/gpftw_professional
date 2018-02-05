@@ -43,17 +43,17 @@ void																	setupParticles													()														{
 					::SApplication										* g_ApplicationInstance						= 0;
 					
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
-	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.MainDisplay.Size;// / 2;
-	::cho::updateSizeDependentTarget(applicationInstance.BitmapOffscreen, newSize);
+	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size;// / 2;
+	::cho::updateSizeDependentTarget(applicationInstance.Framework.Offscreen, newSize);
 	return 0;
 }
 
 // --- Cleanup application resources.
 					::cho::error_t										cleanup										(::SApplication& applicationInstance)											{
-	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
+	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.Framework.MainDisplay.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");
-		error_if(errored(::cho::displayUpdate(applicationInstance.MainDisplay)), "Not sure why this would fail");
+		error_if(errored(::cho::displayUpdate(applicationInstance.Framework.MainDisplay)), "Not sure why this would fail");
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
 
@@ -67,7 +67,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
-	error_if(errored(::mainWindowCreate			(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
+	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
 	return 0;
 }
@@ -92,51 +92,44 @@ void																	addParticle
 }
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	if(applicationInstance.SystemInput.KeyUp	('W')) ::Beep(440, 100);
-	if(applicationInstance.SystemInput.KeyUp	('A')) ::Beep(520, 100);
-	if(applicationInstance.SystemInput.KeyUp	('S')) ::Beep(600, 100);
-	if(applicationInstance.SystemInput.KeyUp	('D')) ::Beep(680, 100);
-	if(applicationInstance.SystemInput.KeyDown	('W')) ::Beep(760, 100);
-	if(applicationInstance.SystemInput.KeyDown	('A')) ::Beep(840, 100);
-	if(applicationInstance.SystemInput.KeyDown	('S')) ::Beep(920, 100);
-	if(applicationInstance.SystemInput.KeyDown	('D')) ::Beep(1000, 100);
+	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
+	if(systemInput.KeyUp	('W')) ::Beep(440, 100);
+	if(systemInput.KeyUp	('A')) ::Beep(520, 100);
+	if(systemInput.KeyUp	('S')) ::Beep(600, 100);
+	if(systemInput.KeyUp	('D')) ::Beep(680, 100);
+	if(systemInput.KeyDown	('W')) ::Beep(760, 100);
+	if(systemInput.KeyDown	('A')) ::Beep(840, 100);
+	if(systemInput.KeyDown	('S')) ::Beep(920, 100);
+	if(systemInput.KeyDown	('D')) ::Beep(1000, 100);
 
-	applicationInstance.SystemInput.KeyboardPrevious						= applicationInstance.SystemInput.KeyboardCurrent;
-	applicationInstance.SystemInput.MousePrevious							= applicationInstance.SystemInput.MouseCurrent;
-	::TParticleSystem															& particleSystem												= applicationInstance.ParticleSystem;
-	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
-	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleSystem.Instances, particleSystem.Integrator, { applicationInstance.BitmapOffscreen.View.width(), applicationInstance.BitmapOffscreen.View.height() });
+	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
+	systemInput.MousePrevious												= systemInput.MouseCurrent;
+	::SApplication::TParticleSystem												& particleSystem							= applicationInstance.ParticleSystem;
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
+	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
+	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
+	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
 	return 0;
 }
 
-					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
-	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
-	applicationInstance.Timer		.Frame();
-	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
-	::cho::SDisplay																& mainWindow								= applicationInstance.MainDisplay;
-	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
-	ree_if(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
-	rvi_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffscreen.View)), "Unknown error.");
-
-	::updateInput(applicationInstance);
-
+					::cho::error_t										updateParticles								(::SApplication& applicationInstance)					{ 
+	::cho::SFrameInfo															& frameInfo									= applicationInstance.Framework.FrameInfo;
 	static float																windDirection								= 0.1f;
-	TParticleSystem::TIntegrator												& particleEngine							= applicationInstance.ParticleSystem.Integrator;
-	const float																	lastFrameSeconds							= (float)applicationInstance.FrameInfo.Seconds.LastFrame;
-	particleEngine.Integrate(lastFrameSeconds, applicationInstance.FrameInfo.Seconds.LastFrameHalfSquared);
+	SApplication::TParticleSystem::TIntegrator									& particleEngine							= applicationInstance.ParticleSystem.Integrator;
+	const float																	lastFrameSeconds							= (float)frameInfo.Seconds.LastFrame;
+	particleEngine.Integrate(lastFrameSeconds, frameInfo.Seconds.LastFrameHalfSquared);
 
-	windDirection															= (float)sin(applicationInstance.FrameInfo.Seconds.Total/5.0f) * .25f;
+	windDirection															= (float)sin(frameInfo.Seconds.Total/5.0f) * .25f;
 
-	::cho::array_pod<TParticleSystem::TParticleInstance>						& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	::cho::array_pod<SApplication::TParticleSystem::TParticleInstance>			& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		::cho::SParticleInstance<PARTICLE_TYPE>											& particleInstance							= particleInstances[iParticle];
-		int32_t																			physicsId									= particleInstance.ParticleIndex;
-		::cho::SParticle2<float>														& particleNext								= particleEngine.ParticleNext[physicsId];
-		if( particleNext.Position.x < 0 || particleNext.Position.x >= applicationInstance.BitmapOffscreen.View.width	()
-		 || particleNext.Position.y < 0 || particleNext.Position.y >= applicationInstance.BitmapOffscreen.View.height	()
+		SApplication::TParticleSystem::TParticleInstance							& particleInstance							= particleInstances[iParticle];
+		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		::cho::SParticle2<float>													& particleNext								= particleEngine.ParticleNext[physicsId];
+		if( particleNext.Position.x < 0 || particleNext.Position.x >= offscreen.View.width	()
+		 || particleNext.Position.y < 0 || particleNext.Position.y >= offscreen.View.height	()
 		 ) { // Remove the particle instance and related information.
 			particleEngine.ParticleState[physicsId].Unused								= true;
 			particleInstances.erase(particleInstances.begin()+iParticle);
@@ -150,29 +143,32 @@ void																	addParticle
 			particleCurrent.Forces.AccumulatedForce.x									+= float(windDirection * abs(particleCurrent.Forces.Velocity.y) * .5) + float((rand() % 100) / 100.0 - .5) / 2.0f;
 		}
 	}
+	return 0;
+}
 
+					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
+	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
+
+	uint32_t																	frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
+	ree_if	(errored(frameworkResult), "Unknown error.");
+	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
+
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
+	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
+
+	::cho::STimer																& timer										= applicationInstance.Framework.Timer;
+	::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
 	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / applicationInstance.Timer.LastTimeSeconds, applicationInstance.Timer.LastTimeSeconds);
+	sprintf_s(buffer, "[%u x %u]. Particle count: %u. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.ParticleSystem.Instances.size(), 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 	return 0;
 }
 
-					::cho::error_t										drawTextFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, ::cho::grid_view<::cho::SColorBGRA> viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
-		int32_t																		coordTableX									= text0[iChar] % characterCellsX;
-		int32_t																		coordTableY									= text0[iChar] / characterCellsX;
-		const ::cho::SCoord2<int32_t>												coordCharTable								= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
-		const ::cho::SCoord2<int32_t>												dstOffset1									= {sizeCharCell.x * iChar, dstOffsetY};
-		const ::cho::SRectangle2D<int32_t>											srcRect0									= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
-		error_if(errored(::cho::grid_copy(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
-	}
-	return 0;
-}
-
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.BitmapOffscreen.View;
-	::cho::array_pod<TParticleSystem::TParticleInstance>						& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
+	::cho::array_pod<::SApplication::TParticleSystem::TParticleInstance>		& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		::cho::SParticleInstance<PARTICLE_TYPE>										& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.ParticleIndex;

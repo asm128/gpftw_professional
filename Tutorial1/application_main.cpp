@@ -18,20 +18,21 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 					::SApplication										* g_ApplicationInstance						= 0;
 
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
-	::cho::updateSizeDependentTarget	(applicationInstance.BitmapOffscreen, applicationInstance.MainDisplay.Size);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.TextureBackgroundDay		.View, applicationInstance.MainDisplay.Size);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.TextureBackgroundNight	.View, applicationInstance.MainDisplay.Size);
+	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size; // / 2;
+	::cho::updateSizeDependentTarget	(applicationInstance.Framework.Offscreen				, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.TextureBackgroundDay		.View, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.TextureBackgroundNight	.View, newSize);
 	return 0;
 }
+
 // --- Cleanup application resources.
 					::cho::error_t										cleanup										(::SApplication& applicationInstance)											{
-	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.MainDisplay.PlatformDetail;
+	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.Framework.MainDisplay.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");
-		error_if(errored(::cho::displayUpdate(applicationInstance.MainDisplay)), "Not sure why this would fail");
+		error_if(errored(::cho::displayUpdate(applicationInstance.Framework.MainDisplay)), "Not sure why this would fail");
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
-
 	g_ApplicationInstance													= 0;
 	//error_printf("Error message test. Press F5 to continue if the debugger breaks execution at this point.");
 	return 0;
@@ -42,11 +43,11 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
-	error_if(errored(::mainWindowCreate(applicationInstance.MainDisplay, applicationInstance.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
+	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
 	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
 	static constexpr	const char												bmpFileName2	[]									= "Codepage-437-24.bmp";
-	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay		)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName2, applicationInstance.TextureFont				)), "Failed to load bitmap from file: %s.", bmpFileName2);
 
@@ -88,31 +89,37 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	}
 	return 0;
 }
+					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
+	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
+	if(systemInput.KeyUp	('W')) ::Beep(440, 100);
+	if(systemInput.KeyUp	('A')) ::Beep(520, 100);
+	if(systemInput.KeyUp	('S')) ::Beep(600, 100);
+	if(systemInput.KeyUp	('D')) ::Beep(680, 100);
+	if(systemInput.KeyDown	('W')) ::Beep(760, 100);
+	if(systemInput.KeyDown	('A')) ::Beep(840, 100);
+	if(systemInput.KeyDown	('S')) ::Beep(920, 100);
+	if(systemInput.KeyDown	('D')) ::Beep(1000, 100);
+
+	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
+	systemInput.MousePrevious												= systemInput.MouseCurrent;
+	return 0;
+
+}
 
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
-	applicationInstance.Timer		.Frame();
-	applicationInstance.FrameInfo	.Frame(applicationInstance.Timer.LastTimeMicroseconds);
-	::cho::SDisplay																& mainWindow								= applicationInstance.MainDisplay;
-	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
-	ree_if(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
-	retval_info_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");
-	error_if(errored(::cho::displayPresentTarget(mainWindow, applicationInstance.BitmapOffscreen.View)), "Unknown error.");
 
-	if(applicationInstance.SystemInput.KeyUp	('W')) ::Beep(440, 100);
-	if(applicationInstance.SystemInput.KeyUp	('A')) ::Beep(520, 100);
-	if(applicationInstance.SystemInput.KeyUp	('S')) ::Beep(600, 100);
-	if(applicationInstance.SystemInput.KeyUp	('D')) ::Beep(680, 100);
-	if(applicationInstance.SystemInput.KeyDown	('W')) ::Beep(760, 100);
-	if(applicationInstance.SystemInput.KeyDown	('A')) ::Beep(840, 100);
-	if(applicationInstance.SystemInput.KeyDown	('S')) ::Beep(920, 100);
-	if(applicationInstance.SystemInput.KeyDown	('D')) ::Beep(1000, 100);
+	uint32_t																	frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
+	ree_if	(errored(frameworkResult), "Unknown error.");
+	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
+	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
 
-	applicationInstance.SystemInput.KeyboardPrevious						= applicationInstance.SystemInput.KeyboardCurrent;
-	applicationInstance.SystemInput.MousePrevious							= applicationInstance.SystemInput.MouseCurrent;
+	::cho::STimer																& timer										= applicationInstance.Framework.Timer;
+	::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
 
 	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / applicationInstance.Timer.LastTimeSeconds, applicationInstance.Timer.LastTimeSeconds);
+	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 	return 0;
@@ -140,11 +147,14 @@ static				::cho::error_t										textDrawFixedSize						(::cho::grid_view<::cho
 }
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	const ::cho::SDisplay														& mainWindow								= applicationInstance.MainDisplay;
-	::cho::grid_view	<::cho::SColorBGRA>										& bmpOffscreen								= applicationInstance.BitmapOffscreen.View;
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
+	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
+	const ::cho::SDisplay														& mainWindow								= framework.MainDisplay;
+	::cho::grid_view	<::cho::SColorBGRA>										& bmpOffscreen								= offscreen.View;
 	const::cho::SCoord2	<int32_t>												screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
-	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((applicationInstance.FrameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
-	::cho::SCircle2D	<int32_t>												geometry1									= {5.0 + (applicationInstance.FrameInfo.FrameNumber / 5) % 5, screenCenter};	
+	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((frameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
+	::cho::SCircle2D	<int32_t>												geometry1									= {5.0 + (frameInfo.FrameNumber / 5) % 5, screenCenter};	
 	::cho::STriangle2D	<int32_t>												geometry2									= {{0, 0}, {15, 15}, {-5, 10}};	
 	geometry2.A																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	geometry2.B																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};

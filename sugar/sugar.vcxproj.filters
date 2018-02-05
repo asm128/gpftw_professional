@@ -123,6 +123,9 @@
     <ClInclude Include="cho_texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cho_framework.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">
@@ -142,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="cho_gui.cpp">
       <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="cho_framework.cpp">
+      <Filter>runtime</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

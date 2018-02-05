@@ -190,6 +190,7 @@
     <ClInclude Include="cho_ascii_target.h" />
     <ClInclude Include="cho_bitmap_file.h" />
     <ClInclude Include="cho_bitmap_target.h" />
+    <ClInclude Include="cho_framework.h" />
     <ClInclude Include="cho_grid_copy.h" />
     <ClInclude Include="cho_color.h" />
     <ClInclude Include="cho_coord.h" />
@@ -214,6 +215,7 @@
     <ClCompile Include="cho_ascii_target.cpp" />
     <ClCompile Include="cho_bitmap_file.cpp" />
     <ClCompile Include="cho_display.cpp" />
+    <ClCompile Include="cho_framework.cpp" />
     <ClCompile Include="cho_gui.cpp" />
     <ClCompile Include="cho_timer.cpp" />
   </ItemGroup>
