@@ -93,23 +93,15 @@ void																	addParticle
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
-	if(systemInput.KeyUp	('W')) ::Beep(440, 100);
-	if(systemInput.KeyUp	('A')) ::Beep(520, 100);
-	if(systemInput.KeyUp	('S')) ::Beep(600, 100);
-	if(systemInput.KeyUp	('D')) ::Beep(680, 100);
-	if(systemInput.KeyDown	('W')) ::Beep(760, 100);
-	if(systemInput.KeyDown	('A')) ::Beep(840, 100);
-	if(systemInput.KeyDown	('S')) ::Beep(920, 100);
-	if(systemInput.KeyDown	('D')) ::Beep(1000, 100);
+	::SApplication::TParticleSystem												& particleSystem							= applicationInstance.ParticleSystem;
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	if(systemInput.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
+	if(systemInput.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
+	if(systemInput.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
+	if(systemInput.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
 
 	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
 	systemInput.MousePrevious												= systemInput.MouseCurrent;
-	::SApplication::TParticleSystem												& particleSystem							= applicationInstance.ParticleSystem;
-	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
-	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
-	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
-	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });
 	return 0;
 }
 

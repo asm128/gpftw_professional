@@ -95,27 +95,19 @@ template<typename _tParticleType>
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
-	if(inputSystem.KeyUp	('W')) ::Beep(440, 100);
-	if(inputSystem.KeyUp	('A')) ::Beep(520, 100);
-	if(inputSystem.KeyUp	('S')) ::Beep(600, 100);
-	if(inputSystem.KeyUp	('D')) ::Beep(680, 100);
-	if(inputSystem.KeyDown	('W')) ::Beep(760, 100);
-	if(inputSystem.KeyDown	('A')) ::Beep(840, 100);
-	if(inputSystem.KeyDown	('S')) ::Beep(920, 100);
-	if(inputSystem.KeyDown	('D')) ::Beep(1000, 100);
-
-	inputSystem.KeyboardPrevious						= applicationInstance.Framework.SystemInput.KeyboardCurrent;
-	inputSystem.MousePrevious							= applicationInstance.Framework.SystemInput.MouseCurrent;
 
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
 	::cho::array_pod<TParticleInstance>											& particleInstances												= applicationInstance.ParticleSystem.Instances;
 	TParticleSystem::TIntegrator												& particleEngine												= applicationInstance.ParticleSystem.Integrator;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen														= applicationInstance.Framework.Offscreen;
-	if(::GetAsyncKeyState('1')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-	if(::GetAsyncKeyState('2')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-	if(::GetAsyncKeyState('3')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-	if(::GetAsyncKeyState('4')) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
+	if(inputSystem.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
+	if(inputSystem.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
+	if(inputSystem.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
+	if(inputSystem.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
+
+	inputSystem.KeyboardPrevious						= applicationInstance.Framework.SystemInput.KeyboardCurrent;
+	inputSystem.MousePrevious							= applicationInstance.Framework.SystemInput.MouseCurrent;
 	return 0;
 }
 
