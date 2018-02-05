@@ -65,7 +65,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
 
-	uint32_t																	frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
+	::cho::error_t																frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
 	ree_if	(errored(frameworkResult), "Unknown error.");
 	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 	ree_if	(errored(::cho::updateSizeDependentTarget	(applicationInstance.Framework.Offscreen, applicationInstance.Framework.MainDisplay.Size)), "Cannot update offscreen and this could cause an invalid memory access later on.");

@@ -115,7 +115,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
 
-	uint32_t																	frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
+	::cho::error_t																frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
 	ree_if	(errored(frameworkResult), "Unknown error.");
 	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
@@ -136,20 +136,29 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 //}
 
 template<size_t _sizeString>
-static				::cho::error_t										textCalcSizeLine						(const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+static				::cho::error_t										textCalcSizeLine							(const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	return (::cho::error_t)(sizeCharCell.x * ::cho::size(text0) - 1);
 }
 
-static				::cho::error_t										textDrawFixedSize						(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::grid_view<::cho::SColorBGRA>& viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+
+
+static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::grid_view<::cho::SColorBGRA>& viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
-		int32_t																	coordTableX								= text0[iChar] % characterCellsX;
-		int32_t																	coordTableY								= text0[iChar] / characterCellsX;
-		const ::cho::SCoord2<int32_t>											coordCharTable							= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
-		const ::cho::SCoord2<int32_t>											dstOffset1								= {sizeCharCell.x * iChar, dstOffsetY};
-		const ::cho::SRectangle2D<int32_t>										srcRect0								= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
+		int32_t																	coordTableX										= text0[iChar] % characterCellsX;
+		int32_t																	coordTableY										= text0[iChar] / characterCellsX;
+		const ::cho::SCoord2<int32_t>											coordCharTable									= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
+		const ::cho::SCoord2<int32_t>											dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
+		const ::cho::SRectangle2D<int32_t>										srcRect0										= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
 		error_if(errored(::cho::grid_copy(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
 	}
 	return 0;
+}
+
+template<size_t _sizeString>
+static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view<::cho::SColorBGRA>& targetView, const ::cho::grid_view<::cho::SColorBGRA>& fontAtlas, uint32_t lineOffset, const ::cho::SCoord2<uint32_t>& targetSize, const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)targetSize.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, text0) / 2, };
+	uint32_t																	dstOffsetY									= (int32_t)(targetSize.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
+	return ::textDrawFixedSize(targetView, fontAtlas, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset);
 }
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
@@ -181,27 +190,12 @@ static				::cho::error_t										textDrawFixedSize						(::cho::grid_view<::cho
 
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
 	uint32_t																	lineOffset									= 0;
-	{
-		static constexpr const char													testText0	[]								= "Press the arrow keys in order to move the inner rectangle.";
-		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, testText0) / 2, };
-		uint32_t																	dstOffsetY									= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		textDrawFixedSize(offscreen.View, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
-	}
-	++lineOffset;
-	{
-		static constexpr const char													testText0	[]								= "Press the numpad arrows in order to resize the inner rectangle.";
-		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, testText0) / 2, };
-		uint32_t																	dstOffsetY									= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		textDrawFixedSize(offscreen.View, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
-	}
-	++lineOffset;
-	{
-		static constexpr const char													testText0	[]								= "Press ESC to quit.";
-		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, testText0) / 2, };
-		uint32_t																	dstOffsetY									= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		textDrawFixedSize(offscreen.View, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
-	}
-	++lineOffset;
+	static constexpr const char													textLine0	[]								= "Press the arrow keys in order to move the inner rectangle.";
+	static constexpr const char													textLine1	[]								= "Press the numpad arrow keys in order to resize the inner rectangle.";
+	static constexpr const char													textLine2	[]								= "Press ESC to exit.";
+	textDrawAlignedFixedSize(offscreen.View, applicationInstance.TextureFont.View, lineOffset, {offscreen.View.width(), offscreen.View.height()}, sizeCharCell, textLine0);	++lineOffset;
+	textDrawAlignedFixedSize(offscreen.View, applicationInstance.TextureFont.View, lineOffset, {offscreen.View.width(), offscreen.View.height()}, sizeCharCell, textLine1);	++lineOffset;
+	textDrawAlignedFixedSize(offscreen.View, applicationInstance.TextureFont.View, lineOffset, {offscreen.View.width(), offscreen.View.height()}, sizeCharCell, textLine2);	++lineOffset;
 
 	const ::cho::SRectangle2D<uint32_t>											dstRect0									= ::cho::SRectangle2D<uint32_t>{{ 9,  16}, sizeCharCell.Cast<uint32_t>()};
 	const ::cho::SRectangle2D<uint32_t>											dstRect1									= ::cho::SRectangle2D<uint32_t>{{18,  32}, sizeCharCell.Cast<uint32_t>()};

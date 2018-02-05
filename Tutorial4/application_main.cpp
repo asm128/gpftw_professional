@@ -148,7 +148,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
 
-	uint32_t																	frameworkResult								= ::cho::updateFramework(framework);
+	::cho::error_t																frameworkResult								= ::cho::updateFramework(framework);
 	ree_if	(errored(frameworkResult), "Unknown error.");
 	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 
