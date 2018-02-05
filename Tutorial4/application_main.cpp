@@ -17,7 +17,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 static ::SApplication::TParticleSystem::TIntegrator::TParticle			particleDefinitions	[::PARTICLE_TYPE_COUNT]	= {};
 
-void																	setupParticles								()																				{
+static				void												setupParticles								()																				{
 	particleDefinitions	[::PARTICLE_TYPE_SNOW].Position						= 
 	particleDefinitions	[::PARTICLE_TYPE_FIRE].Position						= 
 	particleDefinitions	[::PARTICLE_TYPE_RAIN].Position						= 
@@ -69,12 +69,13 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
 	::cho::SCoord2<uint32_t>													effectTargetSize							= {64, 64};
-	error_if(errored(applicationInstance.PSTarget.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	error_if(errored(applicationInstance.PSTarget	.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	error_if(errored(applicationInstance.Ship		.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
 	return 0;
 }
 
 template<typename _tParticleType>
-					::cho::error_t										addParticle														
+static				::cho::error_t										addParticle														
 	(	::PARTICLE_TYPE												particleType
 	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
 	,	::cho::SParticle2Integrator<float>							& particleEngine
@@ -93,14 +94,13 @@ template<typename _tParticleType>
 }
 
 
-					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
-
+static				::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
 	::cho::array_pod<TParticleInstance>											& particleInstances												= applicationInstance.ParticleSystem.Instances;
 	TParticleSystem::TIntegrator												& particleEngine												= applicationInstance.ParticleSystem.Integrator;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen														= applicationInstance.Framework.Offscreen;
+	::cho::SFramework::TOffscreen												& offscreen														= applicationInstance.Framework.Offscreen;
+	::cho::SInput																& inputSystem													= applicationInstance.Framework.SystemInput;
 	if(inputSystem.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
 	if(inputSystem.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
 	if(inputSystem.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
@@ -111,7 +111,7 @@ template<typename _tParticleType>
 	return 0;
 }
 
-					::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
+static				::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;

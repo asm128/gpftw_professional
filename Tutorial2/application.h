@@ -4,15 +4,13 @@
 #define APPLICATION_H_098273498237423
 
 struct SApplication {
-						::cho::SFramework							Framework									= {};
+						::cho::SFramework								Framework									= {};
 
-						::cho::STexture<::cho::SColorBGRA>			TextureFont									= {};
-						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundDay						= {};
-						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundNight						= {};
-						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundScaledDay					= {};
-						::cho::STexture<::cho::SColorBGRA>			TextureBackgroundScaledNight				= {};
+						::cho::STexture<::cho::SColorBGRA>				TextureFont									= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>	TextureBackgroundDay						= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>	TextureBackgroundNight						= {};
 
-																	SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
+																		SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 
 #endif // APPLICATION_H_098273498237423

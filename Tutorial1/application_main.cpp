@@ -20,8 +20,8 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
 	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size; // / 2;
 	::cho::updateSizeDependentTarget	(applicationInstance.Framework.Offscreen				, newSize);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.TextureBackgroundDay		.View, newSize);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.TextureBackgroundNight	.View, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundDay	.Processed	, applicationInstance.TextureBackgroundDay		.Original.View, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundNight	.Processed	, applicationInstance.TextureBackgroundNight	.Original.View, newSize);
 	return 0;
 }
 
@@ -43,13 +43,19 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
-	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
+	::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
+	error_if(errored(::mainWindowCreate(mainWindow, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
 	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
 	static constexpr	const char												bmpFileName2	[]									= "Codepage-437-24.bmp";
-	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
-	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName2, applicationInstance.TextureFont				)), "Failed to load bitmap from file: %s.", bmpFileName2);
+
+	applicationInstance.Rectangle.Offset.x									= mainWindow.Size.x / 4;
+	applicationInstance.Rectangle.Offset.y									= mainWindow.Size.y / 4;
+	applicationInstance.Rectangle.Size	.x									= mainWindow.Size.x - applicationInstance.Rectangle.Offset.x * 2;
+	applicationInstance.Rectangle.Size	.y									= mainWindow.Size.y - applicationInstance.Rectangle.Offset.y * 2;
 
 	{
 		uint8_t																		testBitfield[]									= {1,3,7,15,31,63,127,255};
@@ -91,14 +97,14 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 }
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
-	if(systemInput.KeyUp	('W')) ::Beep(440, 100);
-	if(systemInput.KeyUp	('A')) ::Beep(520, 100);
-	if(systemInput.KeyUp	('S')) ::Beep(600, 100);
-	if(systemInput.KeyUp	('D')) ::Beep(680, 100);
-	if(systemInput.KeyDown	('W')) ::Beep(760, 100);
-	if(systemInput.KeyDown	('A')) ::Beep(840, 100);
-	if(systemInput.KeyDown	('S')) ::Beep(920, 100);
-	if(systemInput.KeyDown	('D')) ::Beep(1000, 100);
+	if(systemInput.KeyboardCurrent.KeyState[VK_UP		])	++applicationInstance.Rectangle.Offset.y;
+	if(systemInput.KeyboardCurrent.KeyState[VK_DOWN		])	--applicationInstance.Rectangle.Offset.y;
+	if(systemInput.KeyboardCurrent.KeyState[VK_LEFT		])	--applicationInstance.Rectangle.Offset.x;
+	if(systemInput.KeyboardCurrent.KeyState[VK_RIGHT	])	++applicationInstance.Rectangle.Offset.x;
+	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD8	])	++applicationInstance.Rectangle.Size.y;
+	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD2	])	--applicationInstance.Rectangle.Size.y;
+	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD4	])	--applicationInstance.Rectangle.Size.x;
+	if(systemInput.KeyboardCurrent.KeyState[VK_NUMPAD6	])	++applicationInstance.Rectangle.Size.x;
 
 	systemInput.KeyboardPrevious											= systemInput.KeyboardCurrent;
 	systemInput.MousePrevious												= systemInput.MouseCurrent;
@@ -148,10 +154,10 @@ static				::cho::error_t										textDrawFixedSize						(::cho::grid_view<::cho
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
+	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
 	const ::cho::SDisplay														& mainWindow								= framework.MainDisplay;
-	::cho::grid_view	<::cho::SColorBGRA>										& bmpOffscreen								= offscreen.View;
+
 	const::cho::SCoord2	<int32_t>												screenCenter								= {(int32_t)mainWindow.Size.x / 2, (int32_t)mainWindow.Size.y / 2};
 	::cho::SRectangle2D	<int32_t>												geometry0									= {{2, 2}, {(int32_t)((frameInfo.FrameNumber / 2) % (mainWindow.Size.x - 2)), 5}};
 	::cho::SCircle2D	<int32_t>												geometry1									= {5.0 + (frameInfo.FrameNumber / 5) % 5, screenCenter};	
@@ -160,45 +166,40 @@ static				::cho::error_t										textDrawFixedSize						(::cho::grid_view<::cho
 	geometry2.B																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 	geometry2.C																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
-	::cho::SRectangle2D	<uint32_t>												rectangle									= {};
-	rectangle.Offset.x														= mainWindow.Size.x / 4;
-	rectangle.Offset.y														= mainWindow.Size.y / 4;
-	rectangle.Size	.x														= mainWindow.Size.x - rectangle.Offset.x * 2;
-	rectangle.Size	.y														= mainWindow.Size.y - rectangle.Offset.y * 2;
-	::memset(bmpOffscreen.begin(), 0, sizeof(::cho::SColorBGRA) * bmpOffscreen.size());	// Clear target.
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureBackgroundScaledDay	.View)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureBackgroundScaledNight.View, rectangle, rectangle)), "I believe this never fails.");
+	::memset(offscreen.Texels.begin(), 0, sizeof(::cho::SFramework::TOffscreen::TTexel) * offscreen.Texels.size());	// Clear target.
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundDay		.Processed.View)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundNight	.Processed.View, applicationInstance.Rectangle, applicationInstance.Rectangle)), "I believe this never fails.");
 	//error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
-	error_if(errored(::cho::drawRectangle	(bmpOffscreen, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawRectangle	(bmpOffscreen, (::cho::SColorBGRA)::cho::BLUE		, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(bmpOffscreen, (::cho::SColorBGRA)::cho::GREEN		, geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(bmpOffscreen, (::cho::SColorBGRA)::cho::RED		, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawTriangle	(bmpOffscreen, (::cho::SColorBGRA)::cho::YELLOW		, geometry2)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpOffscreen, (::cho::SColorBGRA)::cho::MAGENTA	, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpOffscreen, (::cho::SColorBGRA)::cho::WHITE		, ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(bmpOffscreen, (::cho::SColorBGRA)::cho::LIGHTGREEN	, ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::BLUE		, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(offscreen.View, (::cho::SColorBGRA)::cho::GREEN		, geometry1)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(offscreen.View, (::cho::SColorBGRA)::cho::RED		, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawTriangle	(offscreen.View, (::cho::SColorBGRA)::cho::YELLOW		, geometry2)																							), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::MAGENTA	, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::WHITE		, ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::LIGHTGREEN	, ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
 	uint32_t																	lineOffset									= 0;
 	{
-		static constexpr const char													testText0	[]								= "Some";
+		static constexpr const char													testText0	[]								= "Press the arrow keys in order to move the inner rectangle.";
 		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, testText0) / 2, };
 		uint32_t																	dstOffsetY									= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		textDrawFixedSize(bmpOffscreen, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
+		textDrawFixedSize(offscreen.View, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 	{
-		static constexpr const char													testText0	[]								= "Text";
+		static constexpr const char													testText0	[]								= "Press the numpad arrows in order to resize the inner rectangle.";
 		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, testText0) / 2, };
 		uint32_t																	dstOffsetY									= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		textDrawFixedSize(bmpOffscreen, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
+		textDrawFixedSize(offscreen.View, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 	{
-		static constexpr const char													testText0	[]								= "Lines";
+		static constexpr const char													testText0	[]								= "Press ESC to quit.";
 		const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)mainWindow.Size.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, testText0) / 2, };
 		uint32_t																	dstOffsetY									= (int32_t)(mainWindow.Size.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-		textDrawFixedSize(bmpOffscreen, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
+		textDrawFixedSize(offscreen.View, applicationInstance.TextureFont.View, 32, dstOffsetY, sizeCharCell, {testText0, ::cho::size(testText0) -1}, dstTextOffset);
 	}
 	++lineOffset;
 
@@ -213,11 +214,11 @@ static				::cho::error_t										textDrawFixedSize						(::cho::grid_view<::cho
 	const ::cho::SRectangle2D<uint32_t>											srcRect2									= ::cho::SRectangle2D<uint32_t>{{27,  applicationInstance.TextureFont.View.height() - 16}, sizeCharCell.Cast<uint32_t>()};
 	const ::cho::SRectangle2D<uint32_t>											srcRect3									= ::cho::SRectangle2D<uint32_t>{{36,  applicationInstance.TextureFont.View.height() - 16}, sizeCharCell.Cast<uint32_t>()};
 	const ::cho::SRectangle2D<uint32_t>											srcRect4									= ::cho::SRectangle2D<uint32_t>{{45,  applicationInstance.TextureFont.View.height() - 16}, sizeCharCell.Cast<uint32_t>()};
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureFont.View, dstRect0, srcRect0.Offset)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureFont.View, dstRect1.Offset, srcRect1.Offset)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureFont.View, ::cho::SCoord2<uint32_t>{mainWindow.Size.x - applicationInstance.TextureFont.View.width() / 2, dstRect1.Offset.y}, srcRect1.Offset)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureFont.View, dstRect2.Offset, srcRect2)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureFont.View, dstRect3, srcRect3)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(bmpOffscreen, applicationInstance.TextureFont.View, dstRect4, srcRect4)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect0, srcRect0.Offset)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect1.Offset, srcRect1.Offset)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, ::cho::SCoord2<uint32_t>{mainWindow.Size.x - applicationInstance.TextureFont.View.width() / 2, dstRect1.Offset.y}, srcRect1.Offset)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect2.Offset, srcRect2)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect3, srcRect3)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect4, srcRect4)), "I believe this never fails.");
 	return 0;
 }

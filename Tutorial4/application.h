@@ -17,8 +17,10 @@ struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>		TParticleSystem;
 
 						::cho::SFramework									Framework									;
+
 						TParticleSystem										ParticleSystem								= {};
-						::cho::STexture<::cho::SColorBGRA>					PSTarget									= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>		PSTarget									= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>		Ship										= {};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

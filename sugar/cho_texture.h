@@ -8,6 +8,8 @@ namespace cho
 {
 	template<typename _tTexel>
 	struct STexture {
+		typedef				_tTexel												TTexel;
+
 							::cho::array_pod<_tTexel>							Texels										;
 							::cho::grid_view<_tTexel>							View										;
 
@@ -16,7 +18,15 @@ namespace cho
 
 							::cho::error_t										resize										(uint32_t newSizeX, uint32_t newSizeY)			{ cho_necall(Texels.resize(newSizeX * newSizeY), "cannot resize?"); View = {Texels.begin(), newSizeX, newSizeY}; return 0; }
 		inline				::cho::error_t										resize										(::cho::SCoord2<uint32_t> newSize)				{ return resize(newSize.x, newSize.y); }
-	};
-}
+	}; // struct
+
+	template<typename _tTexel>
+	struct STextureProcessable {
+		typedef		_tTexel								TTexel;
+
+					::cho::STexture<_tTexel>			Original;
+					::cho::STexture<_tTexel>			Processed;
+	}; // struct
+} // namespace 
 
 #endif // CHO_TEXTURE_H_902387498237

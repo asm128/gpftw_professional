@@ -7,25 +7,25 @@
 #ifndef CHO_LOG_H_8927349654687654365
 #define CHO_LOG_H_8927349654687654365
 
-#ifndef NULLIFY_CHO_NECALL
-#	define NULLIFY_CHO_NECALL
-#endif
-#ifndef NULLIFY_CONDITIONAL_RETERR
-#	define NULLIFY_CONDITIONAL_RETERR
-#endif
-#ifndef NULLIFY_CONDITIONAL_LOG
-#	define NULLIFY_CONDITIONAL_LOG
-#endif
-#ifndef NULLIFY_CONDITIONAL_THROW
-#	define NULLIFY_CONDITIONAL_THROW
-#endif
+//#ifndef NULLIFY_CHO_NECALL
+//#	define NULLIFY_CHO_NECALL
+//#endif
+//#ifndef NULLIFY_CONDITIONAL_RETERR
+//#	define NULLIFY_CONDITIONAL_RETERR
+//#endif
+//#ifndef NULLIFY_CONDITIONAL_LOG
+//#	define NULLIFY_CONDITIONAL_LOG
+//#endif
+//#ifndef NULLIFY_CONDITIONAL_THROW
+//#	define NULLIFY_CONDITIONAL_THROW
+//#endif
 
 namespace cho
 {
 	void															_cho_print_system_errors			(const char* prefix, uint32_t prefixLen);
 	void															_base_debug_print					(const char* prefix, uint32_t prefixLen);
 
-#define base_debug_print(prefix, prefixLen)	_base_debug_print(prefix, prefixLen)
+#define base_debug_print(prefix, prefixLen)	::cho::_base_debug_print(prefix, (uint32_t)prefixLen)
 
 	template<const size_t _sizePrefix, typename... TArgs>		
 	void															_cho_debug_printf					(int severity, const char (&prefix)[_sizePrefix], uint32_t prefixLength, const char* format, const TArgs... args)			{
@@ -72,7 +72,7 @@ namespace cho
 #endif	
 
 #ifndef NULLIFY_CONDITIONAL_THROW
-#define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); throw(exception);	}
+#define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); throw(exception);	}
 #else
 #pragma warning(disable:4552)	// this is required because "condition" may have no side effect.
 #pragma warning(disable:4553)	// this is required because "condition" may have no side effect.
@@ -80,9 +80,9 @@ namespace cho
 #endif
 
 #ifndef NULLIFY_CONDITIONAL_LOG
-#define error_if(condition, format, ...)						if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
-#define warn_if(condition, format, ...)							if(condition) { warning_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
-#define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); base_debug_print("Condition: " #condition, -1); 						}
+#define error_if(condition, format, ...)						if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); 						}
+#define warn_if(condition, format, ...)							if(condition) { warning_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); 						}
+#define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); 						}
 #else
 #pragma warning(disable:4552)	// this is required because "condition" may have no side effect.
 #pragma warning(disable:4553)	// this is required because "condition" may have no side effect.

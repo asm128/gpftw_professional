@@ -19,7 +19,6 @@ struct SApplication {
 						::cho::SFramework									Framework;
 						TParticleSystem										ParticleSystem								= {};
 
-
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 

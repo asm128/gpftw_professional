@@ -20,8 +20,8 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
 	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size / 2;
 	::cho::updateSizeDependentTarget	(applicationInstance.Framework.Offscreen				, newSize);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledDay			, applicationInstance.TextureBackgroundDay		.View, newSize);
-	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundScaledNight		, applicationInstance.TextureBackgroundNight	.View, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundDay		.Processed, applicationInstance.TextureBackgroundDay	.Original.View, newSize);
+	::cho::updateSizeDependentTexture	(applicationInstance.TextureBackgroundNight		.Processed, applicationInstance.TextureBackgroundNight	.Original.View, newSize);
 	return 0;
 }
 
@@ -44,10 +44,10 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
-	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
-	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
-	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
-	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	static constexpr	const char												bmpFileName0	[]							= "earth_color.bmp";
+	static constexpr	const char												bmpFileName1	[]							= "earth_light.bmp";
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName0, applicationInstance.TextureBackgroundDay	.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad((::cho::view_const_string)bmpFileName1, applicationInstance.TextureBackgroundNight	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	return 0;
 }
 
@@ -112,16 +112,16 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	geometry2.C																+= screenCenter + ::cho::SCoord2<int32_t>{(int32_t)geometry1.Radius, (int32_t)geometry1.Radius};
 
 	::cho::SRectangle2D	<uint32_t>												rectangle									= {};
-	rectangle.Offset.x														= applicationInstance.TextureBackgroundScaledNight.View.width() / 4;
+	rectangle.Offset.x														= applicationInstance.TextureBackgroundNight.Processed.View.width() / 4;
 	rectangle.Offset.y														= 0; 
 	rectangle.Size	.x														= rectangle.Offset.x * 2;
-	rectangle.Size	.y														= applicationInstance.TextureBackgroundScaledNight.View.height(); // - rectangle.Offset.y * 2;
+	rectangle.Size	.y														= applicationInstance.TextureBackgroundNight.Processed.View.height(); // - rectangle.Offset.y * 2;
 
 	rectangle.Offset.x														+= (uint32_t)frameInfo.FrameNumber ;
-	rectangle.Offset.x														%= applicationInstance.TextureBackgroundScaledNight.View.width();
+	rectangle.Offset.x														%= applicationInstance.TextureBackgroundNight.Processed.View.width();
 
-	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundScaledDay.View)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundScaledNight.View, rectangle, rectangle)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundDay		.Processed.View)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundNight	.Processed.View, rectangle, rectangle)), "I believe this never fails.");
 
 	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::BLUE			, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
