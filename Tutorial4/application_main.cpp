@@ -102,10 +102,10 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 	TParticleSystem::TIntegrator												& particleEngine												= applicationInstance.ParticleSystem.Integrator;
 	::cho::SFramework::TOffscreen												& offscreen														= applicationInstance.Framework.Offscreen;
 	::cho::SInput																& inputSystem													= applicationInstance.Framework.SystemInput;
-	if(inputSystem.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-	if(inputSystem.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-	if(inputSystem.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
-	if(inputSystem.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, { offscreen.View.width(), offscreen.View.height() });
+	if(inputSystem.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, offscreen.View.metrics());
+	if(inputSystem.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, offscreen.View.metrics());
+	if(inputSystem.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, offscreen.View.metrics());
+	if(inputSystem.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, offscreen.View.metrics());
 	return 0;
 }
 
@@ -116,7 +116,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	typedef	TParticleSystem::TIntegrator::TParticle								TParticle;
 	TParticleSystem::TIntegrator												& particleEngine							= applicationInstance.ParticleSystem.Integrator;
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
-	particleEngine.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared);
+	ree_if(errored(particleEngine.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
 
 	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
 
@@ -125,11 +125,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		TParticle																	& particleNext								= particleEngine.ParticleNext[physicsId];
-		if( particleNext.Position.x < 0 || particleNext.Position.x >= framework.Offscreen.View.width	()
-		 || particleNext.Position.y < 0 || particleNext.Position.y >= framework.Offscreen.View.height	()
+		if( !::cho::in_range((uint32_t)particleNext.Position.x, 0U, framework.Offscreen.View.width	())
+		 || !::cho::in_range((uint32_t)particleNext.Position.y, 0U, framework.Offscreen.View.height	())
 		 ) { // Remove the particle instance and related information.
 			particleEngine.ParticleState[physicsId].Unused							= true;
-			particleInstances.erase(particleInstances.begin()+iParticle);
+			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else { // Apply forces from wind and gravity.
@@ -179,7 +179,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			= (PARTICLE_TYPE_SNOW == particleInstance.Type) ? ::cho::SColorBGRA(::cho::CYAN)
 			: (PARTICLE_TYPE_FIRE == particleInstance.Type) ? ::cho::SColorBGRA(::cho::RED )
 			: (PARTICLE_TYPE_RAIN == particleInstance.Type) ? ::cho::SColorBGRA(::cho::BLUE)
-			: ::cho::SColorBGRA(::cho::ORANGE)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
+			: ::cho::SColorBGRA(::cho::GREEN)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
 	}
 	return 0;
