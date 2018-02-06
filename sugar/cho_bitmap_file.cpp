@@ -7,16 +7,13 @@
 					::cho::error_t																	cho::bmpFileLoad							(const ::cho::view_const_string	& filename	, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)	{ // 
 	FILE																									* source									= 0; 
 	fopen_s(&source, filename.begin(), "rb");
-	if(source) {
-		if errored(::cho::bmpFileLoad(source, out_Colors, out_ImageView)) {
-			error_printf("Failed to load file: '%s'. File not found?", filename);
-			fclose(source);
-			return -1;
-		}
+	ree_if(0 == source, "Failed to open file: %s. File not found?", filename.begin());
+	if errored(::cho::bmpFileLoad(source, out_Colors, out_ImageView)) {
+		error_printf("Failed to load file: '%s'. File corrupt?", filename.begin());
 		fclose(source);
+		return -1;
 	}
-	else
-		info_printf("Failed to open file %s.", filename);
+	fclose(source);
 	return 0;
 }
 

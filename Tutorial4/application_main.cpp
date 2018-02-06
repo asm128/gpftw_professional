@@ -68,10 +68,12 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
-	::cho::SCoord2<uint32_t>													effectTargetSize							= {64, 64};
-	error_if(errored(applicationInstance.PSTarget	.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
-	error_if(errored(applicationInstance.Ship		.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
-	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+
+	static constexpr	const char												bmpFileName0	[]							= "ship_0.bmp";
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.Ship.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	ree_if	(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	const ::cho::SCoord2<uint32_t>													effectTargetSize							= {64, 64};
+	error_if(errored(applicationInstance.PSTarget.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
 	return 0;
 }
 
