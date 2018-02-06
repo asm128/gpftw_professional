@@ -14,6 +14,7 @@ namespace cho
 							_tElement								* Data						= 0;
 							::cho::SCoord2<uint32_t>				Size						= {0, 0};
 	public:
+		typedef				_tElement								TElement;
 		// Constructors
 		inline constexpr											grid_view					()																			noexcept	= default;
 		inline														grid_view					(_tElement* dataElements, uint32_t gridWidth, uint32_t gridHeight)						: Data{dataElements}, Size{gridWidth, gridHeight}	{

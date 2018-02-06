@@ -22,6 +22,9 @@ struct SApplication {
 						::cho::STextureProcessable<::cho::SColorBGRA>		PSTarget									= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		Ship										= {};
 						::cho::SCoord2<int32_t>								ShipTextureCenter							= {};
+						::cho::SCoord2<int32_t>								PSTextureCenter								= {};
+						::cho::SCoord2<int32_t>								PSTextureOffset								= {};
+						::cho::SCoord2<int32_t>								PSPositionInTextue							= {};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

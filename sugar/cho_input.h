@@ -18,7 +18,6 @@ namespace cho
 							uint8_t									KeyState			[256]					= {};
 							double									KeyTime				[256]					= {};
 							int64_t									KeyStrength			[256]					= {};
-
 	};
 
 	struct SInput {

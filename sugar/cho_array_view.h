@@ -15,6 +15,7 @@ namespace cho
 							_tElement				* Data						= 0;
 							uint32_t				Count						= 0;
 	public:
+		typedef				_tElement				TElement;
 		// Constructors
 		inline constexpr							array_view					()																			noexcept	= default;
 		inline										array_view					(_tElement* dataElements, uint32_t elementCount)										: Data(dataElements), Count(elementCount)										{
