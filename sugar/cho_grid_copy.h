@@ -103,6 +103,26 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
+						::cho::error_t							grid_copy_alpha				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect, const _tCell& comparand)		{
+		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
+		const int32_t													yDstLimit					= ::cho::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.height());
+		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, xDstOffset);	// 
+		uint32_t														elementsCopied				= 0;
+		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
+			const int32_t													yDst						= ySrc + (int32_t)dstRect.Offset.y;
+			if(yDst < 0)
+				continue;
+			if(yDst >= yDstLimit) 
+				break;
+			for(uint32_t x = 0, xStop = xCopyCells; x < xStop; ++x)
+				if(comparand != src[ySrc][x])
+					dst[yDst][x + xDstOffset]									= src[ySrc][x];
+			elementsCopied												+= xCopyCells;
+		}
+		return elementsCopied;
+	}
+
+	template<typename _tCell, typename _tCoord>
 						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SRectangle2D<_tCoord>& dstRect)		{
 		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstRect.Offset.x, 0, (int32_t)dst.width());			// 
 		const int32_t													yDstLimit					= ::cho::min((int32_t)(dstRect.Offset.y + dstRect.Size.y),  (int32_t)dst.height());
@@ -161,6 +181,26 @@ namespace cho
 			if(yDst >= (int32_t)dst.height()) 
 				break;
 			memcpy(&dst[yDst][xDstOffset], &src[ySrc][0], sizeof(_tCell) * xCopyCells);
+			elementsCopied												+= xCopyCells;
+		}
+		return elementsCopied;
+	}
+
+	template<typename _tCell, typename _tCoord>
+						::cho::error_t							grid_copy_alpha				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const _tCell& comparand)		{
+		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstOffset.x, 0, (int32_t)dst.width());			// 
+		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, xDstOffset);	// 
+		uint32_t														elementsCopied				= 0;
+		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
+			const int32_t													yDst						= ySrc + (int32_t)dstOffset.y;
+			if(yDst < 0) 
+				continue;
+			if(yDst >= (int32_t)dst.height()) 
+				break;
+			for(uint32_t x = 0, xStop = xCopyCells; x < xStop; ++x)
+				if(comparand != src[ySrc][x])
+					dst[yDst][x + xDstOffset]									= src[ySrc][x];
+			//memcpy(&dst[yDst][xDstOffset], &src[ySrc][0], sizeof(_tCell) * xCopyCells);
 			elementsCopied												+= xCopyCells;
 		}
 		return elementsCopied;

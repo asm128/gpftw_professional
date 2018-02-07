@@ -178,7 +178,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	memset(offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
-	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.ShipCenterPosition.Cast<int32_t>() - applicationInstance.ShipTextureCenter)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.ShipCenterPosition.Cast<int32_t>() - applicationInstance.ShipTextureCenter, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		TParticleInstance																& particleInstance						= particleInstances[iParticle];
 		const int32_t																	physicsId								= particleInstance.ParticleIndex;
