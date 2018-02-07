@@ -180,9 +180,9 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	memset(offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
 	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.ShipCenterPosition.Cast<int32_t>() - applicationInstance.ShipTextureCenter, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
-		TParticleInstance																& particleInstance						= particleInstances[iParticle];
-		const int32_t																	physicsId								= particleInstance.ParticleIndex;
-		const ::cho::SCoord2<float>														particlePosition						= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
+		TParticleInstance															& particleInstance							= particleInstances[iParticle];
+		const int32_t																physicsId									= particleInstance.ParticleIndex;
+		const ::cho::SCoord2<float>													particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (PARTICLE_TYPE_SNOW == particleInstance.Type) ? ::cho::SColorBGRA(::cho::CYAN)
 			: (PARTICLE_TYPE_FIRE == particleInstance.Type) ? ::cho::SColorBGRA(::cho::RED )
