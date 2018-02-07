@@ -70,10 +70,11 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	::setupParticles();
 
 	static constexpr	const char												bmpFileName0	[]							= "ship_0.bmp";
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.Ship.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	ree_if	(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	const ::cho::SCoord2<uint32_t>													effectTargetSize							= {64, 64};
-	error_if(errored(applicationInstance.PSTarget.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	const ::cho::SCoord2<uint32_t>												effectTargetSize							= {64, 64};
+	error_if(errored(applicationInstance.TexturePS.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	applicationInstance.ShipCenterPosition									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
 	return 0;
 }
 
@@ -81,17 +82,17 @@ template<typename _tParticleType>
 static				::cho::error_t										addParticle														
 	(	::PARTICLE_TYPE												particleType
 	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
-	,	::cho::SParticle2Integrator<float>							& particleEngine
+	,	::SApplication::TParticleSystem::TIntegrator				& particleIntegrator
 	,	const ::cho::SCoord2<uint32_t>								& targetSize
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleEngine, particleDefinitions[particleType])]; 
-	particleEngine.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
+	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
+	particleIntegrator.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
 	switch(particleType) {
-	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 4)}; break;
-	case ::PARTICLE_TYPE_LAVA:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= 0; break;
-	case ::PARTICLE_TYPE_RAIN:
-	case ::PARTICLE_TYPE_SNOW:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleEngine.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
+	case ::PARTICLE_TYPE_FIRE:	particleIntegrator.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 4)}; break;
+	case ::PARTICLE_TYPE_LAVA:	particleIntegrator.Particle[newInstance.ParticleIndex].Position.y	= 0; break;
+	case ::PARTICLE_TYPE_RAIN:	
+	case ::PARTICLE_TYPE_SNOW:	particleIntegrator.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
 	}
 	return particleInstances.push_back(newInstance);
 }
@@ -100,15 +101,19 @@ static				::cho::error_t										addParticle
 static				::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
-	::cho::array_pod<TParticleInstance>											& particleInstances												= applicationInstance.ParticleSystem.Instances;
-	TParticleSystem::TIntegrator												& particleEngine												= applicationInstance.ParticleSystem.Integrator;
-	::cho::SFramework::TOffscreen												& offscreen														= applicationInstance.Framework.Offscreen;
-	::cho::SInput																& inputSystem													= applicationInstance.Framework.SystemInput;
-	if(inputSystem.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleEngine, offscreen.View.metrics());
-	if(inputSystem.KeyboardCurrent.KeyState['2']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleEngine, offscreen.View.metrics());
-	if(inputSystem.KeyboardCurrent.KeyState['3']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleEngine, offscreen.View.metrics());
-	if(inputSystem.KeyboardCurrent.KeyState['4']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleEngine, offscreen.View.metrics());
-	return 0;
+	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
+	/*if(inputSystem.KeyboardCurrent.KeyState['1']) */for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleIntegrator, offscreen.View.metrics());
+	/*if(inputSystem.KeyboardCurrent.KeyState['2']) */for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleIntegrator, offscreen.View.metrics());
+	/*if(inputSystem.KeyboardCurrent.KeyState['3']) */for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_RAIN, particleInstances, particleIntegrator, offscreen.View.metrics());
+	/*if(inputSystem.KeyboardCurrent.KeyState['4']) */for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_LAVA, particleInstances, particleIntegrator, offscreen.View.metrics());
+	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.ShipCenterPosition.y += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100);
+	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.ShipCenterPosition.y -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100);
+	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.ShipCenterPosition.x += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100);
+	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.ShipCenterPosition.x -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100);
+		return 0;
 }
 
 static				::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
@@ -116,9 +121,9 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
 	typedef	TParticleSystem::TIntegrator::TParticle								TParticle;
-	TParticleSystem::TIntegrator												& particleEngine							= applicationInstance.ParticleSystem.Integrator;
+	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
-	ree_if(errored(particleEngine.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
+	ree_if(errored(particleIntegrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
 
 	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
 
@@ -126,18 +131,18 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
-		TParticle																	& particleNext								= particleEngine.ParticleNext[physicsId];
+		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		if( !::cho::in_range((uint32_t)particleNext.Position.x, 0U, framework.Offscreen.View.width	())
 		 || !::cho::in_range((uint32_t)particleNext.Position.y, 0U, framework.Offscreen.View.height	())
 		 ) { // Remove the particle instance and related information.
-			particleEngine.ParticleState[physicsId].Unused							= true;
+			particleIntegrator.ParticleState[physicsId].Unused							= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else { // Apply forces from wind and gravity.
 			static constexpr	const double											gravity										= 9.8;
-			TParticle																	& particleCurrent							= particleEngine.Particle[physicsId];
-			particleCurrent															= particleEngine.ParticleNext[physicsId];
+			TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
+			particleCurrent															= particleIntegrator.ParticleNext[physicsId];
 			particleCurrent.Forces.AccumulatedForce									= {0, float(gravity * lastFrameSeconds) * -1};
 			particleCurrent.Forces.AccumulatedForce.x								+= float(windDirection * abs(particleCurrent.Forces.Velocity.y) * .5) + float((rand() % 100) / 100.0 - .5) / 2.0f;
 		}
@@ -173,6 +178,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	memset(offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.ShipCenterPosition.Cast<int32_t>() - applicationInstance.ShipTextureCenter)), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		TParticleInstance																& particleInstance						= particleInstances[iParticle];
 		const int32_t																	physicsId								= particleInstance.ParticleIndex;

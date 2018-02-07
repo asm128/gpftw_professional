@@ -29,9 +29,6 @@ extern				::SApplication														* g_ApplicationInstance						;
 				mainDisplay.Size																		= newMetrics;
 				mainDisplay.Resized																		= true;
 				mainDisplay.Repaint																		= true; 
-				char																						buffer		[256]							= {};
-				sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g. ", (uint32_t)newMetrics.x, (uint32_t)newMetrics.y, applicationInstance.Framework.Timer.LastTimeSeconds);
-				SetWindowText(mainDisplay.PlatformDetail.WindowHandle, buffer);
 			}
 		}
 		if( wParam == SIZE_MINIMIZED ) {

@@ -19,12 +19,13 @@ struct SApplication {
 						::cho::SFramework									Framework									;
 
 						TParticleSystem										ParticleSystem								= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>		PSTarget									= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>		Ship										= {};
-						::cho::SCoord2<int32_t>								ShipTextureCenter							= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>		TexturePS									= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>		TextureShip									= {};
 						::cho::SCoord2<int32_t>								PSTextureCenter								= {};
-						::cho::SCoord2<int32_t>								PSTextureOffsetFromShipCenter				= {};
-						::cho::SCoord2<int32_t>								PSPositionInTextue							= {};
+						::cho::SCoord2<int32_t>								PSPositionInTexture							= {};
+						::cho::SCoord2<int32_t>								PSOffsetFromShipCenter						= {};
+						::cho::SCoord2<int32_t>								ShipTextureCenter							= {};
+						::cho::SCoord2<float>								ShipCenterPosition							= {};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

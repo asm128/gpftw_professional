@@ -17,8 +17,8 @@ extern				::SApplication														* g_ApplicationInstance						;
 	switch(uMsg) {
 	default: break;		
 	case WM_CLOSE			: ::DestroyWindow(hWnd); return 0;
-	case WM_KEYDOWN			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; input.KeyboardCurrent.KeyState[wParam]  =  1; return 0;
-	case WM_KEYUP			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; input.KeyboardCurrent.KeyState[wParam] &= ~1; return 0;
+	case WM_KEYDOWN			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardCurrent.KeyState[wParam]  =  1; return 0; // input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; 
+	case WM_KEYUP			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardCurrent.KeyState[wParam] &= ~1; return 0; // input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; 
 	case WM_GETMINMAXINFO	:	// Catch this message so to prevent the window from becoming too small.
 		((::MINMAXINFO*)lParam)->ptMinTrackSize													= {minClientRect.right - minClientRect.left, minClientRect.bottom - minClientRect.top}; 
 		return 0;
@@ -30,9 +30,6 @@ extern				::SApplication														* g_ApplicationInstance						;
 				mainDisplay.Size																		= newMetrics;
 				mainDisplay.Resized																		= true;
 				mainDisplay.Repaint																		= true; 
-				char																						buffer		[256]							= {};
-				sprintf_s(buffer, "[%u x %u]. Last frame seconds: %g. ", (uint32_t)newMetrics.x, (uint32_t)newMetrics.y, framework.Timer.LastTimeSeconds);
-				SetWindowText(mainDisplay.PlatformDetail.WindowHandle, buffer);
 			}
 		}
 		if( wParam == SIZE_MINIMIZED ) {

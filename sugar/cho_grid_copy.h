@@ -11,9 +11,10 @@ namespace cho
 			( 0
 			, ::cho::min
 				( ::cho::min
-					( ::cho::min((int32_t)(src.width() - xSrcOffset), (int32_t)(dst.width() - xDstOffset))
-					, (int32_t)srcRect.Size.x
-					)
+					( ::cho::min
+						((int32_t)(src.width() - xSrcOffset), (int32_t)(dst.width() - xDstOffset))
+						, (int32_t)srcRect.Size.x
+						)
 				, (int32_t)dstRect.Size.x
 				)
 			);	// 
@@ -27,7 +28,7 @@ namespace cho
 		const int32_t													ySrcLimit					= ::cho::min((int32_t)(srcRect.Offset.y + srcRect.Size.y), (int32_t)src.height());
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, dstRect, srcRect, xDstOffset, xSrcOffset);
 		uint32_t														elementsCopied				= 0;
-		for(int32_t y = 0, yMax = (int32_t)src.height(); y < yMax; ++y) {
+		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
 			const int32_t													yDst						= y + (int32_t)dstRect.Offset.y;
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)
@@ -58,7 +59,7 @@ namespace cho
 		const int32_t													ySrcLimit					= ::cho::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)src.height());
 		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, srcRect, xDstOffset, xSrcOffset);
 		uint32_t														elementsCopied				= 0;
-		for(int32_t y = 0, yMax = src.height(); y < yMax; ++y) {
+		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
 			const int32_t													yDst						= y + (int32_t)dstOffset.y;
 			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
 			if(yDst < 0 || ySrc < 0)

@@ -7,6 +7,7 @@
 #ifndef CHO_LOG_H_8927349654687654365
 #define CHO_LOG_H_8927349654687654365
 
+#if !defined(DEBUG) && !defined(_DEBUG)
 //#ifndef NULLIFY_CHO_NECALL
 //#	define NULLIFY_CHO_NECALL
 //#endif
@@ -19,6 +20,7 @@
 //#ifndef NULLIFY_CONDITIONAL_THROW
 //#	define NULLIFY_CONDITIONAL_THROW
 //#endif
+#endif
 
 namespace cho
 {
