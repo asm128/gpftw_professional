@@ -121,6 +121,7 @@ namespace cho
 
 								TParticleType									Type										= (TParticleType)-1;
 								int32_t											ParticleIndex								= -1;
+								float											TimeLived									= 0;
 	};
 
 	template<typename _tParticleType, typename _tCoord>

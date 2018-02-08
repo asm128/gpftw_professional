@@ -190,17 +190,21 @@ namespace cho
 						::cho::error_t							grid_copy_alpha				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const _tCell& comparand)		{
 		const int32_t													xDstOffset					= ::cho::min((int32_t)dstOffset.x, (int32_t)dst.width());			// 
 		const int32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, xDstOffset);	// 
-		uint32_t															elementsCopied				= 0;
+		uint32_t														elementsCopied				= 0;
 		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
 			const int32_t													yDst						= ySrc + (int32_t)dstOffset.y;
 			if(yDst < 0) 
 				continue;
 			if(yDst >= (int32_t)dst.height()) 
 				break;
-			for(int32_t x = 0, xStop = xCopyCells; x < xStop; ++x)
-				if((x + xDstOffset) < (int32_t)dst.width())
-					if(comparand != src[ySrc][x])
-						dst[yDst][x + xDstOffset]									= src[ySrc][x];
+			for(int32_t x = 0, xStop = xCopyCells; x < xStop; ++x) {
+				if((x + xDstOffset) >= (int32_t)dst.width())
+					break;
+				if((x + xDstOffset) < 0)
+					continue;
+				if(comparand != src[ySrc][x])
+					dst[yDst][x + xDstOffset]									= src[ySrc][x];
+			}
 			elementsCopied												+= xCopyCells;
 		}
 		return elementsCopied;
