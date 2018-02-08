@@ -74,17 +74,13 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	::setupParticles();
 
 	static constexpr	const char												bmpFileName0	[]							= "ship_0.bmp";
-	static constexpr	const char												bmpFileName1	[]							= "pow_0.bmp";
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip		.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	ree_if	(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
-	applicationInstance.TextureCenterShip									= (applicationInstance.TextureShip		.Original.View.metrics() / 2).Cast<int32_t>();
-	applicationInstance.TextureCenterPowerup								= (applicationInstance.TexturePowerup	.Original.View.metrics() / 2).Cast<int32_t>();
-	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenterShip.x};
 	const ::cho::SCoord2<uint32_t>												effectTargetSize							= {64, 64};
 	error_if(errored(applicationInstance.TexturePS.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	applicationInstance.ShipCenterPosition									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
+	applicationInstance.ShipTextureCenter									= (applicationInstance.TextureShip.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.ShipTextureCenter.x};
 	return 0;
 }
 
@@ -125,18 +121,18 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
 	///*if(inputSystem.KeyboardCurrent.KeyState['1']) */for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.ShipCenterPosition);
 	for(uint32_t i = 0; i < 3; ++i) 
-		::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>());
+		::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.ShipCenterPosition + applicationInstance.PSOffsetFromShipCenter.Cast<float>());
 
 	if(0 == rand() % 5) 
 		for(uint32_t i = 0; i < 1; ++i) 
-			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip);
+			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.ShipCenterPosition);
 
-	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.CenterPositionShip.y += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.CenterPositionShip.y -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.CenterPositionShip.x += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.CenterPositionShip.x -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, 0.0f, (float)offscreen.View.height());
-	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, 0.0f, (float)offscreen.View.width());
+	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.ShipCenterPosition.y += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.ShipCenterPosition.y -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.ShipCenterPosition.x += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.ShipCenterPosition.x -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	applicationInstance.ShipCenterPosition.y								= ::cho::clamp(applicationInstance.ShipCenterPosition.y, 0.0f, (float)offscreen.View.height());
+	applicationInstance.ShipCenterPosition.x								= ::cho::clamp(applicationInstance.ShipCenterPosition.x, 0.0f, (float)offscreen.View.width());
 	return 0;
 }
 
@@ -206,8 +202,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	memset(offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.CenterPositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.ShipCenterPosition.Cast<int32_t>() - applicationInstance.ShipTextureCenter, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.ParticleIndex;
@@ -240,7 +235,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 				}
 			}
 		}
-		else if(PARTICLE_TYPE_STAR == particleInstance.Type) {
+		if(PARTICLE_TYPE_STAR == particleInstance.Type) {
 			for(int32_t y = -1, blendCount = 2; y < blendCount; ++y)
 			for(int32_t x = -1; x < blendCount; ++x) {
 				::cho::SCoord2<uint32_t>													blendPos									= (particlePosition.Cast<int32_t>() + ::cho::SCoord2<int32_t>{x, y}).Cast<uint32_t>();

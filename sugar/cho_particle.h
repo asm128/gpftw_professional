@@ -77,7 +77,7 @@ namespace cho
 							::cho::array_pod<TParticle>							ParticleNext								= {};
 		// -----------------------------------------------------------------	---
 		inline				::cho::error_t										Integrate									(double timeElapsed, double timeElapsedHalfSquared)														{ return Integrate(ParticleNext, timeElapsed, timeElapsedHalfSquared); }
-		inline				::cho::error_t										Integrate									(::cho::array_view<TParticle>& particleNext, double timeElapsed, double timeElapsedHalfSquared)			{
+							::cho::error_t										Integrate									(::cho::array_view<TParticle>& particleNext, double timeElapsed, double timeElapsedHalfSquared)			{
 			for(uint32_t iParticle = 0, particleCount = (uint32_t)ParticleState.size(); iParticle < particleCount; ++iParticle)	
 				if(ParticleState[iParticle].RequiresProcessing()) {
 					TParticle																	& particle = particleNext[iParticle]		= Particle[iParticle];	// Copy the current particle state to the next

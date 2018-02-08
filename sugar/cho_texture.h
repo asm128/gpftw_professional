@@ -13,6 +13,12 @@ namespace cho
 							::cho::array_pod<_tTexel>							Texels										;
 							::cho::grid_view<_tTexel>							View										;
 
+		inline				::cho::array_view<_tTexel>&							operator=									(const ::cho::array_view<_tTexel>& other)		{ 
+			Texels																	= other.Texels;
+			View																	= {Texels.begin(), other.View.metrics()};
+			return *this; 
+		}
+
 		inline				::cho::array_view<_tTexel>							operator[]									(uint32_t index)								{ return View[index]; }
 		inline	const		::cho::array_view<_tTexel>							operator[]									(uint32_t index)	const						{ return View[index]; }
 

@@ -18,7 +18,7 @@ namespace cho
 
 		inline constexpr												grid_static								()																		: grid_view(&Cells[0][0], _sizeWidth, _sizeDepth)	{}
 
-		inline				::cho::error_t								read									(const byte_t* input, uint32_t* inout_bytesRead)						{
+							::cho::error_t								read									(const byte_t* input, uint32_t* inout_bytesRead)						{
 			ree_if(0 == input, "Invalid input pointer!");
 			TGridView															inputGrid								= {(_tCell*)input, Width, Depth};
 			*inout_bytesRead												+= sizeof(_tCell) * size();
@@ -29,7 +29,7 @@ namespace cho
 			return 0;
 		}
 
-		inline				::cho::error_t								write									(byte_t* input, uint32_t* inout_bytesWritten)		const				{
+							::cho::error_t								write									(byte_t* input, uint32_t* inout_bytesWritten)		const				{
 			ree_if(0 == input && 0 == inout_bytesWritten, "Invalid input!");
 			if(0 != inout_bytesWritten)
 				*inout_bytesWritten												+= sizeof(_tCell) * size();	// Just return the size required to store this.

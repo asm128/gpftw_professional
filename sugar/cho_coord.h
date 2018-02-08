@@ -165,7 +165,7 @@ namespace cho
 	template<typename _tElement>	static inline constexpr	_tElement				rise					(const SLine2D<_tElement>& line)											noexcept	{ return line.B.y - line.A.y;		}
 	template<typename _tElement>	static inline constexpr	_tElement				run						(const SLine2D<_tElement>& line)											noexcept	{ return line.B.x - line.A.x;		}
 	template<typename _tElement>	static inline constexpr	_tElement				slope					(const SLine2D<_tElement>& line)											noexcept	{ return rise(line) / run(line);	}
-	template<typename _tElement>	static inline constexpr	_tElement				orient2d				(const ::cho::SLine2D<_tElement>& segment, const ::cho::SCoord2<_tElement>& point)		{ return (segment.B.x - segment.A.x) * (point.y - segment.A.y) - (segment.B.y - segment.A.y) * (point.x - segment.A.x); }
+	template<typename _tElement>	static		  constexpr	_tElement				orient2d				(const ::cho::SLine2D<_tElement>& segment, const ::cho::SCoord2<_tElement>& point)		{ return (segment.B.x - segment.A.x) * (point.y - segment.A.y) - (segment.B.y - segment.A.y) * (point.x - segment.A.x); }
 
 	// ---- Collision
 	template<typename _tElement>	static					bool					raySegmentIntersect		(SCoord2<_tElement> r_d, SCoord2<_tElement> r_p, SCoord2<_tElement> s_d, SCoord2<_tElement> s_p)								{
@@ -233,7 +233,7 @@ namespace cho
 
 	//------------------------------------------------------------------------------------------------------------
 	template <typename _tCoord>
-				::cho::SCoord2<_tCoord>&										realignCoord		
+					::cho::SCoord2<_tCoord>&										realignCoord		
 					(	const ::cho::SCoord2<uint32_t>		& targetSize
 					,	const ::cho::SCoord2<_tCoord>		& coordToRealign
 					,	::cho::SCoord2<_tCoord>				& coordRealigned
@@ -249,14 +249,14 @@ namespace cho
 	}
 
 	template<typename _tValue>	
-	static inline constexpr		bool				in_range		(const ::cho::SCoord2<_tValue>& valueToTest, const ::cho::SCoord2<_tValue>& rangeStart, const ::cho::SCoord2<_tValue>& rangeStop)	noexcept	{ 
+	static constexpr	bool														in_range		(const ::cho::SCoord2<_tValue>& valueToTest, const ::cho::SCoord2<_tValue>& rangeStart, const ::cho::SCoord2<_tValue>& rangeStop)	noexcept	{ 
 		return	::cho::in_range(valueToTest.x, rangeStart.x, rangeStop.x) 
 			&&	::cho::in_range(valueToTest.y, rangeStart.y, rangeStop.y)
 			;
 	}
 
 	template<typename _tValue>	
-	static inline constexpr		bool				in_range		(const ::cho::SCoord2<_tValue>& pointToTest, const ::cho::SRectangle2D<_tValue>& area)	noexcept	{ 
+	static constexpr	bool														in_range		(const ::cho::SCoord2<_tValue>& pointToTest, const ::cho::SRectangle2D<_tValue>& area)	noexcept	{ 
 		return	::cho::in_range(pointToTest.x, area.Offset.x, area.Offset.x + area.Size.x) 
 			&&	::cho::in_range(pointToTest.y, area.Offset.y, area.Offset.y + area.Size.y)
 			;

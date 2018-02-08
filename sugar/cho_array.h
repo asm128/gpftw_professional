@@ -65,8 +65,9 @@ namespace cho
 				Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
 				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
-				for(uint32_t i = 0, count = newSize; i<count; ++i)
-					Data[i]											= other[i];
+				memcpy(Data, other, newSize * sizeof(_tPOD));
+				//for(uint32_t i = 0, count = newSize; i<count; ++i)
+				//	Data[i]											= other[i];
 				Size											= (uint32_t)reserveSize;
 				Count											= other.Count;
 				safeguard.Handle								= 0;
@@ -83,8 +84,9 @@ namespace cho
 				Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
 				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
-				for(uint32_t i = 0, count = newSize; i < count; ++i)
-					Data[i]											= other[i];
+				memcpy(Data, other, newSize * sizeof(_tPOD));
+				//for(uint32_t i = 0, count = newSize; i < count; ++i)
+				//	Data[i]											= other[i];
 				Size											= (uint32_t)reserveSize;
 				Count											= other.Count;
 				safeguard.Handle								= 0;
@@ -92,8 +94,9 @@ namespace cho
 		}
 							array_pod<_tPOD>&			operator =									(const array_pod<_tPOD>& other)															{
 			throw_if(resize(other.Count) != (int32_t)other.Count, "", "Failed to assign array.");
-			for(uint32_t iElement = 0; iElement < other.Count; ++iElement)
-				operator[](iElement)							= other[iElement];
+			memcpy(Data, other, other.Count * sizeof(_tPOD));
+			//for(uint32_t iElement = 0; iElement < other.Count; ++iElement)
+			//	operator[](iElement)							= other[iElement];
 			return *this;
 		}
 		// This method doesn't call destructors of the contained PODs.
@@ -118,7 +121,7 @@ namespace cho
 		// Returns the index of the pushed value
 		template<size_t _Length>
 		inline				int32_t						append										(const _tPOD (&newChain)[_Length])														{ return append(newChain, _Length);		}
-		inline				int32_t						append										(const _tPOD* chainToAppend, uint32_t chainLength)										{ 
+							int32_t						append										(const _tPOD* chainToAppend, uint32_t chainLength)										{ 
 			const uint32_t										startIndex									= Count;
 			const uint32_t										requestedSize								= Count + chainLength; 
 			ree_if(requestedSize < Count, "Size overflow. Cannot append chain.");
@@ -131,7 +134,7 @@ namespace cho
 		}
 
 		// Returns the new size of the array.
-		inline				int32_t						resize										(uint32_t newSize, const _tPOD& newValue)												{ 
+							int32_t						resize										(uint32_t newSize, const _tPOD& newValue)												{ 
 			int32_t												oldCount									= (int32_t)Count;
 			int32_t												newCount									= resize(newSize);
 			ree_if(newCount != (int32_t)newSize, "Failed to resize array. Requested size: %u. Current size: %u (%u).", newCount, Count, Size);
@@ -154,8 +157,9 @@ namespace cho
 
 				TArrayView											safe_data									= {newData, reserveSize};
 				if(oldData) {
-					for(uint32_t i = 0, count = ::cho::min(newSize, oldCount); i<count; ++i)
-						safe_data[i]									= operator[](i);
+					memcpy(safe_data.begin(), Data, ::cho::min(newSize, oldCount) * sizeof(_tPOD));
+					//for(uint32_t i = 0, count = ::cho::min(newSize, oldCount); i<count; ++i)
+					//	safe_data[i]									= operator[](i);
 				}
 				Size											= (uint32_t)reserveSize;
 				Count											= newSize;
@@ -184,9 +188,12 @@ namespace cho
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
 
 				TArrayView											viewSafe									= {newData, Count+1};
-				for(uint32_t i = 0, maxCount = ::cho::min(index, Count); i < maxCount; ++i)
-					viewSafe[i]										= oldData[i];
+				memcpy(viewSafe.begin(), oldData, ::cho::min(index, Count) * sizeof(_tPOD));
+				//for(uint32_t i = 0, maxCount = ::cho::min(index, Count); i < maxCount; ++i)
+				//	viewSafe[i]										= oldData[i];
 				viewSafe[index]									= newValue;
+				//if(index < Count)
+				//	memcpy(&viewSafe[index + 1], oldData, (Count - index) * sizeof(_tPOD));
 				for(uint32_t i = index, maxCount = ::cho::min(index + 1, Count); i < maxCount; ++i) 
 					viewSafe[i + 1]									= oldData[i];
 				Data											= newData;
@@ -231,7 +238,7 @@ namespace cho
 		inline				int32_t						insert										(uint32_t index, const _tPOD* (&chainToInsert)[_chainLength])							{ return insert(index, chainToInsert, _chainLength); }
 
 		// Returns the new size of the list or -1 if the array pointer is not initialized.
-		inline				int32_t						remove_unordered							(uint32_t index)																		{ 
+							int32_t						remove_unordered							(uint32_t index)																		{ 
 			ree_if(0 == Data, "%s", "Uninitialized array pointer!");
 			ree_if(index >= Count, "Invalid index: %u.", index);
 			Data[index]										= Data[--Count];
@@ -240,7 +247,7 @@ namespace cho
 
 		// returns the new array size or -1 if failed.
 		template<typename _tObj>
-		inline				int32_t						erase										(const _tObj* address)																	{ 
+							int32_t						erase										(const _tObj* address)																	{ 
 			ree_if(0 == Data, "Uninitialized array pointer!");
 			const ptrdiff_t										ptrDiff										= ptrdiff_t(address) - (ptrdiff_t)Data;
 			const uint32_t										index										= (uint32_t)(ptrDiff / (ptrdiff_t)sizeof(_tObj));
@@ -268,7 +275,7 @@ namespace cho
 			return -1;
 		}
 
-		inline				::cho::error_t				read										(const byte_t* input, uint32_t* inout_bytesRead)										{
+							::cho::error_t				read										(const byte_t* input, uint32_t* inout_bytesRead)										{
 			uint32_t											elementsToRead								= 0;
 			if(input) {
 				uint32_t											elementsToRead								= *(uint32_t*)input;
@@ -302,7 +309,7 @@ namespace cho
 			return 0;
 		}
 
-		inline				::cho::error_t				write										(byte_t* input, uint32_t* inout_bytesWritten)						const				{
+							::cho::error_t				write										(byte_t* input, uint32_t* inout_bytesWritten)						const				{
 			if(0 == input) {
 				inout_bytesWritten							+= sizeof(uint32_t) + sizeof(_tPOD) * Count;	// Just return the size required to store this.
 				return 0;

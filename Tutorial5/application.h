@@ -23,13 +23,13 @@ struct SApplication {
 						::cho::STextureProcessable<::cho::SColorBGRA>		TextureShip									= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		TexturePowerup								= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		TexturePS									= {};
-						::cho::SCoord2<int32_t>								TextureCenterPS								= {};
+						::cho::SCoord2<int32_t>								PSTextureCenter								= {};
 						::cho::SCoord2<int32_t>								PSPositionInTexture							= {};
 						::cho::SCoord2<int32_t>								PSOffsetFromShipCenter						= {};
-						::cho::SCoord2<int32_t>								TextureCenterShip							= {};
-						::cho::SCoord2<int32_t>								TextureCenterPowerup						= {};
-						::cho::SCoord2<float>								CenterPositionShip							= {};
-						::cho::SCoord2<float>								CenterPositionPowerup						= {};
+						::cho::SCoord2<int32_t>								ShipTextureCenter							= {};
+
+						::cho::SCoord2<float>								ShipCenterPosition							= {};
+						::cho::SCoord2<float>								PowerupCenterPosition						= {};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

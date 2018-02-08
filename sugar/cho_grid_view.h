@@ -17,9 +17,10 @@ namespace cho
 		typedef				_tElement								TElement;
 		// Constructors
 		inline constexpr											grid_view					()																			noexcept	= default;
-		inline														grid_view					(_tElement* dataElements, uint32_t gridWidth, uint32_t gridHeight)						: Data{dataElements}, Size{gridWidth, gridHeight}	{
+		inline														grid_view					(_tElement* dataElements, uint32_t gridWidth, uint32_t gridHeight)						: Data{dataElements}, Size{gridWidth, gridHeight}			{
 			throw_if(0 == dataElements && 0 != Size.x && 0 != Size.y, ::std::exception(""), "Invalid parameters.");	// Crash if we received invalid parameters in order to prevent further malfunctioning.
 		}
+		inline														grid_view					(_tElement* dataElements, const ::cho::SCoord2<uint32_t>& gridMetrics)					: grid_view(dataElements, gridMetrics.x, gridMetrics.y)		{}
 
 		// Operators
 							::cho::array_view<_tElement>			operator[]					(uint32_t row)																			{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Size.y, ::std::exception(""), "Invalid row."); return ::cho::array_view<_tElement			>(&Data[row * Size.x], Size.x); }
