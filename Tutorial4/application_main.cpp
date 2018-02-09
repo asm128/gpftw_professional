@@ -74,7 +74,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	::setupParticles();
 
 	static constexpr	const char												bmpFileName0	[]							= "ship_0.bmp";
-	static constexpr	const char												bmpFileName1	[]							= "pow_0.bmp";
+	static constexpr	const char												bmpFileName1	[]							= "pow_3.bmp";
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip		.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	char																		bmpFileName2	[]							= "crosshair_?.bmp";
@@ -138,12 +138,13 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 		for(uint32_t i = 0; i < 1; ++i) 
 			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false);
 
-	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.CenterPositionShip.y += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.CenterPositionShip.y -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.CenterPositionShip.x += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.CenterPositionShip.x -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, 0.0f, (float)offscreen.View.height());
-	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, 0.0f, (float)offscreen.View.width());
+	applicationInstance.DirectionShip										= {};
+	applicationInstance.TurboShip											= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
+	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.DirectionShip.y	+= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.DirectionShip.y	-= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.DirectionShip.x	+= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.DirectionShip.x	-= 1;
+	applicationInstance.DirectionShip.Normalize();
 	return 0;
 }
 
@@ -190,14 +191,18 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	::cho::error_t																frameworkResult								= ::cho::updateFramework(framework);
 	ree_if	(errored(frameworkResult), "Unknown error.");
-	//rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
+	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
-	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0f) * .5f + .5f) * ((applicationInstance.ColorBackground.b) / 255);
-	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * 255);
-	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * 255);
+
+	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
+
+	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0f) * .5f + .5f);
+	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3));
+	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3));
+
 	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
 
 	::cho::STimer																& timer										= framework.Timer;
@@ -209,21 +214,6 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	return 0;
 }
 
-					::cho::error_t										blendPixel									(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<float> & particlePosition, float factor)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	for(int32_t y = -1, blendCount = 2; y < blendCount; ++y)
-	for(int32_t x = -1; x < blendCount; ++x) {
-		::cho::SCoord2<uint32_t>													blendPos									= (particlePosition.Cast<int32_t>() + ::cho::SCoord2<int32_t>{x, y}).Cast<uint32_t>();
-		if( blendPos.x < viewOffscreen.width ()
-		 && blendPos.y < viewOffscreen.height()
-		 ) {
-			if( y != (int32_t)particlePosition.y
-			 || x != (int32_t)particlePosition.x
-			 )
-				viewOffscreen[blendPos.y][blendPos.x]									= ::cho::interpolate_linear(viewOffscreen[blendPos.y][blendPos.x], viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], factor);
-		}
-	}
-	return 0;
-}
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
@@ -242,31 +232,29 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		const int32_t																physicsId									= particleInstance.ParticleIndex;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (particleInstance.Type == PARTICLE_TYPE_SNOW			)	? ::cho::SColorBGRA(::cho::CYAN)
-			: (particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.TimeLived > .075)	? (framework.SystemInput.KeyboardCurrent.KeyState[VK_SHIFT] ? ::cho::SColorBGRA(::cho::DARKGRAY		) : ::cho::SColorBGRA(::cho::DARKGRAY)		)
-																		: (particleInstance.TimeLived > .03 )	? (framework.SystemInput.KeyboardCurrent.KeyState[VK_SHIFT] ? ::cho::SColorBGRA(::cho::GRAY			) : ::cho::SColorBGRA(::cho::GRAY) 			)
-																		: (physicsId % 3)						? (framework.SystemInput.KeyboardCurrent.KeyState[VK_SHIFT] ? ::cho::SColorBGRA(::cho::CYAN			) : ::cho::SColorBGRA(::cho::RED) 		 	)
-																		: (physicsId % 2)						? (framework.SystemInput.KeyboardCurrent.KeyState[VK_SHIFT] ? ::cho::SColorBGRA(::cho::CYAN			) : ::cho::SColorBGRA(::cho::ORANGE)		)
-																		: ::cho::SColorBGRA(::cho::YELLOW) 
-			//: (particleInstance.Type == PARTICLE_TYPE_RAIN) ? ::cho::SColorBGRA(::cho::BLUE)
-			: (particleInstance.Type == PARTICLE_TYPE_STAR) ? (0 == (physicsId % 8))					? ::cho::SColorBGRA(::cho::DARKGRAY) 
-															: (0 == (physicsId % 7))					? ::cho::SColorBGRA(::cho::GRAY) 
-															: (0 == (physicsId % 6))					? ::cho::SColorBGRA(::cho::WHITE)
-															: (0 == (physicsId % 5))					? ::cho::SColorBGRA(::cho::YELLOW) / 2.0f
-															: (0 == (physicsId % 4))					? ::cho::SColorBGRA(::cho::DARKCYAN) 
-															: (0 == (physicsId % 3))					? ::cho::SColorBGRA(::cho::DARKYELLOW) / 2.0f
-															: (0 == (physicsId % 2))					? ::cho::SColorBGRA(::cho::DARKRED) / 2.0f
-															: ::cho::SColorBGRA(::cho::DARKBLUE) / 2.0f
-			: ::cho::SColorBGRA(::cho::MAGENTA)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
+			= (particleInstance.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
+			: (particleInstance.Type == PARTICLE_TYPE_ROCK			)	? ::cho::GRAY
+			: (particleInstance.Type == PARTICLE_TYPE_ARROW			)	? ::cho::LIGHTGRAY
+			: (particleInstance.Type == PARTICLE_TYPE_POISON		)	? ::cho::GREEN
+			: (particleInstance.Type == PARTICLE_TYPE_FIREBALL		)	? ::cho::RED
+			: (particleInstance.Type == PARTICLE_TYPE_BULLET		)	? ::cho::LIGHTGRAY
+			: (particleInstance.Type == PARTICLE_TYPE_PLASMA		)	? ::cho::CYAN
+			: (particleInstance.Type == PARTICLE_TYPE_BOMB			)	? ::cho::DARKRED
+			: (particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.TimeLived > .075)	? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+																		: (particleInstance.TimeLived > .03 )	? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
+																		: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
+																		: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::ORANGE		)
+																		: ::cho::YELLOW 
+			: (particleInstance.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 5))						? ::cho::DARKGRAY 
+																		: (0 == (physicsId % 4))						? ::cho::GRAY 
+																		: (0 == (physicsId % 3))						? ::cho::WHITE
+																		: (0 == (physicsId % 2))						? ::cho::YELLOW			/ 2.0f
+																		//: (0 == (physicsId % 4))						? ::cho::DARKCYAN 
+																		//: (0 == (physicsId % 3))						? ::cho::DARKYELLOW		/ 2.0f
+																		//: (0 == (physicsId % 2))						? ::cho::DARKBLUE		/ 2.0f
+																		: ::cho::DARKRED / 2.0f
+			: ::cho::MAGENTA// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
-		//if(rand() % 4) {
-		//	if(PARTICLE_TYPE_SHIP_THRUST == particleInstance.Type) {
-		//		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	*= 1.0f - particleInstance.TimeLived;
-		//		::blendPixel(viewOffscreen, particlePosition, (rand() % 3) * .15f);
-		//	}
-		//	else if(PARTICLE_TYPE_STAR == particleInstance.Type)
-		//		::blendPixel(viewOffscreen, particlePosition, (rand() % 3) * .05f);
-		//}
 		if(physicsId % 4) {
 			if(particleInstance.Type == PARTICLE_TYPE_STAR || particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST) {
 				float scale = 1.0f;
@@ -276,7 +264,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 				}
 				else 
 					scale = 0.05f;
-				::blendPixel(viewOffscreen, particlePosition, (rand() % 3) * scale);
+				::cho::drawPixelLight(viewOffscreen, particlePosition, (rand() % 3 + 1) * scale, physicsId % 4 + 1);
 			}
 		}
 	}
