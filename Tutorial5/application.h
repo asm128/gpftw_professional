@@ -6,10 +6,11 @@
 
 enum PARTICLE_TYPE : int8_t
 	{	PARTICLE_TYPE_SNOW		= 0
+	,	PARTICLE_TYPE_SHIP_THRUST
+	,	PARTICLE_TYPE_STAR
+	,	PARTICLE_TYPE_RAIN
 	,	PARTICLE_TYPE_FIRE
 	,	PARTICLE_TYPE_LAVA
-	,	PARTICLE_TYPE_RAIN
-	,	PARTICLE_TYPE_STAR
 	,	PARTICLE_TYPE_COUNT
 	,	PARTICLE_TYPE_INVALID	= -1
 	};
@@ -23,13 +24,13 @@ struct SApplication {
 						::cho::STextureProcessable<::cho::SColorBGRA>		TextureShip									= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		TexturePowerup								= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>		TexturePS									= {};
-						::cho::SCoord2<int32_t>								PSTextureCenter								= {};
+						::cho::SCoord2<int32_t>								TextureCenterPS								= {};
 						::cho::SCoord2<int32_t>								PSPositionInTexture							= {};
 						::cho::SCoord2<int32_t>								PSOffsetFromShipCenter						= {};
-						::cho::SCoord2<int32_t>								ShipTextureCenter							= {};
-
-						::cho::SCoord2<float>								ShipCenterPosition							= {};
-						::cho::SCoord2<float>								PowerupCenterPosition						= {};
+						::cho::SCoord2<int32_t>								TextureCenterShip							= {};
+						::cho::SCoord2<int32_t>								TextureCenterPowerup						= {};
+						::cho::SCoord2<float>								CenterPositionShip							= {};
+						::cho::SCoord2<float>								CenterPositionPowerup						= {};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

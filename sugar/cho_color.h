@@ -34,7 +34,7 @@ namespace cho
 		constexpr									SColorBGRA		()																noexcept	= default;
 		constexpr									SColorBGRA		(const SColorRGBA& other)										noexcept	: b(other.b), g(other.g), r(other.r), a(other.a)																																										{}
 		constexpr									SColorBGRA		(const SColorBGRA& other)										noexcept	= default;
-		constexpr									SColorBGRA		(uint8_t r_, uint8_t g_, uint8_t b_, uint8_t a_=0xff)			noexcept	: b(b_), g(g_), r(r_), a(a_)																																										{}
+		constexpr									SColorBGRA		(uint8_t b_, uint8_t g_, uint8_t r_, uint8_t a_=0xff)			noexcept	: b(b_), g(g_), r(r_), a(a_)																																										{}
 		constexpr									SColorBGRA		(uint32_t other)												noexcept	: b((uint8_t)(((other & 0x000000FF) >> 0))), g((uint8_t)(((other & 0x0000FF00) >> 8))), r((uint8_t)(((other & 0x00FF0000) >> 16))), a((uint8_t)(((other & 0xFF000000) >> 24)))						{}
 
 		constexpr					operator		SColorRGBA		()														const	noexcept	{ return {r, g, b, a};																																												}
@@ -63,7 +63,7 @@ namespace cho
 
 		constexpr					SColorBGR						()																noexcept	= default;
 		constexpr					SColorBGR						(const SColorBGR& otherColorInt)								noexcept	= default;
-		constexpr					SColorBGR						(uint8_t r_, uint8_t g_, uint8_t b_)							noexcept	: b(b_), g(g_), r(r_)																																													{}
+		constexpr					SColorBGR						(uint8_t b_, uint8_t g_, uint8_t r_)							noexcept	: b(b_), g(g_), r(r_)																																													{}
 		constexpr					SColorBGR						(const SColorBGRA& other)										noexcept	: b(other.b), g(other.b), r(other.r)																																									{}
 		constexpr					SColorBGR						(const SColor16& other)											noexcept	: b((uint8_t)((other & 0x001F) / ((float)(0x1F))*255))	, g((uint8_t)(((other & 0x07E0) >>5) / ((float)(0x3F))*255)), r((uint8_t)(((other & 0xF800) >>11) / ((float)(0x1F))*255))						{}
 		constexpr					SColorBGR						(uint32_t other)												noexcept	: b((uint8_t)(((other & 0x000000FF) >> 0)))				, g((uint8_t)((other & 0x0000FF00) >> 8))					, r((uint8_t)(((other & 0x00FF0000) >> 16)))										{}
@@ -103,8 +103,8 @@ namespace cho
 
 									SColorFloat&	operator=		(const SColorFloat& color)													= default;
 		constexpr					operator		uint32_t		()														const	noexcept	{ return (((uint32_t)(a * 255.0f)) << 24) | (((uint32_t)(r * 255.0f)) << 16) | (((uint32_t)(g * 255.0f)) << 8) | ((uint32_t)(b*255.0f));															}
-		constexpr					operator		SColorBGRA		()														const	noexcept	{ return SColorBGRA((uint8_t)(r * 255), (uint8_t)(g * 255), (uint8_t)(b * 255), (uint8_t)(a * 255));																								}
-		constexpr					operator		SColorBGR		()														const	noexcept	{ return SColorBGR ((uint8_t)(r * 255), (uint8_t)(g * 255), (uint8_t)(b * 255));																													}
+		constexpr					operator		SColorBGRA		()														const	noexcept	{ return SColorBGRA((uint8_t)(b * 255), (uint8_t)(g * 255), (uint8_t)(r * 255), (uint8_t)(a * 255));																								}
+		constexpr					operator		SColorBGR		()														const	noexcept	{ return SColorBGR ((uint8_t)(b * 255), (uint8_t)(g * 255), (uint8_t)(r * 255));																													}
 		constexpr					operator		SColor16		()														const	noexcept	{ return ((((uint16_t)(r * 0x1F)) << 11) | (((uint16_t)(g * 0x3F)) << 5) | (((uint16_t)(b * 0x1F)) << 0));																							}
 		constexpr					operator		const float*	()														const	noexcept	{ return &r;																																														}
 		constexpr					bool			operator ==		(const SColorFloat& color)								const	noexcept	{ return ((SColorBGR)color) == ((SColorBGR)*this);																																					}

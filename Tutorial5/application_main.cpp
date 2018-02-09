@@ -19,25 +19,25 @@ static ::SApplication::TParticleSystem::TIntegrator::TParticle			particleDefinit
 
 static				void												setupParticles								()																				{
 	//particleDefinitions	[::PARTICLE_TYPE_SNOW].Position						= 
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Position						= 
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Position						= 
 	//particleDefinitions	[::PARTICLE_TYPE_RAIN].Position						= 
 	//particleDefinitions	[::PARTICLE_TYPE_LAVA].Position						= 
 	particleDefinitions	[::PARTICLE_TYPE_STAR].Position						= {};
 
 	//particleDefinitions	[::PARTICLE_TYPE_SNOW].SetMass						( 2);
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].SetMass						(-1);
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].SetMass						(-1);
 	//particleDefinitions	[::PARTICLE_TYPE_RAIN].SetMass						( 1);
 	//particleDefinitions	[::PARTICLE_TYPE_LAVA].SetMass						( 1);
 	particleDefinitions	[::PARTICLE_TYPE_STAR].SetMass						( 1);
 
 	//particleDefinitions	[::PARTICLE_TYPE_SNOW].Damping						= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Damping						= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Damping						= 0.80f;
 	//particleDefinitions	[::PARTICLE_TYPE_RAIN].Damping						= 1.0f;
 	//particleDefinitions	[::PARTICLE_TYPE_LAVA].Damping						= 0.99f;
 	particleDefinitions	[::PARTICLE_TYPE_STAR].Damping						= 1.0f;
 
 	//particleDefinitions	[::PARTICLE_TYPE_SNOW].Forces.Velocity				= {};
-	particleDefinitions	[::PARTICLE_TYPE_FIRE].Forces.Velocity				= {-(float)(rand() % 400), (float)((rand() % 50) - 20)};
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Forces.Velocity				= {-(float)(rand() % 400), (float)((rand() % 50) - 20)};
 	//particleDefinitions	[::PARTICLE_TYPE_RAIN].Forces.Velocity				= {};
 	//particleDefinitions	[::PARTICLE_TYPE_LAVA].Forces.Velocity				= {(float)0, (float)(rand() % 100)+20};
 	particleDefinitions	[::PARTICLE_TYPE_STAR].Forces.Velocity				= {-(float)(rand() % 400), };
@@ -74,13 +74,17 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	::setupParticles();
 
 	static constexpr	const char												bmpFileName0	[]							= "ship_0.bmp";
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	static constexpr	const char												bmpFileName1	[]							= "pow_0.bmp";
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip		.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	ree_if	(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
+	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
+	applicationInstance.TextureCenterShip									= (applicationInstance.TextureShip		.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterPowerup								= (applicationInstance.TexturePowerup	.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenterShip.x};
 	const ::cho::SCoord2<uint32_t>												effectTargetSize							= {64, 64};
 	error_if(errored(applicationInstance.TexturePS.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
-	applicationInstance.ShipCenterPosition									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.ShipTextureCenter									= (applicationInstance.TextureShip.Original.View.metrics() / 2).Cast<int32_t>();
-	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.ShipTextureCenter.x};
 	return 0;
 }
 
@@ -96,7 +100,7 @@ static				::cho::error_t										addParticle
 	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
 	particleIntegrator.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
 	switch(particleType) {
-	case ::PARTICLE_TYPE_FIRE:	
+	case ::PARTICLE_TYPE_SHIP_THRUST:	
 		particleIntegrator.Particle[newInstance.ParticleIndex].Position			= particlePosition; 
 		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= {-(float)(rand() % 400), (float)((rand() % 31 * 4) - 15 * 4)};
 		break;
@@ -121,18 +125,18 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
 	///*if(inputSystem.KeyboardCurrent.KeyState['1']) */for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.ShipCenterPosition);
 	for(uint32_t i = 0; i < 3; ++i) 
-		::addParticle(PARTICLE_TYPE_FIRE, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.ShipCenterPosition + applicationInstance.PSOffsetFromShipCenter.Cast<float>());
+		::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>());
 
 	if(0 == rand() % 5) 
 		for(uint32_t i = 0; i < 1; ++i) 
-			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.ShipCenterPosition);
+			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip);
 
-	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.ShipCenterPosition.y += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.ShipCenterPosition.y -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.ShipCenterPosition.x += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.ShipCenterPosition.x -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
-	applicationInstance.ShipCenterPosition.y								= ::cho::clamp(applicationInstance.ShipCenterPosition.y, 0.0f, (float)offscreen.View.height());
-	applicationInstance.ShipCenterPosition.x								= ::cho::clamp(applicationInstance.ShipCenterPosition.x, 0.0f, (float)offscreen.View.width());
+	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.CenterPositionShip.y += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.CenterPositionShip.y -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.CenterPositionShip.x += (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.CenterPositionShip.x -= (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 2 : 1);
+	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, 0.0f, (float)offscreen.View.height());
+	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, 0.0f, (float)offscreen.View.width());
 	return 0;
 }
 
@@ -154,7 +158,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_FIRE)
+		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
 		 ) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused							= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
@@ -165,7 +169,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			static constexpr	const double											gravity										= 9.8;
 			TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 			particleCurrent															= particleIntegrator.ParticleNext[physicsId];
-			if(particleInstance.Type != PARTICLE_TYPE_FIRE && particleInstance.Type != PARTICLE_TYPE_STAR) 
+			if(particleInstance.Type != PARTICLE_TYPE_SHIP_THRUST && particleInstance.Type != PARTICLE_TYPE_STAR) 
 				particleCurrent.Forces.AccumulatedForce									= {0, float(gravity * lastFrameSeconds) * -1};
 			if(particleInstance.Type != PARTICLE_TYPE_STAR)
 				particleCurrent.Forces.AccumulatedForce.x								+= float(windDirection * abs(particleCurrent.Forces.Velocity.y) * .5) + float((rand() % 100) / 100.0 - .5) / 2.0f;
@@ -202,14 +206,15 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	memset(offscreen.View.begin(), 0x2D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.ShipCenterPosition.Cast<int32_t>() - applicationInstance.ShipTextureCenter, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.CenterPositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.ParticleIndex;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (PARTICLE_TYPE_SNOW == particleInstance.Type) ? ::cho::SColorBGRA(::cho::CYAN)
-			: (PARTICLE_TYPE_FIRE == particleInstance.Type) ? (particleInstance.TimeLived > .05)	? ::cho::SColorBGRA(::cho::GRAY) 
+			: (PARTICLE_TYPE_SHIP_THRUST == particleInstance.Type) ? (particleInstance.TimeLived > .05)	? ::cho::SColorBGRA(::cho::GRAY) 
 															: (rand() % 2)							? ::cho::SColorBGRA(::cho::RED) 
 															: (rand() % 2)							? ::cho::SColorBGRA(::cho::ORANGE) 
 															: ::cho::SColorBGRA(::cho::YELLOW) 
@@ -219,7 +224,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 															: ::cho::SColorBGRA(::cho::WHITE) 
 			: ::cho::SColorBGRA(::cho::GREEN)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
-		if(PARTICLE_TYPE_FIRE == particleInstance.Type) {
+		if(PARTICLE_TYPE_SHIP_THRUST == particleInstance.Type) {
 			viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	*= 1.0f - particleInstance.TimeLived;
 			for(int32_t y = -1, blendCount = 2; y < blendCount; ++y)
 			for(int32_t x = -1; x < blendCount; ++x) {
@@ -231,11 +236,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 					 && x == (int32_t)particlePosition.x
 					 )
 						continue;
-					viewOffscreen[blendPos.y][blendPos.x]									= ::cho::interpolate_linear(viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], viewOffscreen[blendPos.y][blendPos.x], 0.75 + (rand() % 6) * .05f); // 0.95 + (rand() % 4) * .025f);
+					viewOffscreen[blendPos.y][blendPos.x]									= ::cho::interpolate_linear(viewOffscreen[blendPos.y][blendPos.x], viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], (rand() % 4) * .15f); // 0.95 + (rand() % 4) * .025f);
 				}
 			}
 		}
-		if(PARTICLE_TYPE_STAR == particleInstance.Type) {
+		else if(PARTICLE_TYPE_STAR == particleInstance.Type) {
 			for(int32_t y = -1, blendCount = 2; y < blendCount; ++y)
 			for(int32_t x = -1; x < blendCount; ++x) {
 				::cho::SCoord2<uint32_t>													blendPos									= (particlePosition.Cast<int32_t>() + ::cho::SCoord2<int32_t>{x, y}).Cast<uint32_t>();
@@ -246,7 +251,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 					 && x == (int32_t)particlePosition.x
 					 )
 						continue;
-					viewOffscreen[blendPos.y][blendPos.x]									= ::cho::interpolate_linear(viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], viewOffscreen[blendPos.y][blendPos.x], 0.90 + (rand() % 3) * .05f); // 0.95 + (rand() % 4) * .025f);
+					viewOffscreen[blendPos.y][blendPos.x]									= ::cho::interpolate_linear(viewOffscreen[blendPos.y][blendPos.x], viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], (rand() % 3) * .05f); // 0.95 + (rand() % 4) * .025f);
 				}
 			}
 		}

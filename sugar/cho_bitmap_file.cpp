@@ -70,9 +70,9 @@ struct SHeaderInfoBMP {
 			for(int32_t x = 0; x < infoHeader.Width; ++x) {
 				int32_t																									linearIndexSrc								= y * infoHeader.Width * colorSize + (x * colorSize);
 				out_Colors[y * infoHeader.Width + x]																= 
-					{ srcBytes[linearIndexSrc + 2]
+					{ srcBytes[linearIndexSrc + 0]
 					, srcBytes[linearIndexSrc + 1]
-					, srcBytes[linearIndexSrc + 0]
+					, srcBytes[linearIndexSrc + 2]
 					, b32Bit ? srcBytes[linearIndexSrc + 3] : 0xFFU
 					};
 			}
@@ -128,9 +128,9 @@ struct SHeaderInfoBMP {
 			for(int32_t x = 0; x < infoHeader.Width; ++x) {
 				int32_t																									linearIndexSrc								= y * infoHeader.Width * colorSize + (x * colorSize);
 				out_Colors[y * infoHeader.Width + x]																= 
-					{ srcBytes[linearIndexSrc + 2]
+					{ srcBytes[linearIndexSrc + 0]
 					, srcBytes[linearIndexSrc + 1]
-					, srcBytes[linearIndexSrc + 0]
+					, srcBytes[linearIndexSrc + 2]
 					, b32Bit ? srcBytes[linearIndexSrc + 3] : 0xFFU
 					};
 			}
