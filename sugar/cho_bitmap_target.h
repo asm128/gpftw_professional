@@ -13,15 +13,15 @@ namespace cho
 					::cho::error_t										drawPixelLight								(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, double factor, uint32_t range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 		::cho::SCoord2<float>													maxRange									= {(float)range, (float)range};
 		double																	colorUnit									= 1.0f / maxRange.Length();
-		for(int32_t y = -(int32_t)range, blendCount = 1 + range; y < blendCount; ++y)
-		for(int32_t x = -(int32_t)range; x < blendCount; ++x) {
-			::cho::SCoord2<float>														blendPos									= sourcePosition + ::cho::SCoord2<float>{(float)x, (float)y};
+		for(int32_t y = -(int32_t)range - 2, blendCount = 1 + range + 2; y < blendCount; ++y)
+		for(int32_t x = -(int32_t)range - 2; x < blendCount; ++x) {
+			::cho::SCoord2<float>													blendPos									= sourcePosition + ::cho::SCoord2<float>{(float)x, (float)y};
 			if( blendPos.x < viewOffscreen.width () && blendPos.x >= 0
 			 && blendPos.y < viewOffscreen.height() && blendPos.y >= 0
 			 ) {
-				::cho::SCoord2<float>	brightDistance			= blendPos - sourcePosition.Cast<float>();
-				double					brightDistanceLength	= brightDistance.Length();
-				double					colorFactor				= fabs(brightDistanceLength * colorUnit);
+				::cho::SCoord2<float>													brightDistance								= blendPos - sourcePosition.Cast<float>();
+				double																	brightDistanceLength						= brightDistance.Length();
+				double																	colorFactor									= ::cho::min(fabs(brightDistanceLength * colorUnit), 1.0);
 				if( y != (int32_t)sourcePosition.y
 				 || x != (int32_t)sourcePosition.x
 				 )

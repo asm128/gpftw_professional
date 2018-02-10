@@ -48,6 +48,7 @@ struct SApplication {
 						::cho::SCoord2<float>								CenterPositionCrosshair						= {};
 
 						bool												TurboShip									= false;
+						bool												Firing										= false;
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

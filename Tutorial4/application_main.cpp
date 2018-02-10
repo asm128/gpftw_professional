@@ -18,29 +18,21 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 static ::SApplication::TParticleSystem::TIntegrator::TParticle			particleDefinitions	[::PARTICLE_TYPE_COUNT]	= {};
 
 static				void												setupParticles								()																				{
-	//particleDefinitions	[::PARTICLE_TYPE_SNOW].Position						= 
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Position						= 
-	//particleDefinitions	[::PARTICLE_TYPE_RAIN].Position						= 
-	//particleDefinitions	[::PARTICLE_TYPE_LAVA].Position						= 
-	particleDefinitions	[::PARTICLE_TYPE_STAR].Position						= {};
+	particleDefinitions	[::PARTICLE_TYPE_LASER		].Position				= 
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Position				= 
+	particleDefinitions	[::PARTICLE_TYPE_STAR		].Position				= {};
 
-	//particleDefinitions	[::PARTICLE_TYPE_SNOW].SetMass						( 2);
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].SetMass						(-1);
-	//particleDefinitions	[::PARTICLE_TYPE_RAIN].SetMass						( 1);
-	//particleDefinitions	[::PARTICLE_TYPE_LAVA].SetMass						( 1);
-	particleDefinitions	[::PARTICLE_TYPE_STAR].SetMass						( 1);
+	particleDefinitions	[::PARTICLE_TYPE_LASER		].SetMass				(1);
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].SetMass				(1);
+	particleDefinitions	[::PARTICLE_TYPE_STAR		].SetMass				(1);
 
-	//particleDefinitions	[::PARTICLE_TYPE_SNOW].Damping						= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Damping						= 0.80f;
-	//particleDefinitions	[::PARTICLE_TYPE_RAIN].Damping						= 1.0f;
-	//particleDefinitions	[::PARTICLE_TYPE_LAVA].Damping						= 0.99f;
-	particleDefinitions	[::PARTICLE_TYPE_STAR].Damping						= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_LASER		].Damping				= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Damping				= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_STAR		].Damping				= 1.0f;
 
-	//particleDefinitions	[::PARTICLE_TYPE_SNOW].Forces.Velocity				= {};
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Forces.Velocity				= {-(float)(rand() % 400) - 400, (float)((rand() % 50) - 20)};
-	//particleDefinitions	[::PARTICLE_TYPE_RAIN].Forces.Velocity				= {};
-	//particleDefinitions	[::PARTICLE_TYPE_LAVA].Forces.Velocity				= {(float)0, (float)(rand() % 100)+20};
-	particleDefinitions	[::PARTICLE_TYPE_STAR].Forces.Velocity				= {-(float)(rand() % 400), };
+	particleDefinitions	[::PARTICLE_TYPE_LASER		].Forces.Velocity		= {};
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Forces.Velocity		= {};
+	particleDefinitions	[::PARTICLE_TYPE_STAR		].Forces.Velocity		= {};
 }
 
 					::SApplication										* g_ApplicationInstance						= 0;
@@ -106,44 +98,35 @@ static				::cho::error_t										addParticle
 	,	const ::cho::SCoord2<float>									& particleDirection
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
-	particleIntegrator.Particle[newInstance.ParticleIndex].Position				= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
-	float																			particleSpeed													= 0;
+	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
+	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
+	newParticle.Position													= particlePosition; 
+	float																		particleSpeed													= 1;
 	switch(particleType) {
 	default							: return -1;
+	case ::PARTICLE_TYPE_LASER		:	
+		particleSpeed															= 5000;
+		break;
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
 		particleSpeed															= (float)(rand() % 400) + (isTurbo ? 400 : 0);
-		particleIntegrator.Particle[newInstance.ParticleIndex].Position			= particlePosition; 
-		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= particleDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
-		particleIntegrator.Particle[newInstance.ParticleIndex].Position.x		= (float)(rand() % targetSize.x) + targetSize.x *.5f; 
-		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= particleDirection * particleSpeed;
+		newParticle.Position.x		= (float)(rand() % targetSize.x); 
+		newParticle.Position.y		= (float)(rand() % targetSize.y); 
 		break;
-	//case ::PARTICLE_TYPE_RAIN:	
-	//case ::PARTICLE_TYPE_SNOW:	particleIntegrator.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
-	//case ::PARTICLE_TYPE_LAVA:	particleIntegrator.Particle[newInstance.ParticleIndex].Position.y	= 0; break;
 	}
-	return particleInstances.push_back(newInstance);
+	newParticle.Forces.Velocity	= particleDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
+	return 0;
 }
 
 
 static				::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	typedef	::SApplication::TParticleSystem										TParticleSystem;
-	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
-	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
-	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
-
-	::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 1 : 0, applicationInstance.DirectionShip * -1.0);
-	if(0 == rand() % 5) 
-		for(uint32_t i = 0; i < 1; ++i) 
-			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {-1, 0});
+	applicationInstance.Firing												= inputSystem.KeyboardCurrent.KeyState[VK_SPACE] != 0;
+	applicationInstance.TurboShip											= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
 
 	applicationInstance.DirectionShip										= {};
-	applicationInstance.TurboShip											= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
 	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.DirectionShip.y	+= 1;
 	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.DirectionShip.y	-= 1;
 	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.DirectionShip.x	+= 1;
@@ -176,19 +159,15 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
-		else { // Apply forces from wind and gravity.
+		else {
 			particleInstance.TimeLived												+= lastFrameSeconds;
-			static constexpr	const double											gravity										= 9.8;
 			TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 			particleCurrent															= particleIntegrator.ParticleNext[physicsId];
-			if(particleInstance.Type != PARTICLE_TYPE_SHIP_THRUST && particleInstance.Type != PARTICLE_TYPE_STAR) 
-				particleCurrent.Forces.AccumulatedForce									= {0, float(gravity * lastFrameSeconds) * -1};
-			if(particleInstance.Type != PARTICLE_TYPE_STAR)
-				particleCurrent.Forces.AccumulatedForce.x								+= float(windDirection * abs(particleCurrent.Forces.Velocity.y) * .5) + float((rand() % 100) / 100.0 - .5) / 2.0f;
 		}
 	}
 	return 0;
 }
+
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
@@ -201,12 +180,29 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
 
+	// Add some effect particles
+	typedef	::SApplication::TParticleSystem										TParticleSystem;
+	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
+	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
+	if(0 == rand() % 5) 
+		for(uint32_t i = 0; i < 1; ++i) 
+			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {-1, 0});
+
+	if(applicationInstance.Firing) 
+		::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {1, 0});
+
+	// update ship
 	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
 
+	// update background
 	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
 	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
+	// update crosshair
 	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
 
 	::cho::STimer																& timer										= framework.Timer;
@@ -235,6 +231,9 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.ParticleIndex;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
+		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
+			continue;
+
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (particleInstance.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
 			//: (particleInstance.Type == PARTICLE_TYPE_ROCK			)	? ::cho::GRAY
