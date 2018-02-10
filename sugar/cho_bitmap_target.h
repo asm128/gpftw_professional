@@ -137,6 +137,57 @@ namespace cho
 		return 0;
 	}
 
+	typedef		::cho::error_t												(*cho_raster_callback)						(void* bitmapTarget, const ::cho::SCoord2<uint32_t>& bitmapMetrics, const ::cho::SCoord2<uint32_t>& cellPos, const void* value);
+
+	// Bresenham's line algorithm
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									rasterLine									(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SLine2D<_tCoord>& line, cho_raster_callback callback)				{
+		float																		x1											= (float)line.A.x
+			,																		y1											= (float)line.A.y
+			,																		x2											= (float)line.B.x
+			,																		y2											= (float)line.B.y
+			;
+		const bool																	steep										= (::fabs(y2 - y1) > ::fabs(x2 - x1));
+		if(steep){
+			::std::swap(x1, y1);
+			::std::swap(x2, y2);
+		}
+		if(x1 > x2) {
+			::std::swap(x1, x2);
+			::std::swap(y1, y2);
+		}
+		const float																	dx											= x2 - x1;
+		const float																	dy											= ::fabs(y2 - y1);
+		float																		error										= dx / 2.0f;
+		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
+		int32_t																		y											= (int32_t)y1;
+		if(steep) {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+				if(false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.width()))
+					continue;
+				callback(bitmapTarget.begin(), bitmapTarget.metrics(), {(uint32_t)y, (uint32_t)x}, &value);
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
+			}
+		}
+		else {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+				if(false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.width()))
+					continue;
+				callback(bitmapTarget.begin(), bitmapTarget.metrics(), {(uint32_t)x, (uint32_t)y}, &value);
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
+			}
+		}
+		return 0;
+	}
+
 	// Bresenham's line algorithm
 	template<typename _tCoord, typename _tColor>
 	static					::cho::error_t									drawLine									(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SLine2D<_tCoord>& line)				{

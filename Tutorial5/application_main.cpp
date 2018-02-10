@@ -151,10 +151,14 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
 
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	applicationInstance.ProjectilePaths.clear();
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
+		if(particleInstance.Type == PARTICLE_TYPE_LASER)
+			applicationInstance.ProjectilePaths.push_back({particleCurrent.Position, particleNext.Position});
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
 		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
@@ -165,8 +169,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		}
 		else {
 			particleInstance.TimeLived												+= lastFrameSeconds;
-			TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-			particleCurrent															= particleIntegrator.ParticleNext[physicsId];
+			particleCurrent															= particleNext;
 		}
 	}
 	return 0;
@@ -231,6 +234,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	return 0;
 }
 
+static				::cho::error_t										raster_callback						(void* bitmapTarget, const ::cho::SCoord2<uint32_t>& bitmapMetrics, const ::cho::SCoord2<uint32_t>& cellPos, const void* value) {
+	::cho::grid_view<::cho::SColorBGRA>											target								= {(::cho::SColorBGRA*)bitmapTarget, bitmapMetrics};
+	::cho::drawPixelLight(target, cellPos.Cast<float>(), *(::cho::SColorBGRA*)value, .1f, 3.0f);
+	return 0;
+}
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
@@ -281,7 +289,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 				range																= physicsId % 3 + 1.0f;
 				break;
 			}
-			::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
+			if(particleInstance.Type != PARTICLE_TYPE_LASER)
+				::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 		}
 	}
 
@@ -306,5 +315,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
+
+	for(uint32_t iRay = 0, rayCount = applicationInstance.ProjectilePaths.size(); iRay < rayCount; ++iRay)
+		::cho::rasterLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay], raster_callback);
 	return 0;
 }

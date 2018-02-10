@@ -46,6 +46,7 @@ struct SApplication {
 						::cho::SCoord2<float>								CenterPositionShip							= {};
 						::cho::SCoord2<float>								CenterPositionPowerup						= {};
 						::cho::SCoord2<float>								CenterPositionCrosshair						= {};
+						::cho::array_pod<::cho::SLine2D<float>>				ProjectilePaths								= {};
 
 						bool												TurboShip									= false;
 						bool												Firing										= false;
