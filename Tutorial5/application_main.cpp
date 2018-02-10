@@ -268,18 +268,15 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			: ::cho::MAGENTA
 			;
 		if(particleInstance.Lit) { 
-			float																	maxFactor = .5f;
-			float																	range;
+			float																	maxFactor	= .5f;
+			float																	range		= 3.f;
 			switch(particleInstance.Type) {
-			case PARTICLE_TYPE_SHIP_THRUST:
+			case PARTICLE_TYPE_LASER		: break;
+			case PARTICLE_TYPE_SHIP_THRUST	:
 				maxFactor															*= (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
 				range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
 				break;
-			case PARTICLE_TYPE_LASER:
-				//maxFactor															= 0.5f;
-				range																= 3.0f;
-				break;
-			default:
+			default							:
 				maxFactor															= (rand() % 3 + 1) * 0.15f;
 				range																= physicsId % 3 + 1.0f;
 				break;
@@ -290,5 +287,31 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 				::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 		}
 	}
+
+	static double					beaconTimer			= 0;
+	beaconTimer						+= framework.FrameInfo.Seconds.LastFrame * 8;
+	
+	::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionPowerup.Cast<int32_t>();
+	::cho::SCoord2<int32_t>			lightPos []		= 
+		{ centerPowerup + ::cho::SCoord2<int32_t>{-1,-6}
+		, centerPowerup + ::cho::SCoord2<int32_t>{ 0,-6}
+		, centerPowerup + ::cho::SCoord2<int32_t>{ 5,-1}
+		, centerPowerup + ::cho::SCoord2<int32_t>{ 5, 0}
+		, centerPowerup + ::cho::SCoord2<int32_t>{ 0, 5}
+		, centerPowerup + ::cho::SCoord2<int32_t>{-1, 5}
+		, centerPowerup + ::cho::SCoord2<int32_t>{-6, 0}
+		, centerPowerup + ::cho::SCoord2<int32_t>{-6,-1}
+		};
+
+	::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
+		//,						selectedLightPos1	= lightPos[((uint32_t)timer % (::cho::size(lightPos) / 4)) + 2]
+		,						selectedLightPos2	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+		//,						selectedLightPos3	= lightPos[((uint32_t)timer % (::cho::size(lightPos) / 4)) + 6]
+		;
+
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
+	//::cho::drawPixelLight(viewOffscreen, selectedLightPos1.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .1f, 3.0f);
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
+	//::cho::drawPixelLight(viewOffscreen, selectedLightPos3.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .1f, 3.0f);
 	return 0;
 }

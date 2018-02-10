@@ -16,16 +16,18 @@ namespace cho
 		for(int32_t y = -(int32_t)range - 2, blendCount = 1 + (int32_t)range + 2; y < blendCount; ++y)	// the + 2 - 2 is because we actually process more surrounding pixels in order to compensate for the flooring of the coordinates 
 		for(int32_t x = -(int32_t)range - 2; x < blendCount; ++x) {										// as it causes a visual effect of the light being cut to a rectangle and having sharp borders.
 			::cho::SCoord2<_tCoord>													blendPos										= sourcePosition + ::cho::SCoord2<_tCoord>{(_tCoord)x, (_tCoord)y};
-			if( blendPos.x < viewOffscreen.width () && blendPos.x >= 0
-			 && blendPos.y < viewOffscreen.height() && blendPos.y >= 0
+			if( ::cho::in_range(blendPos.x, (_tCoord)0, (_tCoord)viewOffscreen.width ())
+			 && ::cho::in_range(blendPos.y, (_tCoord)0, (_tCoord)viewOffscreen.height())
 			 ) {
 				::cho::SCoord2<_tCoord>													brightDistance									= blendPos - sourcePosition;
 				double																	brightDistanceLength							= brightDistance.Length();
 				double																	distanceFactor									= ::cho::min(fabs(brightDistanceLength * colorUnit), 1.0);
-				if( y != (int32_t)sourcePosition.y
-				 || x != (int32_t)sourcePosition.x
+				if( (sourcePosition.y + y) != (int32_t)sourcePosition.y
+				 || (sourcePosition.x + x) != (int32_t)sourcePosition.x
 				 )
 					viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x]				= ::cho::interpolate_linear(viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x], colorLight, maxFactor * (1.0f - distanceFactor));
+				else
+					viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x]				= colorLight;
 			}
 		}
 		return 0;
