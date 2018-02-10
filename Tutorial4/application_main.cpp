@@ -103,19 +103,23 @@ static				::cho::error_t										addParticle
 	,	const ::cho::SCoord2<uint32_t>								& targetSize
 	,	const ::cho::SCoord2<float>									& particlePosition
 	,	bool														isTurbo
+	,	const ::cho::SCoord2<float>									& particleDirection
 	)														
 {
 	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
-	particleIntegrator.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
+	particleIntegrator.Particle[newInstance.ParticleIndex].Position				= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
+	float																			particleSpeed													= 0;
 	switch(particleType) {
 	default							: return -1;
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
+		particleSpeed															= (float)(rand() % 400) + (isTurbo ? 400 : 0);
 		particleIntegrator.Particle[newInstance.ParticleIndex].Position			= particlePosition; 
-		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= { -(float)(rand() % 400) - (isTurbo ? 400 : 0), (float)((rand() % 31 * 4) - 15 * 4)};
+		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= particleDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
+		particleSpeed															= (float)(rand() % 400) + 25;
 		particleIntegrator.Particle[newInstance.ParticleIndex].Position.x		= (float)(rand() % targetSize.x) + targetSize.x *.5f; 
-		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= {-(float)(rand() % 400) - 25, };
+		particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity	= particleDirection * particleSpeed;
 		break;
 	//case ::PARTICLE_TYPE_RAIN:	
 	//case ::PARTICLE_TYPE_SNOW:	particleIntegrator.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleIntegrator.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
@@ -133,10 +137,10 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
 
-	::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 1 : 0);
+	::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] ? 1 : 0, applicationInstance.DirectionShip * -1.0);
 	if(0 == rand() % 5) 
 		for(uint32_t i = 0; i < 1; ++i) 
-			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false);
+			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {-1, 0});
 
 	applicationInstance.DirectionShip										= {};
 	applicationInstance.TurboShip											= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
