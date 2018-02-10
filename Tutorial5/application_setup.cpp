@@ -2,7 +2,7 @@
 
 static constexpr	const uint32_t														BMP_SCREEN_WIDTH							= 1280;
 static constexpr	const uint32_t														BMP_SCREEN_HEIGHT							= uint32_t(::BMP_SCREEN_WIDTH * (9.0 / 16.0));
-static				::RECT																minClientRect								= {100, 100, 100 + 128, 100 + 64};
+static				::RECT																minClientRect								= {100, 100, 100 + 320, 100 + 180};
 
 extern				::SApplication														* g_ApplicationInstance						;
 

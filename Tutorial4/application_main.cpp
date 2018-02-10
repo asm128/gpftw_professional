@@ -92,7 +92,6 @@ static				::cho::error_t										addParticle
 	(	::PARTICLE_TYPE												particleType
 	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
 	,	::SApplication::TParticleSystem::TIntegrator				& particleIntegrator
-	,	const ::cho::SCoord2<uint32_t>								& targetSize
 	,	const ::cho::SCoord2<float>									& particlePosition
 	,	bool														isTurbo
 	,	const ::cho::SCoord2<float>									& particleDirection
@@ -113,8 +112,6 @@ static				::cho::error_t										addParticle
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
-		newParticle.Position.x		= (float)targetSize.x - 1;//(rand() % targetSize.x); 
-		newParticle.Position.y		= (float)(rand() % targetSize.y); 
 		break;
 	}
 	newParticle.Forces.Velocity	= particleDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
@@ -195,16 +192,16 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	if(delayThrust > .01) {
 		delayThrust																= 0;
 		for(int32_t i = 0; i < particleCountToSpawn; ++i) 
-			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
+			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
 	}
 	if(delayStar > .1) {
 		delayStar																= 0;
 		//for(int32_t i = 0; i < particleCountToSpawn; ++i) 
-			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {-1, 0});
+		::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, false, {-1, 0});
 	}
 
 	if(applicationInstance.Firing) 
-		::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {1, 0});
+		::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip, false, {1, 0});
 
 	// update ship
 	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
@@ -248,32 +245,21 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (particleInstance.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
-			//: (particleInstance.Type == PARTICLE_TYPE_ROCK			)	? ::cho::GRAY
-			//: (particleInstance.Type == PARTICLE_TYPE_ARROW			)	? ::cho::LIGHTGRAY
-			//: (particleInstance.Type == PARTICLE_TYPE_POISON		)	? ::cho::GREEN
-			//: (particleInstance.Type == PARTICLE_TYPE_FIREBALL		)	? ::cho::RED
-			//: (particleInstance.Type == PARTICLE_TYPE_BULLET		)	? ::cho::LIGHTGRAY
-			//: (particleInstance.Type == PARTICLE_TYPE_PLASMA		)	? ::cho::CYAN
-			//: (particleInstance.Type == PARTICLE_TYPE_BOMB			)	? ::cho::DARKRED
 			: (particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.TimeLived > .075)	? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
 																		: (particleInstance.TimeLived > .03 )	? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
 																		: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
-																		: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::ORANGE		)
+																		: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::WHITE		: ::cho::ORANGE		)
 																		: ::cho::YELLOW 
-			: (particleInstance.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 8))						? ::cho::DARKGRAY 
-																		: (0 == (physicsId % 7))						? ::cho::GRAY 
-																		: (0 == (physicsId % 6))						? ::cho::WHITE
-																		: (0 == (physicsId % 5))						? ::cho::DARKGRAY 
-																		: (0 == (physicsId % 4))						? ::cho::GRAY 
-																		: (0 == (physicsId % 3))						? ::cho::WHITE
-																		: (0 == (physicsId % 2))						? ::cho::YELLOW			/ 2.0f
-																		//: (0 == (physicsId % 4))						? ::cho::DARKCYAN 
-																		//: (0 == (physicsId % 3))						? ::cho::DARKYELLOW		/ 2.0f
-																		//: (0 == (physicsId % 2))						? ::cho::DARKBLUE		/ 2.0f
-																		: ::cho::DARKRED / 2.0f
-			: ::cho::MAGENTA// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
+			: (particleInstance.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 7))						? ::cho::DARKYELLOW	/ 2.0f
+																		: (0 == (physicsId % 6))						? ::cho::GRAY 
+																		: (0 == (physicsId % 5))						? ::cho::WHITE
+																		: (0 == (physicsId % 4))						? ::cho::DARKGRAY 
+																		: (0 == (physicsId % 3))						? ::cho::GRAY 
+																		: (0 == (physicsId % 2))						? ::cho::WHITE
+																		: ::cho::DARKGRAY 
+			: ::cho::MAGENTA
 			;
-		if(particleInstance.Lit)	//Type == PARTICLE_TYPE_STAR || particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST) {
+		if(particleInstance.Lit)	
 			if(physicsId % 4) {
 				float																	maxFactor;
 				float																	range;
