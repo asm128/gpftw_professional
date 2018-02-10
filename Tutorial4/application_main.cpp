@@ -61,7 +61,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
-	_CrtSetBreakAlloc(120);
+	//_CrtSetBreakAlloc(120);
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
@@ -102,6 +102,8 @@ static				::cho::error_t										addParticle
 	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
 	newParticle.Position													= particlePosition; 
 	float																		particleSpeed													= 1;
+	::cho::SCoord2<float>														newDirection													= particleDirection;
+	const float value = .5;
 	switch(particleType) {
 	default							: return -1;
 	case ::PARTICLE_TYPE_LASER		:	
@@ -110,12 +112,15 @@ static				::cho::error_t										addParticle
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
 		particleSpeed															= (float)(rand() % 400) + (isTurbo ? 400 : 0);
 		newParticle.Position.y													+= rand() % 3 - 1;
+		newDirection.Rotate(((rand() % 32767) / 32766.0f) * value - value / 2);
+		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
+		newInstance.Lit															= 0 == (rand() % 2);
 		break;
 	}
-	newParticle.Forces.Velocity	= particleDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
+	newParticle.Forces.Velocity	= newDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
 	return 0;
 }
 
@@ -206,6 +211,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	// update ship
 	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
+	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
+	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 
 	// update background
 	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
@@ -260,27 +267,28 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 																		: ::cho::DARKGRAY 
 			: ::cho::MAGENTA
 			;
-		if(particleInstance.Lit)	
-			if(physicsId % 4) {
-				float																	maxFactor;
-				float																	range;
-				switch(particleInstance.Type) {
-				case PARTICLE_TYPE_SHIP_THRUST:
-					viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	*= 1.0f - ::cho::min(1.0f, particleInstance.TimeLived);
-					maxFactor															= (rand() % 3 + 1) * 0.05f;
-					range																= physicsId % 4 + 1.0f;
-					break;
-				case PARTICLE_TYPE_LASER:
-					maxFactor															= 0.5f;
-					range																= 3.0f;
-					break;
-				default:
-					maxFactor															= (rand() % 3 + 1) * 0.15f;
-					range																= physicsId % 3 + 1.0f;
-					break;
-				}
-				::cho::drawPixelLight(viewOffscreen, particlePosition, maxFactor, range);
+		if(particleInstance.Lit) { 
+			float																	maxFactor = .5f;
+			float																	range;
+			switch(particleInstance.Type) {
+			case PARTICLE_TYPE_SHIP_THRUST:
+				maxFactor															*= (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
+				range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
+				break;
+			case PARTICLE_TYPE_LASER:
+				//maxFactor															= 0.5f;
+				range																= 3.0f;
+				break;
+			default:
+				maxFactor															= (rand() % 3 + 1) * 0.15f;
+				range																= physicsId % 3 + 1.0f;
+				break;
 			}
+			if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
+				::cho::drawPixelBrightness(viewOffscreen, particlePosition, maxFactor, range);
+			else
+				::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
+		}
 	}
 	return 0;
 }
