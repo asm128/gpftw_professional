@@ -61,6 +61,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
+	_CrtSetBreakAlloc(120);
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();

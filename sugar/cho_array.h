@@ -73,6 +73,24 @@ namespace cho
 				safeguard.Handle								= 0;
 			}
 		}
+														array_pod									(const array_pod<_tPOD>& other)														{
+			if(other.Count) {
+				const uint32_t										newSize										= other.Count;
+				const uint32_t										reserveSize									= calc_reserve_size(newSize);
+				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
+				throw_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tPOD)), "", "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
+				::cho::auto_cho_free								safeguard;
+				Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
+				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
+				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
+				memcpy(Data, other.Data, newSize * sizeof(_tPOD));
+				//for(uint32_t i = 0, count = newSize; i<count; ++i)
+				//	Data[i]											= other[i];
+				Size											= (uint32_t)reserveSize;
+				Count											= other.Count;
+				safeguard.Handle								= 0;
+			}
+		}
 		template <size_t _otherCount>
 														array_pod									(const _tPOD (&other)[_otherCount])														{
 			if(other.Count) {
@@ -155,9 +173,9 @@ namespace cho
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to resize array. Requested size: %u. Current size: %u.", newSize, (uint32_t)Size);
 
-				TArrayView											safe_data									= {newData, reserveSize};
+				//TArrayView											safe_data									= {newData, reserveSize};
 				if(oldData) {
-					memcpy(safe_data.begin(), Data, ::cho::min(newSize, oldCount) * sizeof(_tPOD));
+					memcpy(newData, Data, ::cho::min(newSize, oldCount) * sizeof(_tPOD));
 					//for(uint32_t i = 0, count = ::cho::min(newSize, oldCount); i<count; ++i)
 					//	safe_data[i]									= operator[](i);
 				}
