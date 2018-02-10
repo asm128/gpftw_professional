@@ -199,9 +199,9 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
 
-	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0f) * .5f + .5f);
-	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3));
-	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3));
+	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
+	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
+	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
 	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
 
@@ -233,13 +233,13 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
 			= (particleInstance.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
-			: (particleInstance.Type == PARTICLE_TYPE_ROCK			)	? ::cho::GRAY
-			: (particleInstance.Type == PARTICLE_TYPE_ARROW			)	? ::cho::LIGHTGRAY
-			: (particleInstance.Type == PARTICLE_TYPE_POISON		)	? ::cho::GREEN
-			: (particleInstance.Type == PARTICLE_TYPE_FIREBALL		)	? ::cho::RED
-			: (particleInstance.Type == PARTICLE_TYPE_BULLET		)	? ::cho::LIGHTGRAY
-			: (particleInstance.Type == PARTICLE_TYPE_PLASMA		)	? ::cho::CYAN
-			: (particleInstance.Type == PARTICLE_TYPE_BOMB			)	? ::cho::DARKRED
+			//: (particleInstance.Type == PARTICLE_TYPE_ROCK			)	? ::cho::GRAY
+			//: (particleInstance.Type == PARTICLE_TYPE_ARROW			)	? ::cho::LIGHTGRAY
+			//: (particleInstance.Type == PARTICLE_TYPE_POISON		)	? ::cho::GREEN
+			//: (particleInstance.Type == PARTICLE_TYPE_FIREBALL		)	? ::cho::RED
+			//: (particleInstance.Type == PARTICLE_TYPE_BULLET		)	? ::cho::LIGHTGRAY
+			//: (particleInstance.Type == PARTICLE_TYPE_PLASMA		)	? ::cho::CYAN
+			//: (particleInstance.Type == PARTICLE_TYPE_BOMB			)	? ::cho::DARKRED
 			: (particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.TimeLived > .075)	? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
 																		: (particleInstance.TimeLived > .03 )	? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
 																		: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)

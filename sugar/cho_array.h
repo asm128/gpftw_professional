@@ -55,7 +55,7 @@ namespace cho
 			other.Size										= other.Count									= 0;
 			other.Data										= 0;
 		}
-														array_pod									(const array_pod<_tPOD>& other)															{
+														array_pod									(const array_view<_tPOD>& other)														{
 			if(other.Count) {
 				const uint32_t										newSize										= other.Count;
 				const uint32_t										reserveSize									= calc_reserve_size(newSize);
@@ -65,7 +65,7 @@ namespace cho
 				Data											= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				throw_if(0 == Data			, "", "Failed to allocate array. Requested size: %u. ", (uint32_t)newSize);
 				throw_if(0 == other.Data	, "", "%s", "other.Data is null!");
-				memcpy(Data, other, newSize * sizeof(_tPOD));
+				memcpy(Data, other.Data, newSize * sizeof(_tPOD));
 				//for(uint32_t i = 0, count = newSize; i<count; ++i)
 				//	Data[i]											= other[i];
 				Size											= (uint32_t)reserveSize;
@@ -92,7 +92,7 @@ namespace cho
 				safeguard.Handle								= 0;
 			} // 
 		}
-							array_pod<_tPOD>&			operator =									(const array_pod<_tPOD>& other)															{
+							array_pod<_tPOD>&			operator =									(const array_view<_tPOD>& other)														{
 			throw_if(resize(other.Count) != (int32_t)other.Count, "", "Failed to assign array.");
 			memcpy(Data, other, other.Count * sizeof(_tPOD));
 			//for(uint32_t iElement = 0; iElement < other.Count; ++iElement)
