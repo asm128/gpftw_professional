@@ -109,6 +109,7 @@ static				::cho::error_t										addParticle
 		break;
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
 		particleSpeed															= (float)(rand() % 400) + (isTurbo ? 400 : 0);
+		newParticle.Position.y													+= rand() % 3 - 1;
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
@@ -259,7 +260,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 																		: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
 																		: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::ORANGE		)
 																		: ::cho::YELLOW 
-			: (particleInstance.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 5))						? ::cho::DARKGRAY 
+			: (particleInstance.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 8))						? ::cho::DARKGRAY 
+																		: (0 == (physicsId % 7))						? ::cho::GRAY 
+																		: (0 == (physicsId % 6))						? ::cho::WHITE
+																		: (0 == (physicsId % 5))						? ::cho::DARKGRAY 
 																		: (0 == (physicsId % 4))						? ::cho::GRAY 
 																		: (0 == (physicsId % 3))						? ::cho::WHITE
 																		: (0 == (physicsId % 2))						? ::cho::YELLOW			/ 2.0f
@@ -269,18 +273,27 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 																		: ::cho::DARKRED / 2.0f
 			: ::cho::MAGENTA// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
-		if(physicsId % 4) {
-			if(particleInstance.Type == PARTICLE_TYPE_STAR || particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST) {
-				float scale = 1.0f;
-				if(PARTICLE_TYPE_SHIP_THRUST == particleInstance.Type) {
+		if(particleInstance.Lit)	//Type == PARTICLE_TYPE_STAR || particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST) {
+			if(physicsId % 4) {
+				float																	maxFactor;
+				float																	range;
+				switch(particleInstance.Type) {
+				case PARTICLE_TYPE_SHIP_THRUST:
 					viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	*= 1.0f - ::cho::min(1.0f, particleInstance.TimeLived);
-					scale = 0.15f;
+					maxFactor															= (rand() % 3 + 1) * 0.05f;
+					range																= physicsId % 4 + 1.0f;
+					break;
+				case PARTICLE_TYPE_LASER:
+					maxFactor															= 0.5f;
+					range																= 3.0f;
+					break;
+				default:
+					maxFactor															= (rand() % 3 + 1) * 0.15f;
+					range																= physicsId % 3 + 1.0f;
+					break;
 				}
-				else 
-					scale = 0.05f;
-				::cho::drawPixelLight(viewOffscreen, particlePosition, (rand() % 3 + 1) * scale, physicsId % 4 + 1);
+				::cho::drawPixelLight(viewOffscreen, particlePosition, maxFactor, range);
 			}
-		}
 	}
 	return 0;
 }
