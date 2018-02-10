@@ -70,7 +70,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip		.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	char																		bmpFileName2	[]							= "crosshair_?.bmp";
-	for(char iFrame = 0, frameCount = 5; iFrame < frameCount; ++iFrame) {
+	for(char iFrame = 0, frameCount = 6; iFrame < frameCount; ++iFrame) {
 		bmpFileName2[10] = iFrame + '0';
 		error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair[iFrame].Original)), "Failed to load bitmap from file: %s.", bmpFileName2);
 	}
@@ -112,7 +112,7 @@ static				::cho::error_t										addParticle
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
-		newParticle.Position.x		= (float)(rand() % targetSize.x); 
+		newParticle.Position.x		= (float)targetSize.x - 1;//(rand() % targetSize.x); 
 		newParticle.Position.y		= (float)(rand() % targetSize.y); 
 		break;
 	}
@@ -186,10 +186,21 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
-	if(0 == rand() % 5) 
-		for(uint32_t i = 0; i < 1; ++i) 
+	static double																delayThrust									= 0;
+	static double																delayStar									= 0;
+	delayThrust																+= framework.FrameInfo.Seconds.LastFrame;
+	delayStar																+= framework.FrameInfo.Seconds.LastFrame;
+	int particleCountToSpawn = 1 + rand() % 4;
+	if(delayThrust > .01) {
+		delayThrust																= 0;
+		for(int32_t i = 0; i < particleCountToSpawn; ++i) 
+			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
+	}
+	if(delayStar > .1) {
+		delayStar																= 0;
+		//for(int32_t i = 0; i < particleCountToSpawn; ++i) 
 			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {-1, 0});
+	}
 
 	if(applicationInstance.Firing) 
 		::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, offscreen.View.metrics(), applicationInstance.CenterPositionShip, false, {1, 0});
