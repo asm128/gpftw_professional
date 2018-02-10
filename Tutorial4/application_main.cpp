@@ -117,7 +117,7 @@ static				::cho::error_t										addParticle
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
-		newInstance.Lit															= 0 == (rand() % 2);
+		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	}
 	newParticle.Forces.Velocity	= newDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
@@ -268,26 +268,20 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			: ::cho::MAGENTA
 			;
 		if(particleInstance.Lit) { 
-			float																	maxFactor = .5f;
-			float																	range;
+			float																	maxFactor	= .5f;
+			float																	range		= 3.f;
 			switch(particleInstance.Type) {
-			case PARTICLE_TYPE_SHIP_THRUST:
+			case PARTICLE_TYPE_LASER		: break;
+			case PARTICLE_TYPE_SHIP_THRUST	:
 				maxFactor															*= (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
 				range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
 				break;
-			case PARTICLE_TYPE_LASER:
-				//maxFactor															= 0.5f;
-				range																= 3.0f;
-				break;
-			default:
+			default							:
 				maxFactor															= (rand() % 3 + 1) * 0.15f;
 				range																= physicsId % 3 + 1.0f;
 				break;
 			}
-			if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
-				::cho::drawPixelBrightness(viewOffscreen, particlePosition, maxFactor, range);
-			else
-				::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
+			::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 		}
 	}
 

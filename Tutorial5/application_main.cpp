@@ -117,7 +117,7 @@ static				::cho::error_t										addParticle
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
 		particleSpeed															= (float)(rand() % 400) + 25;
-		newInstance.Lit															= 0 == (rand() % 2);
+		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	}
 	newParticle.Forces.Velocity	= newDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
@@ -281,10 +281,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 				range																= physicsId % 3 + 1.0f;
 				break;
 			}
-			if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
-				::cho::drawPixelBrightness(viewOffscreen, particlePosition, maxFactor, range);
-			else
-				::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
+			::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 		}
 	}
 
@@ -304,14 +301,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		};
 
 	::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
-		//,						selectedLightPos1	= lightPos[((uint32_t)timer % (::cho::size(lightPos) / 4)) + 2]
 		,						selectedLightPos2	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
-		//,						selectedLightPos3	= lightPos[((uint32_t)timer % (::cho::size(lightPos) / 4)) + 6]
 		;
 
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
-	//::cho::drawPixelLight(viewOffscreen, selectedLightPos1.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .1f, 3.0f);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
-	//::cho::drawPixelLight(viewOffscreen, selectedLightPos3.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .1f, 3.0f);
 	return 0;
 }
