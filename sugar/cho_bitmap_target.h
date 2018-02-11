@@ -118,9 +118,26 @@ namespace cho
 		return 0;
 	}
 
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawCircle									(const ::cho::SCoord2<uint32_t>& targetMetrics, const ::cho::SCircle2D<_tCoord>& circle, ::cho::array_pod<::cho::SCoord2<int32_t>>& out_Points)			{
+		int32_t																		xStop										= ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.width());
+		double																		radiusSquared								= circle.Radius * circle.Radius;
+		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)targetMetrics.y); y < yStop; ++y)
+		for(int32_t x = ::cho::max(0, (int32_t)(circle.Center.x - circle.Radius)); x < xStop; ++x) {	
+			::cho::SCoord2<int32_t>														cellCurrent									= {x, y};
+			double																		distanceSquared								= (cellCurrent - circle.Center).LengthSquared();
+			if(distanceSquared < radiusSquared) {
+			 	for(const int32_t xLimit = ::cho::min((int32_t)circle.Center.x + ((int32_t)circle.Center.x - x), (int32_t)targetMetrics.x); x < xLimit; ++x)
+					out_Points.push_back({x, y});
+				break;
+			}
+		}
+		return 0;
+	}
+
 	// A good article on this kind of triangle rasterization: https://fgiesen.wordpress.com/2013/02/08/triangle-rasterization-in-practice/ 
 	template<typename _tCoord, typename _tColor>
-	static					::cho::error_t									drawTriangle								(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::STriangle2D<_tCoord>& triangle)		{
+	static					::cho::error_t									drawTriangle								(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::STriangle2D<_tCoord>& triangle)										{
 		::cho::SCoord2	<int32_t>													areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
 		::cho::SCoord2	<int32_t>													areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
 		const int32_t																xStop										= ::cho::min(areaMax.x, (int32_t)bitmapTarget.width());
@@ -137,51 +154,65 @@ namespace cho
 		return 0;
 	}
 
+	template<typename _tCoord, typename _tColor>
+	static					::cho::error_t									drawTriangle								(const ::cho::SCoord2<uint32_t>& targetMetrics, const ::cho::STriangle2D<_tCoord>& triangle, ::cho::array_pod<::cho::SCoord2<int32_t>>& out_Points)		{
+		::cho::SCoord2	<int32_t>													areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
+		::cho::SCoord2	<int32_t>													areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
+		const int32_t																xStop										= ::cho::min(areaMax.x, (int32_t)targetMetrics.x);
+		for(int32_t y = ::cho::max(areaMin.y, 0), yStop = ::cho::min(areaMax.y, (int32_t)targetMetrics.y); y < yStop; ++y)
+		for(int32_t x = ::cho::max(areaMin.x, 0); x < xStop; ++x) {	
+			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
+			// Determine barycentric coordinates
+			int																			w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
+			if (w0 >= 0 && w1 >= 0 && w2 >= 0)  // If p is on or inside all edges, render pixel.
+				out_Points.push_back({x, y});
+		}
+		return 0;
+	}
+
 	typedef		::cho::error_t												(*cho_raster_callback)						(void* bitmapTarget, const ::cho::SCoord2<uint32_t>& bitmapMetrics, const ::cho::SCoord2<uint32_t>& cellPos, const void* value);
 
 	// Bresenham's line algorithm
 	template<typename _tCoord, typename _tColor>
 	static					::cho::error_t									rasterLine									(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SLine2D<_tCoord>& line, cho_raster_callback callback)				{
-		float																		x1											= (float)line.A.x
-			,																		y1											= (float)line.A.y
-			,																		x2											= (float)line.B.x
-			,																		y2											= (float)line.B.y
-			;
-		const bool																	steep										= (::fabs(y2 - y1) > ::fabs(x2 - x1));
+		::cho::SCoord2<float>														A											= line.A.Cast<float>();
+		::cho::SCoord2<float>														B											= line.B.Cast<float>();
+		const bool																	steep										= (::fabs(B.y - A.y) > ::fabs(B.x - A.x));
 		if(steep){
-			::std::swap(x1, y1);
-			::std::swap(x2, y2);
+			::std::swap(A.x, A.y);
+			::std::swap(B.x, B.y);
 		}
-		if(x1 > x2) {
-			::std::swap(x1, x2);
-			::std::swap(y1, y2);
+		if(A.x > B.x) {
+			::std::swap(A.x, B.x);
+			::std::swap(A.y, B.y);
 		}
-		const float																	dx											= x2 - x1;
-		const float																	dy											= ::fabs(y2 - y1);
-		float																		error										= dx / 2.0f;
-		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
-		int32_t																		y											= (int32_t)y1;
+		const ::cho::SCoord2<float>													d											= {B.x - A.x, ::fabs(B.y - A.y)};
+		float																		error										= d.x / 2.0f;
+		const int32_t																ystep										= (A.y < B.y) ? 1 : -1;
+		int32_t																		y											= (int32_t)A.y;
 		if(steep) {
-			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+			for(int32_t x = (int32_t)A.x, xStop = (int32_t)B.x; x < xStop; ++x) {
 				if(false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.width()))
 					continue;
 				callback(bitmapTarget.begin(), bitmapTarget.metrics(), {(uint32_t)y, (uint32_t)x}, &value);
-				error																	-= dy;
+				error																	-= d.y;
 				if(error < 0) {
 					y																		+= ystep;
-					error																	+= dx;
+					error																	+= d.x;
 				}
 			}
 		}
 		else {
-			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+			for(int32_t x = (int32_t)A.x, xStop = (int32_t)B.x; x < xStop; ++x) {
 				if(false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.width()))
 					continue;
 				callback(bitmapTarget.begin(), bitmapTarget.metrics(), {(uint32_t)x, (uint32_t)y}, &value);
-				error																	-= dy;
+				error																	-= d.y;
 				if(error < 0) {
 					y																		+= ystep;
-					error																	+= dx;
+					error																	+= d.x;
 				}
 			}
 		}
@@ -191,44 +222,40 @@ namespace cho
 	// Bresenham's line algorithm
 	template<typename _tCoord, typename _tColor>
 	static					::cho::error_t									drawLine									(::cho::grid_view<_tColor>& bitmapTarget, const _tColor& value, const ::cho::SLine2D<_tCoord>& line)				{
-		float																		x1											= (float)line.A.x
-			,																		y1											= (float)line.A.y
-			,																		x2											= (float)line.B.x
-			,																		y2											= (float)line.B.y
-			;
-		const bool																	steep										= (::fabs(y2 - y1) > ::fabs(x2 - x1));
+		::cho::SCoord2<float>														A											= line.A.Cast<float>();
+		::cho::SCoord2<float>														B											= line.B.Cast<float>();
+		const bool																	steep										= (::fabs(B.y - A.y) > ::fabs(B.x - A.x));
 		if(steep){
-			::std::swap(x1, y1);
-			::std::swap(x2, y2);
+			::std::swap(A.x, A.y);
+			::std::swap(B.x, B.y);
 		}
-		if(x1 > x2) {
-			::std::swap(x1, x2);
-			::std::swap(y1, y2);
+		if(A.x > B.x) {
+			::std::swap(A.x, B.x);
+			::std::swap(A.y, B.y);
 		}
-		const float																	dx											= x2 - x1;
-		const float																	dy											= ::fabs(y2 - y1);
-		float																		error										= dx / 2.0f;
-		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
-		int32_t																		y											= (int32_t)y1;
+		const ::cho::SCoord2<float>													d											= {B.x - A.x, ::fabs(B.y - A.y)};
+		float																		error										= d.x / 2.0f;
+		const int32_t																ystep										= (A.y < B.y) ? 1 : -1;
+		int32_t																		y											= (int32_t)A.y;
 		if(steep) {
-			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+			for(int32_t x = (int32_t)A.x, xStop = (int32_t)B.x; x < xStop; ++x) {
 				if(::cho::in_range(x, 0, (int32_t)bitmapTarget.height()) && ::cho::in_range(y, 0, (int32_t)bitmapTarget.width()))
 					bitmapTarget[x][y]														= value;
-				error																	-= dy;
+				error																	-= d.y;
 				if(error < 0) {
 					y																		+= ystep;
-					error																	+= dx;
+					error																	+= d.x;
 				}
 			}
 		}
 		else {
-			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+			for(int32_t x = (int32_t)A.x, xStop = (int32_t)B.x; x < xStop; ++x) {
 				if(::cho::in_range(y, 0, (int32_t)bitmapTarget.height()) && ::cho::in_range(x, 0, (int32_t)bitmapTarget.width()))
 					bitmapTarget[y][x]														= value;
-				error																	-= dy;
+				error																	-= d.y;
 				if(error < 0) {
 					y																		+= ystep;
-					error																	+= dx;
+					error																	+= d.x;
 				}
 			}
 		}
@@ -238,44 +265,40 @@ namespace cho
 	// Bresenham's line algorithm
 	template<typename _tCoord>
 	static					::cho::error_t									drawLine									(const ::cho::SCoord2<uint32_t>& targetMetrics, const ::cho::SLine2D<_tCoord>& line, ::cho::array_pod<::cho::SCoord2<int32_t>>& out_Points)				{
-		float																		x1											= (float)line.A.x
-			,																		y1											= (float)line.A.y
-			,																		x2											= (float)line.B.x
-			,																		y2											= (float)line.B.y
-			;
-		const bool																	steep										= (::fabs(y2 - y1) > ::fabs(x2 - x1));
+		::cho::SCoord2<float>														A											= line.A.Cast<float>();
+		::cho::SCoord2<float>														B											= line.B.Cast<float>();
+		const bool																	steep										= (::fabs(B.y - A.y) > ::fabs(B.x - A.x));
 		if(steep){
-			::std::swap(x1, y1);
-			::std::swap(x2, y2);
+			::std::swap(A.x, A.y);
+			::std::swap(B.x, B.y);
 		}
-		if(x1 > x2) {
-			::std::swap(x1, x2);
-			::std::swap(y1, y2);
+		if(A.x > B.x) {
+			::std::swap(A.x, B.x);
+			::std::swap(A.y, B.y);
 		}
-		const float																	dx											= x2 - x1;
-		const float																	dy											= ::fabs(y2 - y1);
-		float																		error										= dx / 2.0f;
-		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
-		int32_t																		y											= (int32_t)y1;
+		const ::cho::SCoord2<float>													d											= {B.x - A.x, ::fabs(B.y - A.y)};
+		float																		error										= d.x / 2.0f;
+		const int32_t																ystep										= (A.y < B.y) ? 1 : -1;
+		int32_t																		y											= (int32_t)A.y;
 		if(steep) {
-			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+			for(int32_t x = (int32_t)A.x, xStop = (int32_t)B.x; x < xStop; ++x) {
 				if(::cho::in_range(x, 0, (int32_t)targetMetrics.y) && ::cho::in_range(y, 0, (int32_t)targetMetrics.x))
 					out_Points.push_back({y, x});
-				error																	-= dy;
+				error																	-= d.y;
 				if(error < 0) {
 					y																		+= ystep;
-					error																	+= dx;
+					error																	+= d.x;
 				}
 			}
 		}
 		else {
-			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+			for(int32_t x = (int32_t)A.x, xStop = (int32_t)B.x; x < xStop; ++x) {
 				if(::cho::in_range(y, 0, (int32_t)targetMetrics.y) && ::cho::in_range(x, 0, (int32_t)targetMetrics.x))
 					out_Points.push_back({x, y});
-				error																	-= dy;
+				error																	-= d.y;
 				if(error < 0) {
 					y																		+= ystep;
-					error																	+= dx;
+					error																	+= d.x;
 				}
 			}
 		}

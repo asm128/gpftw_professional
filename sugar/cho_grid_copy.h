@@ -171,7 +171,7 @@ namespace cho
 
 	template<typename _tCell, typename _tCoord>
 						::cho::error_t							grid_copy					(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset)		{
-		const int32_t													xDstOffset					= (uint32_t)::cho::min((int32_t)dstOffset.x, (int32_t)dst.width());			// 
+		const int32_t													xDstOffset					= (int32_t)::cho::clamp(0, (int32_t)dstOffset.x, (int32_t)dst.width());			// 
 		const int32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, src, xDstOffset);	// 
 		uint32_t														elementsCopied				= 0;
 		for(int32_t ySrc = 0, yMax = (int32_t)src.height(); ySrc < yMax; ++ySrc) {
