@@ -27,10 +27,12 @@ namespace cho
 	static inline			::cho::error_t									asciiTargetCreate							(::cho::SASCIITarget& target, const ::cho::SCoord2<_tUnit>& size)						{ return ::cho::asciiTargetCreate(console, (uint32_t)size.x, (uint32_t)size.y); }
 
 	// ------------------------------------------------------ 
+#pragma pack( push, 1 )
 	struct SASCIICell {
 								uint8_t											Character	;
 								uint16_t										Color		;
 	};
+#pragma pack( pop )
 
 	static inline			::cho::error_t									drawRectangle								(::cho::SASCIITarget& asciiTarget, const ::cho::SASCIICell& value, const ::cho::SRectangle2D<int32_t>& rectangle)	{
 		for(int32_t y = (int32_t)::cho::max(0, rectangle.Offset.y), yStop = ::cho::min((int32_t)(rectangle.Offset.y + rectangle.Size.y), (int32_t)asciiTarget.Height	()); y < yStop; ++y)

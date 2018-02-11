@@ -67,7 +67,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	::setupParticles();
 
 	static constexpr	const char												bmpFileName0	[]							= "ship_0.bmp";
-	static constexpr	const char												bmpFileName1	[]							= "pow_3.bmp";
+	static constexpr	const char												bmpFileName1	[]							= "pow_core_1.bmp";
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip		.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	char																		bmpFileName2	[]							= "crosshair_?.bmp";
@@ -94,41 +94,34 @@ static				::cho::error_t										addParticle
 	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
 	,	::SApplication::TParticleSystem::TIntegrator				& particleIntegrator
 	,	const ::cho::SCoord2<float>									& particlePosition
-	,	bool														isTurbo
 	,	const ::cho::SCoord2<float>									& particleDirection
+	,	float														speed
 	)														
 {
 	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
 	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
 	newParticle.Position													= particlePosition; 
-	float																		particleSpeed													= 1;
 	::cho::SCoord2<float>														newDirection													= particleDirection;
 	const float value = .5;
 	switch(particleType) {
-	default							: return -1;
-	case ::PARTICLE_TYPE_LASER		:	
-		particleSpeed															= 5000;
-		break;
+	default							: break;
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
-		particleSpeed															= (float)(rand() % 400) + (isTurbo ? 400 : 0);
 		newParticle.Position.y													+= rand() % 3 - 1;
 		newDirection.Rotate(((rand() % 32767) / 32766.0f) * value - value / 2);
-		newInstance.Lit															= 0 == (rand() % 3);
+		newInstance.Lit															= 0 == (rand() % 2);
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
-		particleSpeed															= (float)(rand() % (isTurbo ? 300 : 50)) + 25;
 		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	}
-	newParticle.Forces.Velocity	= newDirection * particleSpeed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
+	newParticle.Forces.Velocity												= newDirection * speed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
 	return 0;
 }
 
-
 static				::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
-	applicationInstance.Firing												= inputSystem.KeyboardCurrent.KeyState[VK_SPACE] != 0;
-	applicationInstance.TurboShip											= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
+	applicationInstance.ShipState.Firing									= inputSystem.KeyboardCurrent.KeyState[VK_SPACE] != 0;
+	applicationInstance.ShipState.Thrust									= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
 
 	applicationInstance.DirectionShip										= {};
 	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.DirectionShip.y	+= 1;
@@ -201,25 +194,28 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	delayThrust																+= framework.FrameInfo.Seconds.LastFrame;
 	delayStar																+= framework.FrameInfo.Seconds.LastFrame;
 	delayWeapon																+= framework.FrameInfo.Seconds.LastFrame;
+	bool																		isTurbo										= applicationInstance.ShipState.Thrust;
 	if(delayThrust > .01) {
 		delayThrust																= 0;
 		for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) 
-			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
+			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.DirectionShip * -1.0, (float)(rand() % 400) + (isTurbo ? 400 : 0));
 	}
 	if(delayStar > .1) {
 		delayStar																= 0;
-		::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, applicationInstance.TurboShip, {-1, 0});
+		::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, {-1, 0}, (float)(rand() % (isTurbo ? 400 : 75)) + 25);
 	}
 
-	if(applicationInstance.Firing) {
-		if(delayWeapon > .05) {
+	if(applicationInstance.ShipState.Firing) {
+		if(delayWeapon >= applicationInstance.Laser.Delay) {
+			const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Original.View.metrics().Cast<float>();
+			const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenterShip.x), -1};
 			delayWeapon																= 0;
-			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip, false, {1, 0});
+			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
 		}
 	}
 
 	// update ship
-	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
+	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.ShipState.Thrust ? 2 : 1);
 	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
 	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 
@@ -278,15 +274,16 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	static double					beaconTimer			= 0;
 	beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
 	::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionPowerup.Cast<int32_t>();
+	int32_t							halfWidth		= (framework.FrameInfo.FrameNumber / 1000) % 6;
 	::cho::SCoord2<int32_t>			lightPos []		= 
-		{ centerPowerup + ::cho::SCoord2<int32_t>{-1,-6}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ 0,-6}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ 5,-1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ 5, 0}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ 0, 5}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-1, 5}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-6, 0}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-6,-1}
+		{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
+		, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
+		, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth, -1}
+		, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth,  0}
+		, centerPowerup + ::cho::SCoord2<int32_t>{ 0, halfWidth}
+		, centerPowerup + ::cho::SCoord2<int32_t>{-1, halfWidth}
+		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
+		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
 		};
 
 	::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
@@ -295,7 +292,6 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
-
 
 	// --- Draw ship
 	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.CenterPositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
@@ -314,10 +310,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			continue;
 
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (thrustToDraw.TimeLived > .075)		? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
-			: (thrustToDraw.TimeLived > .03 )		? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
-			: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
-			: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::WHITE		: ::cho::ORANGE		)
+			= (thrustToDraw.TimeLived > .075)		? (applicationInstance.ShipState.Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+			: (thrustToDraw.TimeLived > .03 )		? (applicationInstance.ShipState.Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
+			: (physicsId % 3)						? (applicationInstance.ShipState.Thrust ? ::cho::CYAN		: ::cho::RED 		)
+			: (physicsId % 2)						? (applicationInstance.ShipState.Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
 			: ::cho::YELLOW 
 			;
 		float																	maxFactor	= .5f;

@@ -16,9 +16,6 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_BULLET
 	,	PARTICLE_TYPE_PLASMA
 	,	PARTICLE_TYPE_BOMB
-	//,	PARTICLE_TYPE_RAIN
-	//,	PARTICLE_TYPE_FIRE
-	//,	PARTICLE_TYPE_LAVA
 	,	PARTICLE_TYPE_COUNT
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
@@ -35,6 +32,16 @@ struct SStuffToDraw {
 						::cho::array_pod<::cho::SLine2D<float>>				ProjectilePaths								= {};
 						::cho::array_pod<::SParticleToDraw>					Stars										= {};
 						::cho::array_pod<::SParticleToDraw>					Thrust										= {};
+};
+
+struct SWeapon {
+						float												Delay;
+						float												Speed;
+};
+
+struct SShipState {
+						bool												Thrust										: 1;
+						bool												Firing										: 1;
 };
 
 struct SApplication {
@@ -64,8 +71,8 @@ struct SApplication {
 						::SStuffToDraw										StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>			CacheLinePoints								= {};
 
-						bool												TurboShip									= false;
-						bool												Firing										= false;
+						::SShipState										ShipState									= {false, false};
+						::SWeapon											Laser										= {.15f, 1000};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

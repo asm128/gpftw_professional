@@ -132,7 +132,6 @@ namespace cho
 
 									SColorFloat&	Clamp			()																noexcept	{ r = ::cho::clamp(r, 0.0f, 1.0f); g = ::cho::clamp(g, 0.0f, 1.0f); b = ::cho::clamp(b, 0.0f, 1.0f); return *this;																				}
 	};	// struct
-#pragma pack( pop )
 
 	static constexpr	const ::cho::SColorFloat	BLACK			= {0.0f, 0.0f, 0.0f, 1.0f					};
 	static constexpr	const ::cho::SColorFloat	WHITE			= {1.0f, 1.0f, 1.0f, 1.0f					};
@@ -161,7 +160,7 @@ namespace cho
 	static constexpr	const ::cho::SColorFloat	LIGHTMAGENTA	= {1.0f, 0.25f, 1.0f, 1.0f					};
 	static constexpr	const ::cho::SColorFloat	LIGHTCYAN		= {0.25f, 1.0f, 1.0f, 1.0f					};
 	static constexpr	const ::cho::SColorFloat	LIGHTORANGE		= {1.0f, 0.780f, 0.25f, 1.0f				};
-
+#pragma pack( pop )
 } // namespace
 
 

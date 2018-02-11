@@ -7,14 +7,19 @@
 #ifndef CHO_MEMORY_H__92836409283642038462309846
 #define CHO_MEMORY_H__92836409283642038462309846
 
-#define GREF_CUSTOM_ALIGN					16
-#define CHO_MALLOC_CUSTOM_ALIGN			16
-
-#ifdef GREF_CUSTOM_ALIGN
-#	define BASETYPE_ALIGN						GREF_CUSTOM_ALIGN
+#define CHO_MALLOC_CUSTOM_ALIGN					16
+#ifdef CHO_MALLOC_CUSTOM_ALIGN
+#	define CHO_MALLOC_ALIGN						CHO_MALLOC_CUSTOM_ALIGN
 #else
-#	define BASETYPE_ALIGN						sizeof(void*)
+#	define CHO_MALLOC_ALIGN						sizeof(void*)
 #endif
+
+//#define GREF_CUSTOM_ALIGN						16
+//#ifdef GREF_CUSTOM_ALIGN
+//#	define BASETYPE_ALIGN						GREF_CUSTOM_ALIGN
+//#else
+//#	define BASETYPE_ALIGN						sizeof(void*)
+//#endif
 
 #define calc_align_address(alignment, address)	((alignment - ((alignment - 1) & (uintptr_t)address)) & (alignment - 1))	// returns the difference between an origin address and the next aligned addres. The alignment must always be a power of two.
 #define calc_align_address_4( address)		calc_align_address( 4, address)	// (0x04 - (0x03 & (uintptr_t)address) & 0x03)
@@ -26,10 +31,10 @@
 namespace cho
 {
 #if defined(CHO_WINDOWS)
-	static inline void*																			cho_malloc					(size_t size)													{ return _aligned_malloc(size, CHO_MALLOC_CUSTOM_ALIGN);	}
+	static inline void*																			cho_malloc					(size_t size)													{ return _aligned_malloc(size, CHO_MALLOC_ALIGN);	}
 	static inline void																			cho_free					(void* ptr)														{ _aligned_free(ptr);										}
 #elif defined(CHO_LINUX) || defined(CHO_ANDROID)
-	static inline void*																			cho_malloc					(size_t size)													{ return ::memalign(CHO_MALLOC_CUSTOM_ALIGN, size);			}
+	static inline void*																			cho_malloc					(size_t size)													{ return ::memalign(CHO_MALLOC_ALIGN, size);			}
 	static inline void																			cho_free					(void* ptr)														{ ::free(ptr);												}
 #endif
 
