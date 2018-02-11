@@ -218,6 +218,27 @@ namespace cho
 			memcpy(&dst[y][0], &src[y][0], sizeof(_tCell) * xCopyCells);
 		return xCopyCells * yCopyRows;
 	}
+
+	template<typename _tCell>
+						::cho::error_t							grid_mirror_x				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src)		{
+		const uint32_t													yCopyRows					= ::cho::min(dst.height(), src.height());
+		const uint32_t													xCopyCells					= ::cho::min(dst.width (), src.width ());
+		uint32_t														srcMaxX						= src.width() - 1;
+		for(uint32_t y = 0; y < yCopyRows; ++y) 
+		for(uint32_t x = 0; x < xCopyCells; ++x) 
+			dst[y][x]													= src[y][srcMaxX - x];
+		return xCopyCells * yCopyRows;
+	}
+
+	template<typename _tCell>
+						::cho::error_t							grid_mirror_y				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src)		{
+		const uint32_t													yCopyRows					= ::cho::min(dst.height(), src.height());
+		const uint32_t													xCopyCells					= ::cho::min(dst.width (), src.width ());
+		uint32_t														srcMaxY						= src.height() - 1;
+		for(uint32_t y = 0; y < yCopyRows; ++y) 
+			memcpy(&dst[y][0], &src[srcMaxY - y][0], sizeof(_tCell) * xCopyCells);
+		return xCopyCells * yCopyRows;
+	}
 } // namespace
 
 #endif // CHO_GRID_COPY_20983429834

@@ -72,7 +72,7 @@ struct SApplication {
 						::cho::array_pod<::cho::SCoord2<int32_t>>			CacheLinePoints								= {};
 
 						::SShipState										ShipState									= {false, false};
-						::SWeapon											Laser										= {.15f, 1000};
+						::SWeapon											Laser										= {.15f, 2000};
 
 																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
