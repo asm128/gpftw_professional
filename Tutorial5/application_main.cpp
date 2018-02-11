@@ -116,7 +116,7 @@ static				::cho::error_t										addParticle
 		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	case ::PARTICLE_TYPE_STAR		:	
-		particleSpeed															= (float)(rand() % 400) + 25;
+		particleSpeed															= (float)(rand() % (isTurbo ? 300 : 50)) + 25;
 		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	}
@@ -151,14 +151,14 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
 
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	applicationInstance.ProjectilePaths.clear();
+	applicationInstance.StuffToDraw.ProjectilePaths.clear();
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 		if(particleInstance.Type == PARTICLE_TYPE_LASER)
-			applicationInstance.ProjectilePaths.push_back({particleCurrent.Position, particleNext.Position});
+			applicationInstance.StuffToDraw.ProjectilePaths.push_back({particleCurrent.Position, particleNext.Position});
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
 		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
@@ -168,6 +168,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			--iParticle;
 		}
 		else {
+				 if(particleInstance.Type == PARTICLE_TYPE_STAR)		applicationInstance.StuffToDraw.Stars	.push_back({physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit});
+			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)	applicationInstance.StuffToDraw.Thrust	.push_back({physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit});
 			particleInstance.TimeLived												+= lastFrameSeconds;
 			particleCurrent															= particleNext;
 		}
@@ -199,16 +201,14 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	delayThrust																+= framework.FrameInfo.Seconds.LastFrame;
 	delayStar																+= framework.FrameInfo.Seconds.LastFrame;
 	delayWeapon																+= framework.FrameInfo.Seconds.LastFrame;
-	int particleCountToSpawn = 1 + rand() % 4;
 	if(delayThrust > .01) {
 		delayThrust																= 0;
-		for(int32_t i = 0; i < particleCountToSpawn; ++i) 
+		for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) 
 			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
 	}
 	if(delayStar > .1) {
 		delayStar																= 0;
-		//for(int32_t i = 0; i < particleCountToSpawn; ++i) 
-		::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, false, {-1, 0});
+		::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, applicationInstance.TurboShip, {-1, 0});
 	}
 
 	if(applicationInstance.Firing) {
@@ -249,60 +249,34 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	typedef	::SApplication::TParticleSystem										TParticleSystem;
-	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	//memset(offscreen.View.begin(), 0x1D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
 	::cho::drawRectangle(offscreen.View, applicationInstance.ColorBackground, ::cho::SRectangle2D<uint32_t>{{}, offscreen.View.metrics()});
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.CenterPositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair[(uint32_t)(framework.FrameInfo.Seconds.Total * 10.0f) % 5].Original.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
-		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		const int32_t																physicsId									= particleInstance.ParticleIndex;
-		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
-		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
+	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Stars.size(); iRay < rayCount; ++iRay) {
+		::SParticleToDraw															& starToDraw								= applicationInstance.StuffToDraw.Stars[iRay];
+		if(false == starToDraw.Lit)
 			continue;
-
+		::cho::SCoord2<int32_t>														& particlePosition							= starToDraw.Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (particleInstance.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
-			: (particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.TimeLived > .075)	? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
-																		: (particleInstance.TimeLived > .03 )	? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
-																		: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
-																		: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::WHITE		: ::cho::ORANGE		)
-																		: ::cho::YELLOW 
-			: (particleInstance.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 7))						? ::cho::DARKYELLOW	/ 2.0f
-																		: (0 == (physicsId % 6))						? ::cho::GRAY 
-																		: (0 == (physicsId % 5))						? ::cho::WHITE
-																		: (0 == (physicsId % 4))						? ::cho::DARKGRAY 
-																		: (0 == (physicsId % 3))						? ::cho::GRAY 
-																		: (0 == (physicsId % 2))						? ::cho::WHITE
-																		: ::cho::DARKGRAY 
-			: ::cho::MAGENTA
+			= (0 == (starToDraw.Id % 7))	? ::cho::DARKYELLOW	/ 2.0f
+			: (0 == (starToDraw.Id % 6))	? ::cho::GRAY 
+			: (0 == (starToDraw.Id % 5))	? ::cho::WHITE
+			: (0 == (starToDraw.Id % 4))	? ::cho::DARKGRAY 
+			: (0 == (starToDraw.Id % 3))	? ::cho::GRAY 
+			: (0 == (starToDraw.Id % 2))	? ::cho::WHITE
+			: ::cho::DARKGRAY 
 			;
-		if(particleInstance.Lit) { 
-			float																	maxFactor	= .5f;
-			float																	range		= 3.f;
-			switch(particleInstance.Type) {
-			case PARTICLE_TYPE_LASER		: break;
-			case PARTICLE_TYPE_SHIP_THRUST	:
-				maxFactor															*= (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
-				range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, particleInstance.TimeLived / 4));
-				break;
-			default							:
-				maxFactor															= (rand() % 3 + 1) * 0.15f;
-				range																= physicsId % 3 + 1.0f;
-				break;
-			}
-			if(particleInstance.Type != PARTICLE_TYPE_LASER)
-				::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
-		}
+		float																	maxFactor	= .5f;
+		float																	range		= 3.f;
+		maxFactor															= (rand() % 3 + 1) * 0.10f;
+		range																= starToDraw.Id % 3 + 1.0f;
+		::cho::drawPixelLight(viewOffscreen, particlePosition.Cast<float>(), viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 	}
+	applicationInstance.StuffToDraw.Stars.clear();
 
+	// --- Draw powerups
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	static double					beaconTimer			= 0;
-	beaconTimer						+= framework.FrameInfo.Seconds.LastFrame * 8;
-	
+	beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
 	::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionPowerup.Cast<int32_t>();
 	::cho::SCoord2<int32_t>			lightPos []		= 
 		{ centerPowerup + ::cho::SCoord2<int32_t>{-1,-6}
@@ -322,11 +296,43 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);
 
-	for(uint32_t iRay = 0, rayCount = applicationInstance.ProjectilePaths.size(); iRay < rayCount; ++iRay) {
+
+	// --- Draw ship
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.CenterPositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	
+	// --- Draw crosshair
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair[(uint32_t)(framework.FrameInfo.Seconds.Total * 10.0f) % 5].Original.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	
+	// --- Draw propulsion engine
+	for(uint32_t iThrust = 0, particleCount = (uint32_t)applicationInstance.StuffToDraw.Thrust.size(); iThrust < particleCount; ++iThrust) {
+		::SParticleToDraw															& thrustToDraw								= applicationInstance.StuffToDraw.Thrust[iThrust];
+		if(false == thrustToDraw.Lit)
+			continue;
+		const int32_t																physicsId									= thrustToDraw.Id;
+		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
+		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
+			continue;
+
+		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
+			= (thrustToDraw.TimeLived > .075)		? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+			: (thrustToDraw.TimeLived > .03 )		? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
+			: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
+			: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::WHITE		: ::cho::ORANGE		)
+			: ::cho::YELLOW 
+			;
+		float																	maxFactor	= .5f;
+		float																	range		= 3.f;
+		maxFactor															*= (1.0f - ::cho::min(1.0f, thrustToDraw.TimeLived / 4));
+		range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, thrustToDraw.TimeLived / 4));
+		::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
+	}
+	applicationInstance.StuffToDraw.Thrust.clear();
+
+	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iRay < rayCount; ++iRay) {
 		//::cho::rasterLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay], raster_callback);
 		//::cho::drawLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay]);
 		applicationInstance.CacheLinePoints.clear();
-		::cho::drawLine(viewOffscreen.metrics(), applicationInstance.ProjectilePaths[iRay], applicationInstance.CacheLinePoints);
+		::cho::drawLine(viewOffscreen.metrics(), applicationInstance.StuffToDraw.ProjectilePaths[iRay], applicationInstance.CacheLinePoints);
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>								& pointToDraw									= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, ::cho::SColorBGRA(::cho::RED), .1f, 3.0f);

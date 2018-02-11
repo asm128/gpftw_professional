@@ -23,6 +23,20 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
+struct SParticleToDraw {
+	int32_t							Id;
+	int32_t							IndexParticle;
+	float							TimeLived;
+	::cho::SCoord2<int32_t>			Position;
+	bool							Lit;
+};
+
+struct SStuffToDraw {
+						::cho::array_pod<::cho::SLine2D<float>>				ProjectilePaths								= {};
+						::cho::array_pod<::SParticleToDraw>					Stars										= {};
+						::cho::array_pod<::SParticleToDraw>					Thrust										= {};
+};
+
 struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>		TParticleSystem;
 
@@ -46,7 +60,8 @@ struct SApplication {
 						::cho::SCoord2<float>								CenterPositionShip							= {};
 						::cho::SCoord2<float>								CenterPositionPowerup						= {};
 						::cho::SCoord2<float>								CenterPositionCrosshair						= {};
-						::cho::array_pod<::cho::SLine2D<float>>				ProjectilePaths								= {};
+
+						::SStuffToDraw										StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>			CacheLinePoints								= {};
 
 						bool												TurboShip									= false;
