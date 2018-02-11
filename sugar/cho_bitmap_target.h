@@ -212,9 +212,8 @@ namespace cho
 		int32_t																		y											= (int32_t)y1;
 		if(steep) {
 			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-				if(false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.width()))
-					continue;
-				bitmapTarget[x][y]														= value;
+				if(::cho::in_range(x, 0, (int32_t)bitmapTarget.height()) && ::cho::in_range(y, 0, (int32_t)bitmapTarget.width()))
+					bitmapTarget[x][y]														= value;
 				error																	-= dy;
 				if(error < 0) {
 					y																		+= ystep;
@@ -224,9 +223,8 @@ namespace cho
 		}
 		else {
 			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
-				if(false == ::cho::in_range(y, 0, (int32_t)bitmapTarget.height()) || false == ::cho::in_range(x, 0, (int32_t)bitmapTarget.width()))
-					continue;
-				bitmapTarget[y][x]														= value;
+				if(::cho::in_range(y, 0, (int32_t)bitmapTarget.height()) && ::cho::in_range(x, 0, (int32_t)bitmapTarget.width()))
+					bitmapTarget[y][x]														= value;
 				error																	-= dy;
 				if(error < 0) {
 					y																		+= ystep;
@@ -236,6 +234,54 @@ namespace cho
 		}
 		return 0;
 	}
+
+	// Bresenham's line algorithm
+	template<typename _tCoord>
+	static					::cho::error_t									drawLine									(const ::cho::SCoord2<uint32_t>& targetMetrics, const ::cho::SLine2D<_tCoord>& line, ::cho::array_pod<::cho::SCoord2<int32_t>>& out_Points)				{
+		float																		x1											= (float)line.A.x
+			,																		y1											= (float)line.A.y
+			,																		x2											= (float)line.B.x
+			,																		y2											= (float)line.B.y
+			;
+		const bool																	steep										= (::fabs(y2 - y1) > ::fabs(x2 - x1));
+		if(steep){
+			::std::swap(x1, y1);
+			::std::swap(x2, y2);
+		}
+		if(x1 > x2) {
+			::std::swap(x1, x2);
+			::std::swap(y1, y2);
+		}
+		const float																	dx											= x2 - x1;
+		const float																	dy											= ::fabs(y2 - y1);
+		float																		error										= dx / 2.0f;
+		const int32_t																ystep										= (y1 < y2) ? 1 : -1;
+		int32_t																		y											= (int32_t)y1;
+		if(steep) {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+				if(::cho::in_range(x, 0, (int32_t)targetMetrics.y) && ::cho::in_range(y, 0, (int32_t)targetMetrics.x))
+					out_Points.push_back({y, x});
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
+			}
+		}
+		else {
+			for(int32_t x = (int32_t)x1, xStop = (int32_t)x2; x < xStop; ++x) {
+				if(::cho::in_range(y, 0, (int32_t)targetMetrics.y) && ::cho::in_range(x, 0, (int32_t)targetMetrics.x))
+					out_Points.push_back({x, y});
+				error																	-= dy;
+				if(error < 0) {
+					y																		+= ystep;
+					error																	+= dx;
+				}
+			}
+		}
+		return 0;
+	}
+
 } // namespace
 
 #endif // BITMAP_TARGET_H_98237498023745654654
