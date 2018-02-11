@@ -8,9 +8,8 @@
 
 namespace cho
 {
-
-	template<typename _tCoord>
-					::cho::error_t											drawPixelBrightness								(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, _tCoord factor, _tCoord range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	template<typename _tCoord, typename _tCell>
+					::cho::error_t											drawPixelBrightness								(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, const _tCell& colorLight, _tCoord factor, _tCoord range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 		::cho::SCoord2<_tCoord>														maxRange										= {range, range};
 		_tCoord																		colorUnit										= _tCoord(1.0 / maxRange.Length());
 		for(int32_t y = -(int32_t)range - 2, blendCount = 1 + (int32_t)range + 2; y < blendCount; ++y)	// the + 2 - 2 is because we actually process more surrounding pixels in order to compensate for the flooring of the coordinates 
@@ -23,7 +22,7 @@ namespace cho
 					::cho::SCoord2<_tCoord>													brightDistance									= blendPos - sourcePosition;
 					double																	brightDistanceLength							= brightDistance.Length();
 					double																	colorFactor										= ::cho::min(fabs(brightDistanceLength * colorUnit), 1.0);
-					viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x]				= ::cho::interpolate_linear(viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x], viewOffscreen[(uint32_t)sourcePosition.y][(uint32_t)sourcePosition.x], factor * (1.0f - colorFactor));
+					viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x]				= ::cho::interpolate_linear(viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x], colorLight, factor * (1.0f - colorFactor));
 				}
 			}
 		}
@@ -32,8 +31,11 @@ namespace cho
 
 	template<typename _tCoord, typename _tCell>
 					::cho::error_t											drawPixelLight									(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, const _tCell& colorLight, _tCoord maxFactor, _tCoord range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-		viewOffscreen[(uint32_t)sourcePosition.y][(uint32_t)sourcePosition.x]	= colorLight;
-		return drawPixelBrightness(viewOffscreen, sourcePosition, maxFactor, range);
+		if( ((uint32_t)sourcePosition.x) < viewOffscreen.width	()
+		 && ((uint32_t)sourcePosition.y) < viewOffscreen.height	()
+		 )
+			viewOffscreen[(uint32_t)sourcePosition.y][(uint32_t)sourcePosition.x]	= colorLight;
+		return drawPixelBrightness(viewOffscreen, sourcePosition, colorLight, maxFactor, range);
 	}
 
 	template<typename _tElement>
