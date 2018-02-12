@@ -69,6 +69,8 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
+	memset(viewOffscreen.begin(), 0, sizeof(::cho::SColorBGRA) * viewOffscreen.size());
 	::setupParticles();
 	return 0;
 }
