@@ -17,19 +17,31 @@
 
 					::cho::error_t										drawCollisions								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iRay < rayCount; ++iRay) {
 		const ::cho::SCoord2<float>													& pointToDraw									= applicationInstance.StuffToDraw.CollisionPoints[iRay];
 		::cho::drawPixelLight(viewOffscreen, pointToDraw, ::cho::SColorBGRA(::cho::ORANGE), .15f, 3.0f);
 	}
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
+
+	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Debris.size(); iRay < rayCount; ++iRay) {
+		const ::SParticleToDraw														& particleToDraw								= applicationInstance.StuffToDraw.Debris[iRay];
+		const ::cho::SCoord2<float>													& pointToDraw									= particleToDraw.Position.Cast<float>();
+		if(particleToDraw.Lit) {
+			::cho::SColorBGRA															finalColor										
+				= particleToDraw.Id % 3 ? ::cho::SColorBGRA(::cho::ORANGE) 
+				: particleToDraw.Id % 2 ? ::cho::SColorBGRA(::cho::YELLOW) 
+				: ::cho::SColorBGRA(::cho::RED);
+			finalColor																*= 1.0f - (particleToDraw.TimeLived);
+			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, ::cho::max(0.0f, 1.0f - (particleToDraw.TimeLived)) * 4.0f);
+		}
+		
+	}
+	applicationInstance.StuffToDraw.Debris.clear();
 	return 0;
 }
 					::cho::error_t										drawShots									(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	::cho::SFramework															& framework									= applicationInstance.Framework;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iRay < rayCount; ++iRay) {
 		//::cho::rasterLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay], raster_callback);
 		//::cho::drawLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay]);

@@ -131,6 +131,7 @@ static				::cho::error_t										addParticle
 		newDirection.Rotate(((rand() % 32767) / 32766.0f) * value - value / 2);
 		newInstance.Lit															= 0 == (rand() % 2);
 		break;
+	case ::PARTICLE_TYPE_DEBRIS		:	
 	case ::PARTICLE_TYPE_STAR		:	
 		newInstance.Lit															= 0 == (rand() % 3);
 		break;
@@ -141,8 +142,9 @@ static				::cho::error_t										addParticle
 
 static				::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
-	applicationInstance.ShipState.Firing									= inputSystem.KeyboardCurrent.KeyState[VK_SPACE] != 0;
-	applicationInstance.ShipState.Thrust									= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
+	applicationInstance.ShipState.Firing									= inputSystem.KeyboardCurrent.KeyState[VK_SPACE		] != 0;
+	applicationInstance.ShipState.Thrust									= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT		] != 0;
+	applicationInstance.ShipState.Brakes									= inputSystem.KeyboardCurrent.KeyState[VK_CONTROL	] != 0;
 
 	applicationInstance.DirectionShip										= {};
 	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.DirectionShip.y += 1;
@@ -182,8 +184,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			--iParticle;
 		}
 		else {
-				 if(particleInstance.Type == PARTICLE_TYPE_STAR)		applicationInstance.StuffToDraw.Stars	.push_back({physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit});
-			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)	applicationInstance.StuffToDraw.Thrust	.push_back({physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit});
+			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
+				 if(particleInstance.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
+			else if(particleInstance.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
 			particleInstance.TimeLived												+= lastFrameSeconds;
 			particleCurrent															= particleNext;
 		}
@@ -319,7 +323,8 @@ template<typename _tCoord>
 	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
 	// update ship
-	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.ShipState.Thrust ? 2 : 1);
+	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * 
+		(applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
 	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
 	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 
@@ -334,31 +339,44 @@ template<typename _tCoord>
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 
-	//for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-	//	const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionCrosshair;
-	//	float											halfSizeBox				= 5.0f;
-	//	::cho::SLine2D<float>							rectangleSegment0		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}};
-	//	::cho::SLine2D<float>							rectangleSegment1		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}};
-	//	::cho::SLine2D<float>							rectangleSegment2		= {posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
-	//	::cho::SLine2D<float>							rectangleSegment3		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
-	//	::cho::SCoord2<float>							collision0				= {};
-	//	::cho::SCoord2<float>							collision1				= {};
-	//	::cho::SCoord2<float>							collision2				= {};
-	//	::cho::SCoord2<float>							collision3				= {};
-	//	::cho::SLine2D<float>							projectilePath			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-	//	//info_if(line_line_intersect(projectilePath, rectangleSegment0, collision0), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision0.x, collision0.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-	//	//info_if(line_line_intersect(projectilePath, rectangleSegment1, collision1), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision1.x, collision1.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-	//	//info_if(line_line_intersect(projectilePath, rectangleSegment2, collision2), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision2.x, collision2.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-	//	//info_if(line_line_intersect(projectilePath, rectangleSegment3, collision3), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision3.x, collision3.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-	//
-	//	if(line_segment_intersect(projectilePath, rectangleSegment0, collision0)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision0);
-	//	if(line_segment_intersect(projectilePath, rectangleSegment1, collision1)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision1);
-	//	if(line_segment_intersect(projectilePath, rectangleSegment2, collision2)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision2);
-	//	if(line_segment_intersect(projectilePath, rectangleSegment3, collision3)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision3);
-	//}
-
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
+		float											halfSizeBox				= (float)applicationInstance.TextureCenterPowerup.x;
+		::cho::SLine2D<float>							rectangleSegments[]		= 
+			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}}
+			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}}
+			, {posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}}
+			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}}
+			};
+		const ::cho::SLine2D<float>						& projectilePath								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
+		for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
+			::cho::SCoord2<float>							& collision										= collisions[iSeg];
+			const ::cho::SLine2D<float>						& segSelected									= rectangleSegments	[iSeg]; 
+			if(segment_segment_intersect(projectilePath, segSelected, collision)) {
+				bool											bFound											= false;
+				for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
+					if(collision == collisions[iS2]) {
+						bFound = true;
+						info_printf("Discarded collision point.");
+						break;
+					}
+				}
+				if(false == bFound)
+ 					applicationInstance.StuffToDraw.CollisionPoints.push_back(collision);
+			}
+		}
+	}
+	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
+		for(uint32_t i=0; i < 10; ++i) {
+			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
+			angle.Normalize();
+			::addParticle(PARTICLE_TYPE_DEBRIS, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100);
+		}
+	applicationInstance.StuffToDraw.CollisionPoints.clear();
+
+	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
+		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionCrosshair;
 		float											halfSizeBox				= 5.0f;
 		::cho::SLine2D<float>							rectangleSegment0		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}};
 		::cho::SLine2D<float>							rectangleSegment1		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}};
@@ -369,23 +387,10 @@ template<typename _tCoord>
 		::cho::SCoord2<float>							collision2				= {};
 		::cho::SCoord2<float>							collision3				= {};
 		::cho::SLine2D<float>							projectilePath			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-		//info_if(line_line_intersect(projectilePath, rectangleSegment0, collision0), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision0.x, collision0.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-		//info_if(line_line_intersect(projectilePath, rectangleSegment1, collision1), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision1.x, collision1.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-		//info_if(line_line_intersect(projectilePath, rectangleSegment2, collision2), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision2.x, collision2.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-		//info_if(line_line_intersect(projectilePath, rectangleSegment3, collision3), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision3.x, collision3.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
-
-		if(segment_segment_intersect(projectilePath, rectangleSegment0, collision0)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision0);
-		if(segment_segment_intersect(projectilePath, rectangleSegment1, collision1)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision1);
-		if(segment_segment_intersect(projectilePath, rectangleSegment2, collision2)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision2);
-		if(segment_segment_intersect(projectilePath, rectangleSegment3, collision3)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision3);
+		if(line_line_intersect(projectilePath, rectangleSegment0, collision0)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision0);
+		if(line_line_intersect(projectilePath, rectangleSegment1, collision1)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision1);
+		if(line_line_intersect(projectilePath, rectangleSegment2, collision2)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision2);
+		if(line_line_intersect(projectilePath, rectangleSegment3, collision3)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision3);
 	}
-
-	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
-		for(uint32_t i=0; i < 10; ++i) {
-			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20), (float)(rand() % 20 - 1 - 10)};
-			angle.Normalize();
-			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 400);
-		}
-
 	return 0;
 }

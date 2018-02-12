@@ -16,6 +16,7 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_BULLET
 	,	PARTICLE_TYPE_PLASMA
 	,	PARTICLE_TYPE_BOMB
+	,	PARTICLE_TYPE_DEBRIS
 	,	PARTICLE_TYPE_COUNT
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
@@ -32,6 +33,7 @@ struct SStuffToDraw {
 						::cho::array_pod<::cho::SLine2D<float>>					ProjectilePaths								= {};
 						::cho::array_pod<::SParticleToDraw>						Stars										= {};
 						::cho::array_pod<::SParticleToDraw>						Thrust										= {};
+						::cho::array_pod<SParticleToDraw>						Debris										= {};
 						::cho::array_pod<::cho::SCoord2<float>>					CollisionPoints								= {};
 };
 
@@ -43,6 +45,7 @@ struct SWeapon {
 struct SShipState {
 						bool													Thrust										: 1;
 						bool													Firing										: 1;
+						bool													Brakes										: 1;
 };
 
 //struct STextureArray {
