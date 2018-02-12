@@ -29,11 +29,17 @@ struct SParticleToDraw {
 						bool													Lit;
 };
 
+struct SLaserToDraw {
+						int32_t													Id;
+						int32_t													IndexParticle;
+						::cho::SLine2D<float>									Segment;
+};
+
 struct SStuffToDraw {
-						::cho::array_pod<::cho::SLine2D<float>>					ProjectilePaths								= {};
+						::cho::array_pod<::SLaserToDraw>						ProjectilePaths								= {};
 						::cho::array_pod<::SParticleToDraw>						Stars										= {};
 						::cho::array_pod<::SParticleToDraw>						Thrust										= {};
-						::cho::array_pod<SParticleToDraw>						Debris										= {};
+						::cho::array_pod<::SParticleToDraw>						Debris										= {};
 						::cho::array_pod<::cho::SCoord2<float>>					CollisionPoints								= {};
 };
 

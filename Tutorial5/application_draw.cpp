@@ -1,13 +1,7 @@
 #include "application.h"
 #include "cho_grid_copy.h"
 #include "cho_bitmap_target.h"
-
 //
-//static				::cho::error_t										raster_callback						(void* bitmapTarget, const ::cho::SCoord2<uint32_t>& bitmapMetrics, const ::cho::SCoord2<uint32_t>& cellPos, const void* value) {
-//	::cho::grid_view<::cho::SColorBGRA>											target								= {(::cho::SColorBGRA*)bitmapTarget, bitmapMetrics};
-//	::cho::drawPixelLight(target, cellPos.Cast<float>(), *(::cho::SColorBGRA*)value, .1f, 3.0f);
-//	return 0;
-//}
 					::cho::error_t										drawShips									(::SApplication& applicationInstance)											{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
@@ -29,27 +23,34 @@
 		const ::cho::SCoord2<float>													& pointToDraw									= particleToDraw.Position.Cast<float>();
 		if(particleToDraw.Lit) {
 			::cho::SColorBGRA															finalColor										
-				= particleToDraw.Id % 3 ? ::cho::SColorBGRA(::cho::ORANGE) 
-				: particleToDraw.Id % 2 ? ::cho::SColorBGRA(::cho::YELLOW) 
-				: ::cho::SColorBGRA(::cho::RED);
+				= (0 == (particleToDraw.Id % 3)) ? ::cho::SColorBGRA(::cho::YELLOW) 
+				: (0 == (particleToDraw.Id % 2)) ? ::cho::SColorBGRA(::cho::RED) 
+				: ::cho::SColorBGRA(::cho::ORANGE)
+				;
 			finalColor																*= 1.0f - (particleToDraw.TimeLived);
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, ::cho::max(0.0f, 1.0f - (particleToDraw.TimeLived)) * 4.0f);
 		}
-		
 	}
 	applicationInstance.StuffToDraw.Debris.clear();
 	return 0;
 }
+
 					::cho::error_t										drawShots									(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iRay < rayCount; ++iRay) {
-		//::cho::rasterLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay], raster_callback);
-		//::cho::drawLine(viewOffscreen, ::cho::SColorBGRA(::cho::RED), applicationInstance.ProjectilePaths[iRay]);
+		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iRay];
 		applicationInstance.CacheLinePoints.clear();
-		::cho::drawLine(viewOffscreen.metrics(), applicationInstance.StuffToDraw.ProjectilePaths[iRay], applicationInstance.CacheLinePoints);
+		::cho::drawLine(viewOffscreen.metrics(), laserToDraw.Segment, applicationInstance.CacheLinePoints);
+		::cho::SColorBGRA															finalColor										
+			= (0 == (laserToDraw.Id %  5)) ? ::cho::SColorBGRA(::cho::CYAN) 
+			: (0 == (laserToDraw.Id %  7)) ? ::cho::SColorBGRA(::cho::YELLOW) 
+			: (0 == (laserToDraw.Id % 11)) ? ::cho::SColorBGRA(::cho::RED) 
+			: (0 == (laserToDraw.Id % 13)) ? ::cho::SColorBGRA(::cho::MAGENTA) 
+			: ::cho::SColorBGRA(::cho::ORANGE)
+			;
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>								& pointToDraw									= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
-			::cho::drawPixelLight(viewOffscreen, pointToDraw, ::cho::SColorBGRA(::cho::RED), .15f, 3.0f);
+			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 3.0f);
 		}
 	}
 	return 0;
@@ -154,8 +155,7 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	if((int32_t)framework.FrameInfo.Seconds.Total % 2)
-	{
+	if((int32_t)framework.FrameInfo.Seconds.Total % 2) {
 		static double																beaconTimer				= 0;
 		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
 		::cho::SCoord2<int32_t>														centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
@@ -173,8 +173,7 @@
 		}
 	}
 	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair.Processed.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	if(0 == ((int32_t)framework.FrameInfo.Seconds.Total % 2))
-	{ // This works
+	if(0 == ((int32_t)framework.FrameInfo.Seconds.Total % 2)) {
 		static double					beaconTimer				= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 8;
 		::cho::SCoord2<int32_t>			centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();

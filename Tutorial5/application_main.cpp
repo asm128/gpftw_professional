@@ -173,8 +173,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-		if(particleInstance.Type == PARTICLE_TYPE_LASER)
-			applicationInstance.StuffToDraw.ProjectilePaths.push_back({particleCurrent.Position, particleNext.Position});
+		if(particleInstance.Type == PARTICLE_TYPE_LASER) {
+			::SLaserToDraw	laserToDraw	= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}};
+			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
+		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
 		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
@@ -339,16 +341,18 @@ template<typename _tCoord>
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 
+	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
-		float											halfSizeBox				= (float)applicationInstance.TextureCenterPowerup.x;
+		float											halfSizeBox				= (float)applicationInstance.TextureCenterPowerup.x / 4 * 3;
 		::cho::SLine2D<float>							rectangleSegments[]		= 
-			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}}
-			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}}
-			, {posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}}
-			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}}
+			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}}
+			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
+			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}}
+			, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
 			};
-		const ::cho::SLine2D<float>						& projectilePath								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		const ::SLaserToDraw							& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		const ::cho::SLine2D<float>						& projectilePath								= laserToDraw.Segment;
 		::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
 		for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
 			::cho::SCoord2<float>							& collision										= collisions[iSeg];
@@ -367,30 +371,42 @@ template<typename _tCoord>
 			}
 		}
 	}
+
 	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
 		for(uint32_t i=0; i < 10; ++i) {
 			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
 			angle.Normalize();
 			::addParticle(PARTICLE_TYPE_DEBRIS, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100);
 		}
-	applicationInstance.StuffToDraw.CollisionPoints.clear();
 
+	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionCrosshair;
 		float											halfSizeBox				= 5.0f;
-		::cho::SLine2D<float>							rectangleSegment0		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}};
-		::cho::SLine2D<float>							rectangleSegment1		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}};
-		::cho::SLine2D<float>							rectangleSegment2		= {posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
-		::cho::SLine2D<float>							rectangleSegment3		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
-		::cho::SCoord2<float>							collision0				= {};
-		::cho::SCoord2<float>							collision1				= {};
-		::cho::SCoord2<float>							collision2				= {};
-		::cho::SCoord2<float>							collision3				= {};
-		::cho::SLine2D<float>							projectilePath			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-		if(line_line_intersect(projectilePath, rectangleSegment0, collision0)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision0);
-		if(line_line_intersect(projectilePath, rectangleSegment1, collision1)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision1);
-		if(line_line_intersect(projectilePath, rectangleSegment2, collision2)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision2);
-		if(line_line_intersect(projectilePath, rectangleSegment3, collision3)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision3);
+		::cho::SLine2D<float>							rectangleSegments[]		= 
+			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
+			, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
+			};
+
+		const ::SLaserToDraw							& laserToDraw			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		const ::cho::SLine2D<float>						& projectilePath		= laserToDraw.Segment;
+		::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
+		for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
+			::cho::SCoord2<float>							& collision										= collisions		[iSeg];
+			const ::cho::SLine2D<float>						& segSelected									= rectangleSegments	[iSeg]; 
+			if(line_line_intersect(projectilePath, segSelected, collision)) {
+				bool											bFound											= false;
+				for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
+					if(collision == collisions[iS2]) {
+						bFound = true;
+						info_printf("Discarded collision point.");
+						break;
+					}
+				}
+				if(false == bFound)
+ 					applicationInstance.StuffToDraw.CollisionPoints.push_back(collision);
+			}
+		}
 	}
 	return 0;
 }
