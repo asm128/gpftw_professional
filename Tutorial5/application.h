@@ -21,60 +21,78 @@ enum PARTICLE_TYPE : int8_t
 	};
 
 struct SParticleToDraw {
-	int32_t							Id;
-	int32_t							IndexParticle;
-	float							TimeLived;
-	::cho::SCoord2<int32_t>			Position;
-	bool							Lit;
+						int32_t													Id;
+						int32_t													IndexParticle;
+						float													TimeLived;
+						::cho::SCoord2<int32_t>									Position;
+						bool													Lit;
 };
 
 struct SStuffToDraw {
-						::cho::array_pod<::cho::SLine2D<float>>				ProjectilePaths								= {};
-						::cho::array_pod<::SParticleToDraw>					Stars										= {};
-						::cho::array_pod<::SParticleToDraw>					Thrust										= {};
+						::cho::array_pod<::cho::SLine2D<float>>					ProjectilePaths								= {};
+						::cho::array_pod<::SParticleToDraw>						Stars										= {};
+						::cho::array_pod<::SParticleToDraw>						Thrust										= {};
+						::cho::array_pod<::cho::SCoord2<float>>					CollisionPoints								= {};
 };
 
 struct SWeapon {
-						float												Delay;
-						float												Speed;
+						float													Delay;
+						float													Speed;
 };
 
 struct SShipState {
-						bool												Thrust										: 1;
-						bool												Firing										: 1;
+						bool													Thrust										: 1;
+						bool													Firing										: 1;
 };
 
+//struct STextureArray {
+//						::cho::array_pod<::cho::STexture<::cho::SColorBGRA>>	Original									= {};
+//						::cho::array_pod<::cho::STexture<::cho::SColorBGRA>>	Processed									= {};
+//};
+						//::STextureArray											TexturesShip								= {};
+						//::STextureArray											TexturesPowerup								= {};
+						//::STextureArray											TexturesCrosshair							= {};
+						//
+						//::cho::grid_view<::cho::SColorBGRA>						TextureViewShip								= {};
+						//::cho::grid_view<::cho::SColorBGRA>						TextureViewPowerup							= {};
+						//::cho::grid_view<::cho::SColorBGRA>						TextureViewCrosshair						= {};
+
+
 struct SApplication {
-	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>		TParticleSystem;
+	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
 
-						::cho::SFramework									Framework									;
+						::cho::SFramework										Framework									;
 
-						TParticleSystem										ParticleSystem								= {};
+						TParticleSystem											ParticleSystem								= {};
 
-						::cho::SColorBGRA									ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
+						::cho::SColorBGRA										ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
 
-						::cho::STextureProcessable<::cho::SColorBGRA>		TextureShip									= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>		TexturePowerup								= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>		TextureCrosshair[6]							= {};
-						::cho::SCoord2<int32_t>								PSOffsetFromShipCenter						= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup								= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TextureCrosshair							= {};
 
-						::cho::SCoord2<int32_t>								TextureCenterShip							= {};
-						::cho::SCoord2<int32_t>								TextureCenterPowerup						= {};
-						::cho::SCoord2<int32_t>								TextureCenterCrosshair						= {};
 
-						::cho::SCoord2<float>								DirectionShip								= {};
+						::cho::SCoord2<int32_t>									TextureCenterShip							= {};
+						::cho::SCoord2<int32_t>									TextureCenterPowerup						= {};
+						::cho::SCoord2<int32_t>									TextureCenterCrosshair						= {};
+						::cho::SCoord2<int32_t>									PSOffsetFromShipCenter						= {};
 
-						::cho::SCoord2<float>								CenterPositionShip							= {};
-						::cho::SCoord2<float>								CenterPositionPowerup						= {};
-						::cho::SCoord2<float>								CenterPositionCrosshair						= {};
+						::cho::SCoord2<float>									DirectionShip								= {};
 
-						::SStuffToDraw										StuffToDraw									= {};
-						::cho::array_pod<::cho::SCoord2<int32_t>>			CacheLinePoints								= {};
+						::cho::SCoord2<float>									CenterPositionShip							= {};
+						::cho::SCoord2<float>									CenterPositionPowerup						= {};
+						::cho::SCoord2<float>									CenterPositionCrosshair						= {};
 
-						::SShipState										ShipState									= {false, false};
-						::SWeapon											Laser										= {.15f, 2000};
+						::SStuffToDraw											StuffToDraw									= {};
+						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};
 
-																			SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
+						::SShipState											ShipState									= {false, false};
+						::SWeapon												Laser										= {.15f, 2000};
+
+						::cho::array_pod<::SShipState>							ShipsStates									= {};
+						::cho::array_pod<::cho::SCoord2<float>>					ShipsPosition								= {};
+
+																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 
 #endif // APPLICATION_H_098273498237423

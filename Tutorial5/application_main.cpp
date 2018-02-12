@@ -9,9 +9,6 @@
 
 #include "cho_app_impl.h"
 
-static constexpr	const uint32_t										ASCII_SCREEN_WIDTH							= 132	;
-static constexpr	const uint32_t										ASCII_SCREEN_HEIGHT							= 50	;
-
 CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);	
 
 static ::SApplication::TParticleSystem::TIntegrator::TParticle			particleDefinitions	[::PARTICLE_TYPE_COUNT]	= {};
@@ -44,12 +41,14 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 // --- Cleanup application resources.
 					::cho::error_t										cleanup										(::SApplication& applicationInstance)											{
+#if defined(CHO_WINDOWS)
 	::cho::SDisplayPlatformDetail												& displayDetail								= applicationInstance.Framework.MainDisplay.PlatformDetail;
 	if(displayDetail.WindowHandle) {
 		error_if(0 == ::DestroyWindow(displayDetail.WindowHandle), "Not sure why would this fail.");
 		error_if(errored(::cho::displayUpdate(applicationInstance.Framework.MainDisplay)), "Not sure why this would fail");
 	}
 	::UnregisterClass(displayDetail.WindowClassName, displayDetail.WindowClass.hInstance);
+#endif
 
 	g_ApplicationInstance													= 0;
 	//error_printf("Error message test. Press F5 to continue if the debugger breaks execution at this point.");
@@ -58,6 +57,18 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 					::cho::error_t										mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance);
 
+					::cho::error_t										setupSprites								(::SApplication& applicationInstance)											{ 
+
+	applicationInstance.TextureCenterShip									= (applicationInstance.TextureShip		.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterPowerup								= (applicationInstance.TexturePowerup	.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterCrosshair								= (applicationInstance.TextureCrosshair	.Original.View.metrics() / 2).Cast<int32_t>();
+
+	applicationInstance.TextureShip			.Processed.View					= applicationInstance.TextureShip		.Original.View;
+	applicationInstance.TexturePowerup		.Processed.View					= applicationInstance.TexturePowerup	.Original.View;
+	applicationInstance.TextureCrosshair	.Processed.View					= applicationInstance.TextureCrosshair	.Original.View;
+	return 0;
+}
+
 // --- Initialize console.
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	//_CrtSetBreakAlloc(120);
@@ -65,29 +76,36 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
 
-	static constexpr	const char												bmpFileName0	[]							= "ship_1.bmp";
+	static constexpr	const char												bmpFileName0	[]							= "ship_2.bmp";
 	static constexpr	const char												bmpFileName1	[]							= "pow_core_1.bmp";
 	static constexpr	const char												bmpFileName2	[]							= "crosshair_template.bmp";
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip			.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup		.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair[0]	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
-	//{
-	//	char																		bmpFileName3	[]							= "crosshair_?.bmp";
-	//	for(char iFrame = 0, frameCount = 6; iFrame < frameCount; ++iFrame) {
-	//		bmpFileName3[10] = iFrame + '0';
-	//		error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName3), applicationInstance.TextureCrosshair[iFrame].Original)), "Failed to load bitmap from file: %s.", bmpFileName3);
-	//	}
-	//}
-	ree_if	(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
+	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
 	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
-	applicationInstance.TextureCenterShip									= (applicationInstance.TextureShip			.Original.View.metrics() / 2).Cast<int32_t>();
-	applicationInstance.TextureCenterPowerup								= (applicationInstance.TexturePowerup		.Original.View.metrics() / 2).Cast<int32_t>();
-	applicationInstance.TextureCenterCrosshair								= (applicationInstance.TextureCrosshair[0]	.Original.View.metrics() / 2).Cast<int32_t>();
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenterShip.x};
-	//const ::cho::SCoord2<uint32_t>												effectTargetSize							= {64, 64};
-	//error_if(errored(applicationInstance.TexturePS.Original.resize(effectTargetSize)), "Something about this that shouldn't fail.");
+	return 0;
+}
+
+					::cho::error_t										drawBackground								(::SApplication& applicationInstance);	
+					::cho::error_t										drawShots									(::SApplication& applicationInstance);	
+					::cho::error_t										drawThrust									(::SApplication& applicationInstance);	
+					::cho::error_t										drawPowerups								(::SApplication& applicationInstance);	
+					::cho::error_t										drawShips									(::SApplication& applicationInstance);	
+					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance);	
+					::cho::error_t										drawCollisions								(::SApplication& applicationInstance);	
+					::cho::error_t										draw										(::SApplication& applicationInstance)											{	
+	error_if(errored(::drawBackground		(applicationInstance)), "Why??");		// --- Draw stars
+	error_if(errored(::drawPowerups			(applicationInstance)), "Why??");		// --- Draw powerups
+	error_if(errored(::drawShips			(applicationInstance)), "Why??");		// --- Draw ship
+	error_if(errored(::drawCrosshair		(applicationInstance)), "Why??");		// --- Draw crosshair
+	error_if(errored(::drawThrust			(applicationInstance)), "Why??");		// --- Draw propulsion engine
+	error_if(errored(::drawShots			(applicationInstance)), "Why??");		// --- Draw lasers
+	error_if(errored(::drawCollisions		(applicationInstance)), "Why??");		// --- Draw lasers
 	return 0;
 }
 
@@ -127,10 +145,10 @@ static				::cho::error_t										updateInput									(::SApplication& applicati
 	applicationInstance.ShipState.Thrust									= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
 
 	applicationInstance.DirectionShip										= {};
-	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.DirectionShip.y	+= 1;
-	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.DirectionShip.y	-= 1;
-	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.DirectionShip.x	+= 1;
-	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.DirectionShip.x	-= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['W']) applicationInstance.DirectionShip.y += 1;
+	if(inputSystem.KeyboardCurrent.KeyState['S']) applicationInstance.DirectionShip.y -= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['D']) applicationInstance.DirectionShip.x += 1;
+	if(inputSystem.KeyboardCurrent.KeyState['A']) applicationInstance.DirectionShip.x -= 1;
 	applicationInstance.DirectionShip.Normalize();
 	return 0;
 }
@@ -173,7 +191,85 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	return 0;
 }
 
-					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
+template<typename _tCoord>
+static inline	double		determinant					(const ::cho::SLine2D<_tCoord>& line)			noexcept { return ::cho::determinant((double)line.A.x, (double)line.A.y, (double)line.B.x, (double)line.B.y); }
+
+// Calculate intersection of two lines. return 1 if found, 0 if not found or -1 on error
+template<typename _tCoord>
+::cho::error_t				line_line_intersect			
+	( const ::cho::SLine2D<_tCoord>	& line1
+	, const ::cho::SLine2D<_tCoord>	& line2
+	, ::cho::SCoord2<_tCoord>		& out_point
+	)
+{
+	double detL1 = ::determinant(line1);
+	double detL2 = ::determinant(line2);
+
+	double x1mx2 = line1.A.x - line1.B.x;
+	double y1my2 = line1.A.y - line1.B.y;
+
+	double x3mx4 = line2.A.x - line2.B.x;
+	double y3my4 = line2.A.y - line2.B.y;
+
+	double xnom  = ::cho::determinant(detL1, x1mx2, detL2, x3mx4);
+	double ynom  = ::cho::determinant(detL1, y1my2, detL2, y3my4);
+	double denom = ::cho::determinant(x1mx2, y1my2, x3mx4, y3my4);
+	if(denom == 0.0) { // Lines don't seem to cross
+		out_point.x = NAN;
+		out_point.y = NAN;
+		return 0;
+	}
+	out_point.x = (_tCoord)(xnom / denom);	
+	out_point.y = (_tCoord)(ynom / denom);
+	ree_if(!isfinite((_tCoord)out_point.x) 
+		|| !isfinite((_tCoord)out_point.y)
+		, "Probably a numerical issue");
+	return 1; //All OK
+}
+
+// Calculate intersection of two lines. return 1 if found, 0 if not found or -1 on error
+template<typename _tCoord>
+::cho::error_t				line_segment_intersect			
+	( const ::cho::SLine2D<_tCoord>	& line
+	, const ::cho::SLine2D<_tCoord>	& segment
+	, ::cho::SCoord2<_tCoord>		& out_point
+	)
+{
+	::cho::error_t																collision									= line_line_intersect(line, segment, out_point);
+	if(1 == collision) {
+		collision 
+			= ( out_point.x >=	::cho::min(segment.A.x, segment.B.x)
+			&&	out_point.y >=	::cho::min(segment.A.y, segment.B.y)
+			&&	out_point.x <=	::cho::max(segment.A.x, segment.B.x)
+			&&	out_point.y <=	::cho::max(segment.A.y, segment.B.y)
+			) ? 1 : 0;
+	}
+	return collision;
+}
+
+// Calculate intersection of two lines. return 1 if found, 0 if not found or -1 on error
+template<typename _tCoord>
+::cho::error_t				segment_segment_intersect			
+	( const ::cho::SLine2D<_tCoord>	& segment1
+	, const ::cho::SLine2D<_tCoord>	& segment2
+	, ::cho::SCoord2<_tCoord>		& out_point
+	)
+{
+	::cho::error_t																collision									= line_segment_intersect(segment1, segment2, out_point);
+	if(1 == collision) {
+		collision 
+			= ( out_point.x >=	::cho::min(segment1.A.x, segment1.B.x)
+			&&	out_point.y >=	::cho::min(segment1.A.y, segment1.B.y)
+			&&	out_point.x <=	::cho::max(segment1.A.x, segment1.B.x)
+			&&	out_point.y <=	::cho::max(segment1.A.y, segment1.B.y)
+			) ? 1 : 0;
+	}
+	return collision;
+}
+
+
+
+ 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
 
@@ -210,7 +306,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	if(applicationInstance.ShipState.Firing) {
 		if(delayWeapon >= applicationInstance.Laser.Delay) {
-			const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Original.View.metrics().Cast<float>();
+			const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
 			const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenterShip.x), -1};
 			delayWeapon																= 0;
 			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
@@ -228,7 +324,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 
 	// update crosshair
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{128,};
+	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
+	applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
 
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
@@ -236,22 +333,59 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	sprintf_s(buffer, "[%u x %u]. Particle count: %u. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.ParticleSystem.Instances.size(), 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
-	return 0;
-}
 
-					::cho::error_t										drawBackground								(::SApplication& applicationInstance);	
-					::cho::error_t										drawShots									(::SApplication& applicationInstance);	
-					::cho::error_t										drawThrust									(::SApplication& applicationInstance);	
-					::cho::error_t										drawPowerups								(::SApplication& applicationInstance);	
-					::cho::error_t										drawShips									(::SApplication& applicationInstance);	
-					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance);	
-					::cho::error_t										draw										(::SApplication& applicationInstance)											{	
-	error_if(errored(::drawBackground		(applicationInstance)), "Why??");		// --- Draw stars
-	error_if(errored(::drawPowerups			(applicationInstance)), "Why??");		// --- Draw powerups
-	error_if(errored(::drawShips			(applicationInstance)), "Why??");		// --- Draw ship
-	// --- Draw 
-	error_if(errored(::drawCrosshair		(applicationInstance)), "Why??");		// --- Draw crosshair
-	error_if(errored(::drawThrust			(applicationInstance)), "Why??");		// --- Draw propulsion engine
-	error_if(errored(::drawShots			(applicationInstance)), "Why??");		// --- Draw lasers
+	//for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
+	//	const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionCrosshair;
+	//	float											halfSizeBox				= 5.0f;
+	//	::cho::SLine2D<float>							rectangleSegment0		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}};
+	//	::cho::SLine2D<float>							rectangleSegment1		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}};
+	//	::cho::SLine2D<float>							rectangleSegment2		= {posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
+	//	::cho::SLine2D<float>							rectangleSegment3		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
+	//	::cho::SCoord2<float>							collision0				= {};
+	//	::cho::SCoord2<float>							collision1				= {};
+	//	::cho::SCoord2<float>							collision2				= {};
+	//	::cho::SCoord2<float>							collision3				= {};
+	//	::cho::SLine2D<float>							projectilePath			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+	//	//info_if(line_line_intersect(projectilePath, rectangleSegment0, collision0), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision0.x, collision0.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+	//	//info_if(line_line_intersect(projectilePath, rectangleSegment1, collision1), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision1.x, collision1.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+	//	//info_if(line_line_intersect(projectilePath, rectangleSegment2, collision2), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision2.x, collision2.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+	//	//info_if(line_line_intersect(projectilePath, rectangleSegment3, collision3), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision3.x, collision3.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+	//
+	//	if(line_segment_intersect(projectilePath, rectangleSegment0, collision0)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision0);
+	//	if(line_segment_intersect(projectilePath, rectangleSegment1, collision1)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision1);
+	//	if(line_segment_intersect(projectilePath, rectangleSegment2, collision2)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision2);
+	//	if(line_segment_intersect(projectilePath, rectangleSegment3, collision3)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision3);
+	//}
+
+	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
+		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
+		float											halfSizeBox				= 5.0f;
+		::cho::SLine2D<float>							rectangleSegment0		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}};
+		::cho::SLine2D<float>							rectangleSegment1		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}};
+		::cho::SLine2D<float>							rectangleSegment2		= {posXHair + ::cho::SCoord2<float>{-halfSizeBox, halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
+		::cho::SLine2D<float>							rectangleSegment3		= {posXHair + ::cho::SCoord2<float>{ halfSizeBox,-halfSizeBox}, posXHair + ::cho::SCoord2<float>{-halfSizeBox,-halfSizeBox}};
+		::cho::SCoord2<float>							collision0				= {};
+		::cho::SCoord2<float>							collision1				= {};
+		::cho::SCoord2<float>							collision2				= {};
+		::cho::SCoord2<float>							collision3				= {};
+		::cho::SLine2D<float>							projectilePath			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		//info_if(line_line_intersect(projectilePath, rectangleSegment0, collision0), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision0.x, collision0.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+		//info_if(line_line_intersect(projectilePath, rectangleSegment1, collision1), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision1.x, collision1.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+		//info_if(line_line_intersect(projectilePath, rectangleSegment2, collision2), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision2.x, collision2.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+		//info_if(line_line_intersect(projectilePath, rectangleSegment3, collision3), "collision at (%f, %f). posXHair: (%f, %f). projectilePath: {(%f, %f), (%f, %f).", collision3.x, collision3.y, posXHair.x, posXHair.y, projectilePath.A.x, projectilePath.A.y, projectilePath.B.x, projectilePath.B.y);
+
+		if(segment_segment_intersect(projectilePath, rectangleSegment0, collision0)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision0);
+		if(segment_segment_intersect(projectilePath, rectangleSegment1, collision1)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision1);
+		if(segment_segment_intersect(projectilePath, rectangleSegment2, collision2)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision2);
+		if(segment_segment_intersect(projectilePath, rectangleSegment3, collision3)) applicationInstance.StuffToDraw.CollisionPoints.push_back(collision3);
+	}
+
+	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
+		for(uint32_t i=0; i < 10; ++i) {
+			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20), (float)(rand() % 20 - 1 - 10)};
+			angle.Normalize();
+			::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 400);
+		}
+
 	return 0;
 }

@@ -261,6 +261,9 @@ namespace cho
 			&&	::cho::in_range(pointToTest.y, area.Offset.y, area.Offset.y + area.Size.y)
 			;
 	}
+
+	template<typename _tCoord>
+	static inline		double														determinant		(const ::cho::SLine2D<_tCoord>& line)													noexcept	{ return ::cho::determinant((double)line.A.x, (double)line.A.y, (double)line.B.x, (double)line.B.y); }
 }
 
 #endif // CHO_COORD_H_928374982364923322

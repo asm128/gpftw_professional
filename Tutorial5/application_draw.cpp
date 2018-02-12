@@ -11,10 +11,21 @@
 					::cho::error_t										drawShips									(::SApplication& applicationInstance)											{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Original.View, applicationInstance.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenterShip, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Processed.View, applicationInstance.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenterShip, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	return 0;
 }
 
+					::cho::error_t										drawCollisions								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
+	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iRay < rayCount; ++iRay) {
+		const ::cho::SCoord2<float>													& pointToDraw									= applicationInstance.StuffToDraw.CollisionPoints[iRay];
+		::cho::drawPixelLight(viewOffscreen, pointToDraw, ::cho::SColorBGRA(::cho::ORANGE), .15f, 3.0f);
+	}
+	applicationInstance.StuffToDraw.CollisionPoints.clear();
+	return 0;
+}
 					::cho::error_t										drawShots									(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
@@ -93,7 +104,7 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup.Processed.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	{
 		static double					beaconTimer			= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
@@ -133,11 +144,11 @@
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	if((int32_t)framework.FrameInfo.Seconds.Total % 2)
 	{
-		static double					beaconTimer			= 0;
-		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
-		int32_t							halfWidth		= 7 - ((int32_t)beaconTimer % 8);
-		::cho::SCoord2<int32_t>			lightCrosshair []		= 
+		static double																beaconTimer				= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
+		::cho::SCoord2<int32_t>														centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+		int32_t																		halfWidth				= 8 - ((int32_t)beaconTimer % 9);
+		::cho::SCoord2<int32_t>														lightCrosshair []		= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
 			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth, -halfWidth - 1 }
 			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
@@ -149,13 +160,13 @@
 			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 		}
 	}
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair[0].Original.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair.Processed.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	if(0 == ((int32_t)framework.FrameInfo.Seconds.Total % 2))
 	{ // This works
-		static double					beaconTimer			= 0;
+		static double					beaconTimer				= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
-		int32_t							halfWidth		= 7 - ((int32_t)beaconTimer % 8);
+		::cho::SCoord2<int32_t>			centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+		int32_t							halfWidth				= 8 - ((int32_t)beaconTimer % 9);
 		::cho::SCoord2<int32_t>			lightCrosshair []		= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
 			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
@@ -169,7 +180,12 @@
 	
 		for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
 			::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
-			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
+			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>()
+				, (0 == (int32_t)framework.FrameInfo.Seconds.Total % 5) ? ::cho::SColorBGRA(::cho::RED			) 
+				: (0 == (int32_t)framework.FrameInfo.Seconds.Total % 3) ? ::cho::SColorBGRA(::cho::LIGHTGREEN	)
+				: (0 == (int32_t)framework.FrameInfo.Seconds.Total % 2) ? ::cho::SColorBGRA(::cho::LIGHTYELLOW	) 
+				: ::cho::SColorBGRA(::cho::LIGHTCYAN)
+				, .2f, 3.0f);
 		}
 	}	return 0;
 }

@@ -10,7 +10,7 @@
 	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
 	::cho::STimer																& timer										= framework.Timer;
 	timer		.Frame();
-	frameInfo	.Frame(timer.LastTimeMicroseconds);
+	frameInfo	.Frame(::cho::min(timer.LastTimeMicroseconds, 200000ULL));
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
 	ree_if(errored(::cho::displayUpdate(mainWindow)), "Not sure why this would fail.");
 	rvi_if(1, 0 == mainWindow.PlatformDetail.WindowHandle, "Application exiting because the main window was closed.");

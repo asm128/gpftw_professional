@@ -26,6 +26,11 @@ namespace cho
 	struct					SPairSinCos				{ double Sin, Cos; };	
 
 	static inline			SPairSinCos				getSinCos				(double theta)																noexcept	{ return {sin(theta), cos(theta)};						}
+
+	// Calculate determinant of matrix:
+	// [a b]
+	// [c d]
+	constexpr				double					determinant				(double a, double b, double c, double d)									noexcept	{ return a * d - b * c; }
 #pragma pack(pop)
 }
 
