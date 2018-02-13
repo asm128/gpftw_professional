@@ -5,6 +5,17 @@
 					::cho::error_t										drawShips									(::SApplication& applicationInstance)											{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
+
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureEnemy.Processed.View, applicationInstance.CenterPositionEnemy.Cast<int32_t>() - applicationInstance.TextureCenterEnemy, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	{
+		static double																beaconTimer				= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
+		::cho::SCoord2<float>														centerPowerup			= applicationInstance.CenterPositionEnemy;
+		char																		positionsX[]			= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
+		int32_t																		selectedPos				= ((int32_t)beaconTimer % ::cho::size(positionsX));
+		::cho::SCoord2<float>														lightCrosshair			= centerPowerup + ::cho::SCoord2<float>{(float)positionsX[selectedPos], 0.0f};
+		::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::GREEN), .2f, 3.0f);
+	}
 	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Processed.View, applicationInstance.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenterShip, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	return 0;
 }
@@ -113,21 +124,26 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup.Processed.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	static float																timer										= 0;
+	timer																	+= (float)framework.FrameInfo.Seconds.LastFrame / 2;
 	{
+		::cho::SCoord2<int32_t>		offset		= {0, 0};
+		::cho::SCoord2<int32_t>		position	= applicationInstance.CenterPositionPowerup.Cast<int32_t>() + offset;
+		for(uint32_t iTex = 0, textureCount = applicationInstance.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
+			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturesPowerup0[iTex], position - applicationInstance.TextureCenterPowerup0, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double					beaconTimer			= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
-		::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionPowerup.Cast<int32_t>();
-		int32_t							halfWidth		= 5; //(framework.FrameInfo.FrameNumber / 100) % 6;
+		::cho::SCoord2<int32_t>			centerPowerup	= position;
+		int32_t							halfWidth		= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
 		::cho::SCoord2<int32_t>			lightPos []		= 
-			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
-			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
-			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth, -1}
-			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth,  0}
-			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, halfWidth}
-			, centerPowerup + ::cho::SCoord2<int32_t>{-1, halfWidth}
-			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
-			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
+			{ centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}
+			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}
+			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}
+			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth	,  halfWidth}
+			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth - 1,  halfWidth}
+			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth	,  halfWidth - 1}
+			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}
+			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}
 			};
 
 		::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
@@ -144,6 +160,41 @@
 		::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 		::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 	}
+
+	{
+		::cho::SCoord2<int32_t>		offset		= {-150, -150};
+		::cho::SCoord2<int32_t>		position	= applicationInstance.CenterPositionPowerup.Cast<int32_t>() + offset;
+		for(uint32_t iTex = 0, textureCount = applicationInstance.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
+			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturesPowerup1[iTex], position - applicationInstance.TextureCenterPowerup1, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		static double					beaconTimer			= 0;
+		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
+		::cho::SCoord2<int32_t>			centerPowerup	= position;
+		int32_t							halfWidth		= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
+		::cho::SCoord2<int32_t>			lightPos []		= 
+			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
+			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
+			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth, -1}
+			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth,  0}
+			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, halfWidth}
+			, centerPowerup + ::cho::SCoord2<int32_t>{-1, halfWidth}
+			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
+			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
+			};
+
+		::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
+			,						selectedLightPos2	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+			;
+
+		::cho::SColorBGRA			colors []			= 
+			{ ::cho::LIGHTYELLOW
+			, ::cho::RED
+			, ::cho::LIGHTGREEN
+			, ::cho::LIGHTCYAN
+			};
+		int32_t						selectedColor		= ((int32_t)beaconTimer / 4) % ::cho::size(colors);
+		::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
+		::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
+	}
 	return 0;
 }
 
@@ -151,12 +202,14 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	if((int32_t)framework.FrameInfo.Seconds.Total % 2) {
-		static double																beaconTimer				= 0;
-		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<int32_t>														centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
-		int32_t																		halfWidth				= 8 - ((int32_t)beaconTimer % 9);
-		::cho::SCoord2<int32_t>														lightCrosshair []		= 
+	static double																powTimer									= 0;
+	powTimer																+= framework.FrameInfo.Seconds.LastFrame;
+	if((int32_t)powTimer % 2) {
+		static double																beaconTimer									= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 9;
+		::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+		int32_t																		halfWidth									= 8 - ((int32_t)beaconTimer % 9);
+		::cho::SCoord2<int32_t>														lightCrosshair []							= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
 			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth, -halfWidth - 1 }
 			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
@@ -169,24 +222,24 @@
 		}
 	}
 	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair.Processed.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	if(0 == ((int32_t)framework.FrameInfo.Seconds.Total % 2)) {
-		static double					beaconTimer				= 0;
-		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<int32_t>			centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
-		int32_t							halfWidth				= 8 - ((int32_t)beaconTimer % 9);
-		::cho::SCoord2<int32_t>			lightCrosshair []		= 
-			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
-			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
-			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth, -1}
-			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth,  0}
-			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, halfWidth}
-			, centerPowerup + ::cho::SCoord2<int32_t>{-1, halfWidth}
-			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
-			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
+	if(0 == ((int32_t)powTimer % 2)) {
+		static double																beaconTimer									= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 9;
+		const ::cho::SCoord2<int32_t>												centerCrosshair								= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+		int32_t																		halfWidth									= 8 - ((int32_t)beaconTimer % 9);
+		const ::cho::SCoord2<int32_t>												lightCrosshair []							= 
+			{ centerCrosshair + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{halfWidth, -1}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{halfWidth,  0}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, halfWidth}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{-1, halfWidth}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
+			, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
 			};
 	
 		for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
-			::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
+			const ::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
 			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>()
 				, (0 == (int32_t)framework.FrameInfo.Seconds.Total % 5) ? ::cho::SColorBGRA(::cho::RED			) 
 				: (0 == (int32_t)framework.FrameInfo.Seconds.Total % 3) ? ::cho::SColorBGRA(::cho::LIGHTGREEN	)

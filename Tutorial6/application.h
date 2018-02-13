@@ -64,26 +64,43 @@ struct SApplication {
 						::cho::SColorBGRA										ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
 
 						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup								= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup0								= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup1								= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>			TextureCrosshair							= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowIcon								= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TextureEnemy								= {};
 
 						::cho::SCoord2<int32_t>									TextureCenterShip							= {};
-						::cho::SCoord2<int32_t>									TextureCenterPowerup						= {};
+						::cho::SCoord2<int32_t>									TextureCenterPowerup0						= {};
+						::cho::SCoord2<int32_t>									TextureCenterPowerup1						= {};
 						::cho::SCoord2<int32_t>									TextureCenterCrosshair						= {};
+						::cho::SCoord2<int32_t>									TextureCenterPowIcon						= {};
+						::cho::SCoord2<int32_t>									TextureCenterEnemy							= {};
 						::cho::SCoord2<int32_t>									PSOffsetFromShipCenter						= {};
-
+						
 						::cho::SCoord2<float>									DirectionShip								= {};
 
 						::cho::SCoord2<float>									CenterPositionShip							= {};
 						::cho::SCoord2<float>									CenterPositionPowerup						= {};
 						::cho::SCoord2<float>									CenterPositionCrosshair						= {};
+						::cho::SCoord2<float>									CenterPositionEnemy							= {};
 
 						::SStuffToDraw											StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};
 
 						::SShipState											ShipState									= {false, false};
-						::SWeapon												Laser										= {.15f, 2000};
+						::SWeapon												Laser										= {.10f, 2000};
 
+						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup0							= {};
+						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup1							= {};
+
+						uint32_t												PathStep									= 0;
+						::cho::SCoord2<float>									PathEnemy	[4]								= 
+							{ { 10.f,  10.f}
+							, {320.f, 180.f}
+							, { 50.f, 200.f}
+							, {480.f,  10.f}
+							};
 																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 

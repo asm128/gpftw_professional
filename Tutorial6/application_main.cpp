@@ -55,38 +55,55 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
-					::cho::error_t										mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance);
-
 					::cho::error_t										setupSprites								(::SApplication& applicationInstance)											{ 
-
 	applicationInstance.TextureCenterShip									= (applicationInstance.TextureShip		.Original.View.metrics() / 2).Cast<int32_t>();
-	applicationInstance.TextureCenterPowerup								= (applicationInstance.TexturePowerup	.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterPowerup0								= (applicationInstance.TexturePowerup0	.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterPowerup1								= (applicationInstance.TexturePowerup1	.Original.View.metrics() / 2).Cast<int32_t>();
 	applicationInstance.TextureCenterCrosshair								= (applicationInstance.TextureCrosshair	.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterPowIcon								= (applicationInstance.TexturePowIcon	.Original.View.metrics() / 2).Cast<int32_t>();
+	applicationInstance.TextureCenterEnemy									= (applicationInstance.TextureEnemy		.Original.View.metrics() / 2).Cast<int32_t>();
 
 	applicationInstance.TextureShip			.Processed.View					= applicationInstance.TextureShip		.Original.View;
-	applicationInstance.TexturePowerup		.Processed.View					= applicationInstance.TexturePowerup	.Original.View;
+	applicationInstance.TexturePowerup0		.Processed.View					= applicationInstance.TexturePowerup0	.Original.View;
+	applicationInstance.TexturePowerup1		.Processed.View					= applicationInstance.TexturePowerup1	.Original.View;
 	applicationInstance.TextureCrosshair	.Processed.View					= applicationInstance.TextureCrosshair	.Original.View;
+	applicationInstance.TexturePowIcon		.Processed.View					= applicationInstance.TexturePowIcon	.Original.View;
+	applicationInstance.TextureEnemy		.Processed.View					= applicationInstance.TextureEnemy		.Original.View;
+
+	applicationInstance.TexturesPowerup0.push_back(applicationInstance.TexturePowerup0	.Processed.View);
+	applicationInstance.TexturesPowerup0.push_back(applicationInstance.TexturePowIcon	.Processed.View);
+
+	applicationInstance.TexturesPowerup1.push_back(applicationInstance.TexturePowerup1	.Processed.View);
+	applicationInstance.TexturesPowerup1.push_back(applicationInstance.TexturePowIcon	.Processed.View);
 	return 0;
 }
 
-// --- Initialize console.
+					::cho::error_t										mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance);
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	//_CrtSetBreakAlloc(120);
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
 
-	static constexpr	const char												bmpFileName0	[]							= "ship_2.bmp";
-	static constexpr	const char												bmpFileName1	[]							= "pow_core_1.bmp";
-	static constexpr	const char												bmpFileName2	[]							= "crosshair_template.bmp";
+	static constexpr	const char												bmpFileName0	[]							= "ship_1.bmp";
+	static constexpr	const char												bmpFileName1	[]							= "pow_core_0.bmp";
+	static constexpr	const char												bmpFileName2	[]							= "pow_core_1.bmp";
+	static constexpr	const char												bmpFileName3	[]							= "crosshair_template.bmp";
+	static constexpr	const char												bmpFileName4	[]							= "pow_icon_0.bmp";
+	static constexpr	const char												bmpFileName5	[]							= "enemy_0.bmp";
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip			.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup		.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
-	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup0		.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TexturePowerup1		.Original)), "Failed to load bitmap from file: %s.", bmpFileName2);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName3), applicationInstance.TextureCrosshair	.Original)), "Failed to load bitmap from file: %s.", bmpFileName3);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName4), applicationInstance.TexturePowIcon		.Original)), "Failed to load bitmap from file: %s.", bmpFileName4);
+	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName5), applicationInstance.TextureEnemy		.Original)), "Failed to load bitmap from file: %s.", bmpFileName5);
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
 	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
+	applicationInstance.CenterPositionEnemy									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
 	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
+
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenterShip.x};
 	return 0;
 }
@@ -329,31 +346,62 @@ template<typename _tCoord>
 					::cho::error_t										updateShots									(::SApplication& applicationInstance)					{ 
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
-		float											halfSizeBox				= (float)applicationInstance.TextureCenterPowerup.x / 4 * 3;
-		::cho::SLine2D<float>							rectangleSegments[]		= 
-			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}}
-			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
-			, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}}
-			, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
-			};
-		const ::SLaserToDraw							& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-		const ::cho::SLine2D<float>						& projectilePath								= laserToDraw.Segment;
-		::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
-		for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
-			::cho::SCoord2<float>							& collision										= collisions[iSeg];
-			const ::cho::SLine2D<float>						& segSelected									= rectangleSegments	[iSeg]; 
-			if(segment_segment_intersect(projectilePath, segSelected, collision)) {
-				bool											bFound											= false;
-				for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
-					if(collision == collisions[iS2]) {
-						bFound = true;
-						info_printf("Discarded collision point.");
-						break;
+		{ // Check powerup
+			const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
+			float											halfSizeBox				= (float)applicationInstance.TextureCenterPowerup0.x / 4 * 3;
+			::cho::SLine2D<float>							rectangleSegments[]		= 
+				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}}
+				, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
+				, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}}
+				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
+				};
+			const ::SLaserToDraw							& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+			const ::cho::SLine2D<float>						& projectilePath								= laserToDraw.Segment;
+			::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
+			for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
+				::cho::SCoord2<float>							& collision										= collisions[iSeg];
+				const ::cho::SLine2D<float>						& segSelected									= rectangleSegments	[iSeg]; 
+				if(segment_segment_intersect(projectilePath, segSelected, collision)) {
+					bool											bFound											= false;
+					for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
+						if(collision == collisions[iS2]) {
+							bFound = true;
+							info_printf("Discarded collision point.");
+							break;
+						}
 					}
+					if(false == bFound)
+ 						applicationInstance.StuffToDraw.CollisionPoints.push_back(collision);
 				}
-				if(false == bFound)
- 					applicationInstance.StuffToDraw.CollisionPoints.push_back(collision);
+			}
+		}
+		{ // Check enemy
+			const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionEnemy;
+			float											halfSizeBox				= (float)applicationInstance.TextureCenterEnemy.x / 4 * 3;
+			::cho::SLine2D<float>							rectangleSegments[]		= 
+				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}}
+				, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
+				, {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1,-halfSizeBox		}}
+				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	,-halfSizeBox		}}
+				};
+			const ::SLaserToDraw							& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+			const ::cho::SLine2D<float>						& projectilePath								= laserToDraw.Segment;
+			::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
+			for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
+				::cho::SCoord2<float>							& collision										= collisions[iSeg];
+				const ::cho::SLine2D<float>						& segSelected									= rectangleSegments	[iSeg]; 
+				if(segment_segment_intersect(projectilePath, segSelected, collision)) {
+					bool											bFound											= false;
+					for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
+						if(collision == collisions[iS2]) {
+							bFound = true;
+							info_printf("Discarded collision point.");
+							break;
+						}
+					}
+					if(false == bFound)
+ 						applicationInstance.StuffToDraw.CollisionPoints.push_back(collision);
+				}
 			}
 		}
 	}
@@ -423,11 +471,37 @@ template<typename _tCoord>
 	error_if(errored(::updateSpawn					(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateShip					(applicationInstance)), "Unknown error.");
 
-	// update crosshair
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
-	applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
+	{
+		static float																timerPath									= 0;
+		timerPath																+= (float)framework.Timer.LastTimeSeconds;
+		if(timerPath > 10.0f) {
+			timerPath = 0;
+			++applicationInstance.PathStep;
+			if(applicationInstance.PathStep >= ::cho::size(applicationInstance.PathEnemy))
+				applicationInstance.PathStep = 0;
+		}
+		const ::cho::SCoord2<float>													& pathTarget							= applicationInstance.PathEnemy[applicationInstance.PathStep];
+		::cho::SCoord2<float>														directionEnemy							= (pathTarget - applicationInstance.CenterPositionEnemy);
+		if(directionEnemy.LengthSquared() < 0.5) {
+			timerPath = 0;
+			++applicationInstance.PathStep;
+			if(applicationInstance.PathStep >= ::cho::size(applicationInstance.PathEnemy))
+				applicationInstance.PathStep = 0;
+		}
+		else {
+			directionEnemy.Normalize();
+			// update enemy
+			applicationInstance.CenterPositionEnemy									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+			applicationInstance.CenterPositionEnemy.x								= ::cho::clamp(applicationInstance.CenterPositionEnemy.x, .1f, (float)offscreen.View.metrics().x - 1);
+			applicationInstance.CenterPositionEnemy.y								= ::cho::clamp(applicationInstance.CenterPositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1);
+		}
+	}
 
+	{ // update crosshair 
+		applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
+		applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
+	}
 	error_if(errored(::updateShots					(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");
 	::cho::STimer																& timer										= framework.Timer;
