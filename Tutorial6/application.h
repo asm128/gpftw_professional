@@ -54,6 +54,18 @@ struct SShipState {
 						bool													Brakes										: 1;
 };
 
+enum GAME_TEXTURE : int8_t
+	{ GAME_TEXTURE_SHIP			
+	, GAME_TEXTURE_POWERUP0		
+	, GAME_TEXTURE_POWERUP1		
+	, GAME_TEXTURE_CROSSHAIR	
+	, GAME_TEXTURE_POWICON		
+	, GAME_TEXTURE_ENEMY		
+	, GAME_TEXTURE_COUNT	
+	, GAME_TEXTURE_INVALID		= -1	
+	};
+
+
 struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
 
@@ -63,19 +75,10 @@ struct SApplication {
 
 						::cho::SColorBGRA										ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
 
-						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup0								= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup1								= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>			TextureCrosshair							= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowIcon								= {};
-						::cho::STextureProcessable<::cho::SColorBGRA>			TextureEnemy								= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			Textures		[GAME_TEXTURE_COUNT]		= {};
+						::cho::SCoord2<int32_t>									TextureCenters	[GAME_TEXTURE_COUNT]		= {};
 
-						::cho::SCoord2<int32_t>									TextureCenterShip							= {};
-						::cho::SCoord2<int32_t>									TextureCenterPowerup0						= {};
-						::cho::SCoord2<int32_t>									TextureCenterPowerup1						= {};
-						::cho::SCoord2<int32_t>									TextureCenterCrosshair						= {};
-						::cho::SCoord2<int32_t>									TextureCenterPowIcon						= {};
-						::cho::SCoord2<int32_t>									TextureCenterEnemy							= {};
+						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
 						::cho::SCoord2<int32_t>									PSOffsetFromShipCenter						= {};
 						
 						::cho::SCoord2<float>									DirectionShip								= {};
@@ -93,6 +96,8 @@ struct SApplication {
 
 						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup0							= {};
 						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup1							= {};
+						double													GhostTimer									= 0;
+						bool													LineOfFire									= false;
 
 						uint32_t												PathStep									= 0;
 						::cho::SCoord2<float>									PathEnemy	[4]								= 

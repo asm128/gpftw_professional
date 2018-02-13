@@ -28,7 +28,7 @@ extern				::SApplication														* g_ApplicationInstance						;
 			if(newMetrics != mainDisplay.Size) {
 				mainDisplay.PreviousSize																= mainDisplay.Size;
 				mainDisplay.Size																		= newMetrics;
-				mainDisplay.Resized																		= true;
+				mainDisplay.Resized																		= 
 				mainDisplay.Repaint																		= true; 
 			}
 		}
@@ -40,7 +40,7 @@ extern				::SApplication														* g_ApplicationInstance						;
 			mainDisplay.NoDraw																		= false;
 		}
 		else if( wParam == SIZE_RESTORED ) {
-			mainDisplay.Resized																		= true;
+			mainDisplay.Resized																		= 
 			mainDisplay.MinOrMaxed																	= true;
 			mainDisplay.NoDraw																		= false;
 		}

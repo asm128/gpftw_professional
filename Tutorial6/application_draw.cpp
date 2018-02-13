@@ -5,18 +5,39 @@
 					::cho::error_t										drawShips									(::SApplication& applicationInstance)											{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureEnemy.Processed.View, applicationInstance.CenterPositionEnemy.Cast<int32_t>() - applicationInstance.TextureCenterEnemy, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	// Draw enemy ships
+	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, applicationInstance.CenterPositionEnemy.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	{
-		static double																beaconTimer				= 0;
+		static double																beaconTimer									= 0;
 		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<float>														centerPowerup			= applicationInstance.CenterPositionEnemy;
-		char																		positionsX[]			= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-		int32_t																		selectedPos				= ((int32_t)beaconTimer % ::cho::size(positionsX));
-		::cho::SCoord2<float>														lightCrosshair			= centerPowerup + ::cho::SCoord2<float>{(float)positionsX[selectedPos], 0.0f};
-		::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::GREEN), .2f, 3.0f);
+		::cho::SCoord2<float>														centerPowerup								= applicationInstance.CenterPositionEnemy;
+		char																		positionsX[]								= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
+		int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(positionsX));
+		::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)positionsX[selectedPos], 0.0f};
+		::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 	}
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Processed.View, applicationInstance.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenterShip, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	applicationInstance.GhostTimer											+= framework.FrameInfo.Seconds.LastFrame;
+	static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
+	::cho::SCoord2<float>														vector;
+	for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
+		vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
+		vector.Rotate(::cho::math_2pi / 5 * iGhost + applicationInstance.GhostTimer);
+		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (applicationInstance.CenterPositionEnemy + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		{
+			static double																beaconTimer								= 0;
+			beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
+			::cho::SCoord2<float>														centerPowerup							= applicationInstance.CenterPositionEnemy + vector;
+			char																		positionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
+			int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(positionsX));
+			::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)positionsX[selectedPos], 0.0f};
+			::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
+		}
+	}
+
+	// Draw player ships
+	const ::cho::grid_view<::cho::SColorBGRA>									& shipView									= applicationInstance.Textures[GAME_TEXTURE_SHIP].Processed.View;
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, applicationInstance.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	return 0;
 }
 
@@ -58,7 +79,7 @@
 			: ::cho::SColorBGRA(::cho::ORANGE)
 			;
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
-			const ::cho::SCoord2<float>								& pointToDraw									= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
+			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 3.0f);
 		}
 	}
@@ -83,10 +104,10 @@
 			: (0 == (starToDraw.Id % 2))	? ::cho::WHITE
 			: ::cho::DARKGRAY 
 			;
-		float																	maxFactor	= .5f;
-		float																	range		= 3.f;
-		maxFactor															= (rand() % 3 + 1) * 0.10f;
-		range																= starToDraw.Id % 3 + 1.0f;
+		float																		maxFactor	= .5f;
+		float																		range		= 3.f;
+		maxFactor																= (rand() % 3 + 1) * 0.10f;
+		range																	= starToDraw.Id % 3 + 1.0f;
 		::cho::drawPixelLight(viewOffscreen, particlePosition.Cast<float>(), viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 	}
 	return 0;
@@ -130,7 +151,7 @@
 		::cho::SCoord2<int32_t>		offset		= {0, 0};
 		::cho::SCoord2<int32_t>		position	= applicationInstance.CenterPositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
-			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturesPowerup0[iTex], position - applicationInstance.TextureCenterPowerup0, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double					beaconTimer			= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
 		::cho::SCoord2<int32_t>			centerPowerup	= position;
@@ -165,7 +186,7 @@
 		::cho::SCoord2<int32_t>		offset		= {-150, -150};
 		::cho::SCoord2<int32_t>		position	= applicationInstance.CenterPositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
-			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturesPowerup1[iTex], position - applicationInstance.TextureCenterPowerup1, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double					beaconTimer			= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
 		::cho::SCoord2<int32_t>			centerPowerup	= position;
@@ -198,54 +219,65 @@
 	return 0;
 }
 
+
+static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
+	static double																beaconTimer									= 0;
+	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 20;
+	::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
+	::cho::SCoord2<int32_t>														lightCrosshair []							= 
+		{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
+		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth, -halfWidth - 1 }
+		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
+		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth }
+		};
+
+	for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
+		::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
+		::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
+	}
+	return 0;
+}
+
+static				::cho::error_t										drawCrosshairAligned						(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
+	static double																beaconTimer									= 0;
+	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 10;
+	const ::cho::SCoord2<int32_t>												centerCrosshair								= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
+	const ::cho::SCoord2<int32_t>												lightCrosshair []							= 
+		{ centerCrosshair + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{halfWidth, -1}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{halfWidth,  0}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, halfWidth}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{-1, halfWidth}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
+		, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
+		};
+	
+	for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
+		const ::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
+		::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>()
+			, (0 == (int32_t)beaconTimer % 5) ? ::cho::SColorBGRA(::cho::RED			) 
+			: (0 == (int32_t)beaconTimer % 3) ? ::cho::SColorBGRA(::cho::LIGHTGREEN	)
+			: (0 == (int32_t)beaconTimer % 2) ? ::cho::SColorBGRA(::cho::LIGHTYELLOW	) 
+			: ::cho::SColorBGRA(::cho::LIGHTCYAN)
+			, .2f, 3.0f);
+	}
+	return 0;
+}
 					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	static double																powTimer									= 0;
 	powTimer																+= framework.FrameInfo.Seconds.LastFrame;
-	if((int32_t)powTimer % 2) {
-		static double																beaconTimer									= 0;
-		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 9;
-		::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
-		int32_t																		halfWidth									= 8 - ((int32_t)beaconTimer % 9);
-		::cho::SCoord2<int32_t>														lightCrosshair []							= 
-			{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
-			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth, -halfWidth - 1 }
-			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
-			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth }
-			};
-
-		for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
-			::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
-			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
-		}
-	}
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair.Processed.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	if(0 == ((int32_t)powTimer % 2)) {
-		static double																beaconTimer									= 0;
-		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 9;
-		const ::cho::SCoord2<int32_t>												centerCrosshair								= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
-		int32_t																		halfWidth									= 8 - ((int32_t)beaconTimer % 9);
-		const ::cho::SCoord2<int32_t>												lightCrosshair []							= 
-			{ centerCrosshair + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{halfWidth, -1}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{halfWidth,  0}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, halfWidth}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{-1, halfWidth}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
-			, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
-			};
-	
-		for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
-			const ::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
-			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>()
-				, (0 == (int32_t)framework.FrameInfo.Seconds.Total % 5) ? ::cho::SColorBGRA(::cho::RED			) 
-				: (0 == (int32_t)framework.FrameInfo.Seconds.Total % 3) ? ::cho::SColorBGRA(::cho::LIGHTGREEN	)
-				: (0 == (int32_t)framework.FrameInfo.Seconds.Total % 2) ? ::cho::SColorBGRA(::cho::LIGHTYELLOW	) 
-				: ::cho::SColorBGRA(::cho::LIGHTCYAN)
-				, .2f, 3.0f);
-		}
-	}	return 0;
+	if(false == applicationInstance.LineOfFire) 
+		drawCrosshairDiagonal(applicationInstance);
+	error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	if(applicationInstance.LineOfFire) 
+		drawCrosshairAligned(applicationInstance);
+	return 0;
 }
