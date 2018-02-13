@@ -41,7 +41,7 @@
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 		if(particleInstance.Type == PARTICLE_TYPE_LASER) {
-			::SLaserToDraw	laserToDraw	= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}};
+			::SLaserToDraw	laserToDraw	= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, applicationInstance.LineOfFire ? ::cho::CYAN : ::cho::RED};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
@@ -148,38 +148,22 @@ static				::cho::error_t										addParticle
 	return 0;
 }
 
-template<typename _tCoord>
-					::cho::error_t										buildAABBSegments		
-	( const ::cho::SCoord2<_tCoord> & center0
-	, const _tCoord					halfSizeBox
-	,		::cho::SLine2D<_tCoord>	& left
-	,		::cho::SLine2D<_tCoord>	& top
-	,		::cho::SLine2D<_tCoord>	& right
-	,		::cho::SLine2D<_tCoord>	& bottom
-	) {
-	const ::cho::SCoord2<_tCoord>  center	= center0;// - ::cho::SCoord2<_tCoord>{(_tCoord).5, (_tCoord).5};
-	left																	= {center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
-	top																		= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}};
-	right																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}};
-	bottom																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
-	return 0;
-}
-
 struct SAABBCache {	
-					::cho::SLine2D<float>								RectangleSegments	[4]						= {};
-					::cho::SCoord2<float>								CollisionPoints		[4]						= {};
-					bool												Collision			[4]						= {};
+						::cho::SLine2D<float>								RectangleSegments	[4]						= {};
+						::cho::SCoord2<float>								CollisionPoints		[4]						= {};
+						bool												Collision			[4]						= {};
 };
 
+template<typename _tCoord>
 static				::cho::error_t										updateLaserCollision
-	( const ::cho::SLine2D<float>														& projectilePath
-	, ::SAABBCache																		aabbCache
-	, const cho::SCoord2<float>															& posXHair	
-	, float																				halfSizeBox	
-	, ::cho::array_pod<cho::SCoord2<float>>												& collisionPoints
+	( const ::cho::SLine2D<_tCoord>												& projectilePath
+	, ::SAABBCache																aabbCache
+	, const cho::SCoord2<_tCoord>												& posXHair	
+	, float																		halfSizeBox	
+	, ::cho::array_pod<cho::SCoord2<_tCoord>>									& collisionPoints
 	)
 { // Check powerup
-	::buildAABBSegments(posXHair, halfSizeBox
+	::cho::buildAABBSegments(posXHair, halfSizeBox
 		, aabbCache.RectangleSegments[0]
 		, aabbCache.RectangleSegments[1]
 		, aabbCache.RectangleSegments[2]
@@ -187,7 +171,7 @@ static				::cho::error_t										updateLaserCollision
 		);
 	::cho::error_t																result											= 0;
 	for(uint32_t iSeg = 0; iSeg < 4; ++iSeg) {
-		::cho::SCoord2<float>														& collision										= aabbCache.CollisionPoints[iSeg];
+		::cho::SCoord2<_tCoord>														& collision										= aabbCache.CollisionPoints[iSeg];
 		if(1 == ::cho::segment_segment_intersect(projectilePath, aabbCache.RectangleSegments[iSeg], collision)) {
 			bool																		bFound											= false;
 			for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {

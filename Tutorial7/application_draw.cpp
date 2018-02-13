@@ -71,13 +71,7 @@
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iRay];
 		applicationInstance.CacheLinePoints.clear();
 		::cho::drawLine(viewOffscreen.metrics(), laserToDraw.Segment, applicationInstance.CacheLinePoints);
-		::cho::SColorBGRA															finalColor										
-			= (0 == (laserToDraw.Id %  5)) ? ::cho::SColorBGRA(::cho::CYAN) 
-			: (0 == (laserToDraw.Id %  7)) ? ::cho::SColorBGRA(::cho::YELLOW) 
-			: (0 == (laserToDraw.Id % 11)) ? ::cho::SColorBGRA(::cho::RED) 
-			: (0 == (laserToDraw.Id % 13)) ? ::cho::SColorBGRA(::cho::MAGENTA) 
-			: ::cho::SColorBGRA(::cho::ORANGE)
-			;
+		::cho::SColorBGRA															finalColor									= laserToDraw.Color;
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 3.0f);

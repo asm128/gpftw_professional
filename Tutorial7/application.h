@@ -33,6 +33,7 @@ struct SLaserToDraw {
 						int32_t													Id;
 						int32_t													IndexParticle;
 						::cho::SLine2D<float>									Segment;
+						::cho::SColorBGRA										Color;
 };
 
 struct SStuffToDraw {

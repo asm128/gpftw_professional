@@ -148,23 +148,6 @@ static				::cho::error_t										addParticle
 	return 0;
 }
 
-template<typename _tCoord>
-					::cho::error_t										buildAABBSegments		
-	( const ::cho::SCoord2<_tCoord> & center0
-	, const _tCoord					halfSizeBox
-	,		::cho::SLine2D<_tCoord>	& left
-	,		::cho::SLine2D<_tCoord>	& top
-	,		::cho::SLine2D<_tCoord>	& right
-	,		::cho::SLine2D<_tCoord>	& bottom
-	) {
-	const ::cho::SCoord2<_tCoord>  center	= center0;// - ::cho::SCoord2<_tCoord>{(_tCoord).5, (_tCoord).5};
-	left																	= {center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
-	top																		= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}};
-	right																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}};
-	bottom																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
-	return 0;
-}
-
 struct SAABBCache {	
 					::cho::SLine2D<float>								RectangleSegments	[4]						= {};
 					::cho::SCoord2<float>								CollisionPoints		[4]						= {};
@@ -179,7 +162,7 @@ static				::cho::error_t										updateLaserCollision
 	, ::cho::array_pod<cho::SCoord2<float>>												& collisionPoints
 	)
 { // Check powerup
-	::buildAABBSegments(posXHair, halfSizeBox
+	::cho::buildAABBSegments(posXHair, halfSizeBox
 		, aabbCache.RectangleSegments[0]
 		, aabbCache.RectangleSegments[1]
 		, aabbCache.RectangleSegments[2]

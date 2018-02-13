@@ -78,6 +78,41 @@ namespace cho
 		}
 		return collision;
 	}
+
+
+	template<typename _tCoord>
+						::cho::error_t										buildAABBSegments		
+		( const ::cho::SCoord2<_tCoord> & center
+		, const _tCoord					halfSizeBox
+		,		::cho::SLine2D<_tCoord>	& left
+		,		::cho::SLine2D<_tCoord>	& top
+		,		::cho::SLine2D<_tCoord>	& right
+		,		::cho::SLine2D<_tCoord>	& bottom
+		) 
+	{
+		left																	= {center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
+		top																		= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}};
+		right																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}};
+		bottom																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
+		return 0;
+	}
+
+	template<typename _tCoord>
+						::cho::error_t										buildAABBSegments		
+		( const ::cho::SRectangle2D<_tCoord>	& rect
+		,		::cho::SLine2D<_tCoord>			& left
+		,		::cho::SLine2D<_tCoord>			& top
+		,		::cho::SLine2D<_tCoord>			& right
+		,		::cho::SLine2D<_tCoord>			& bottom
+		) 
+	{
+		left																	= {rect.Offset														, rect.Offset + ::cho::SCoord2<_tCoord>{0			, rect.Size.y}};
+		top																		= {rect.Offset + ::cho::SCoord2<_tCoord>{0, rect.Size.y}			, rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x	, rect.Size.y}};
+		right																	= {rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x, rect.Size.y}	, rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x, 0}};
+		bottom																	= {rect.Offset														, rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x, 0}};
+		return 0;
+	}
+
 }
 
 
