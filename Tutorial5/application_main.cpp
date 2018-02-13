@@ -167,7 +167,13 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
 
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	applicationInstance.StuffToDraw.ProjectilePaths.clear();
+	::cho::clear
+		( applicationInstance.StuffToDraw.ProjectilePaths
+		, applicationInstance.StuffToDraw.CollisionPoints	
+		, applicationInstance.StuffToDraw.Debris			
+		, applicationInstance.StuffToDraw.Thrust			
+		, applicationInstance.StuffToDraw.Stars				
+		);
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
