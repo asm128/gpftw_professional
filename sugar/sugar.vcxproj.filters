@@ -126,6 +126,9 @@
     <ClInclude Include="cho_framework.h">
       <Filter>runtime</Filter>
     </ClInclude>
+    <ClInclude Include="cho_collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">
