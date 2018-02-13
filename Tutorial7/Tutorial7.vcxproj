@@ -18,6 +18,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="application_draw.cpp" />
+    <ClCompile Include="application_main.cpp" />
+    <ClCompile Include="application_setup.cpp" />
+    <ClCompile Include="application_update.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="application.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{c55c9b85-d29e-4353-b4fd-dc5a9a7ad5a0}</ProjectGuid>
