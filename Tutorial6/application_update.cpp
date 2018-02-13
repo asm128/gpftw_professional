@@ -225,17 +225,18 @@ static				::cho::error_t										addParticle
 
 template<typename _tCoord>
 					::cho::error_t										buildAABBSegments		
-	( const ::cho::SCoord2<_tCoord> & center
+	( const ::cho::SCoord2<_tCoord> & center0
 	, const _tCoord					halfSizeBox
 	,		::cho::SLine2D<_tCoord>	& left
 	,		::cho::SLine2D<_tCoord>	& top
 	,		::cho::SLine2D<_tCoord>	& right
 	,		::cho::SLine2D<_tCoord>	& bottom
 	) {
-	left																	= {center + ::cho::SCoord2<_tCoord>{-halfSizeBox		, halfSizeBox - 1	}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox		,-halfSizeBox		}};
-	top																		= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox - 1	, halfSizeBox - 1	}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox		, halfSizeBox - 1	}};
-	right																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox - 1	, halfSizeBox - 1	}, center + ::cho::SCoord2<_tCoord>{ halfSizeBox - 1	,-halfSizeBox		}};
-	bottom																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox - 1	,-halfSizeBox		}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox		,-halfSizeBox		}};
+	const ::cho::SCoord2<_tCoord>  center	= center0;// - ::cho::SCoord2<_tCoord>{(_tCoord).5, (_tCoord).5};
+	left																	= {center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
+	top																		= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}};
+	right																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}};
+	bottom																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
 	return 0;
 }
 
@@ -327,17 +328,18 @@ static				::cho::error_t										updateLaserCollision
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	{
 		::SAABBCache																aabbCache;
+		::cho::SLine2D<float>														projectilePath			= {applicationInstance.CenterPositionShip, applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{10000, }};
+		projectilePath.A.y														-= 1;
+		projectilePath.B.y														-= 1;
 		{
 			const cho::SCoord2<float>													& posXHair				= applicationInstance.CenterPositionEnemy;
-			float																		halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x / 4 * 3;
-			::cho::SLine2D<float>														projectilePath			= {applicationInstance.CenterPositionShip, applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{10000, }};
+			float																		halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 			if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 				applicationInstance.LineOfFire											= true;
 		}
 		{
-			const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
-			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x / 4 * 3;
-			::cho::SLine2D<float>							projectilePath			= {applicationInstance.CenterPositionShip, applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{10000, }};
+			const cho::SCoord2<float>													& posXHair				= applicationInstance.CenterPositionPowerup;
+			float																		halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
 			if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 				applicationInstance.LineOfFire											= true;
 		}
