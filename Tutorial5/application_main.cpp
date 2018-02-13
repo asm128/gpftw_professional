@@ -273,26 +273,25 @@ template<typename _tCoord>
 	return collision;
 }
 
-
-
- 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
+ 					::cho::error_t										updateShip									(::SApplication& applicationInstance)					{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
+	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
+	// update ship
+	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
+		(applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
+	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
+	return 0;
+}
 
-	::cho::error_t																frameworkResult								= ::cho::updateFramework(framework);
-	ree_if	(errored(frameworkResult), "Unknown error.");
-	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
-
-	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
-	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
-
+					::cho::error_t										updateSpawn									(::SApplication& applicationInstance)					{
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
 	// Add some effect particles
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
-	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
 	static double																delayThrust									= 0;
 	static double																delayStar									= 0;
 	static double																delayWeapon									= 0;
@@ -318,29 +317,10 @@ template<typename _tCoord>
 			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
 		}
 	}
+	return 0;
+}
 
-	// update background
-	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
-	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
-	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
-
-	// update ship
-	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * 
-		(applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
-	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
-
-	// update crosshair
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
-	applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
-
-	::cho::STimer																& timer										= framework.Timer;
-	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
-	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. Particle count: %u. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.ParticleSystem.Instances.size(), 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
-	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
-	SetWindowText(windowHandle, buffer);
-
+					::cho::error_t										updateShots									(::SApplication& applicationInstance)					{ 
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
@@ -372,13 +352,19 @@ template<typename _tCoord>
 		}
 	}
 
+	typedef	::SApplication::TParticleSystem										TParticleSystem;
+	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
+	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
 		for(uint32_t i=0; i < 10; ++i) {
 			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
 			angle.Normalize();
 			::addParticle(PARTICLE_TYPE_DEBRIS, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100);
 		}
-
+	return 0;
+} 
+					::cho::error_t										updateGUI									(::SApplication& applicationInstance)					{ 
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionCrosshair;
@@ -408,5 +394,41 @@ template<typename _tCoord>
 			}
 		}
 	}
+	return 0;
+}
+
+					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
+
+	::cho::error_t																frameworkResult								= ::cho::updateFramework(framework);
+	ree_if	(errored(frameworkResult), "Unknown error.");
+	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
+
+	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
+
+	// update background
+	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
+	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
+	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
+
+	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateSpawn					(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateShip					(applicationInstance)), "Unknown error.");
+
+	// update crosshair
+	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
+	applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
+
+	error_if(errored(::updateShots					(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");
+	::cho::STimer																& timer										= framework.Timer;
+	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
+	char																		buffer		[256]							= {};
+	sprintf_s(buffer, "[%u x %u]. Particle count: %u. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.ParticleSystem.Instances.size(), 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
+	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
+	SetWindowText(windowHandle, buffer);
 	return 0;
 }

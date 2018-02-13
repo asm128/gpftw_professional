@@ -20,6 +20,17 @@ namespace cho
 #endif
 	};
 
+#if defined(CHO_WINDOWS)
+	static inline		void													initWndClass								(::HINSTANCE hInstance, const TCHAR* className, ::WNDCLASSEX& wndClassToInit, WNDPROC wndProc)	{
+		wndClassToInit																= {sizeof(::WNDCLASSEX),};
+		wndClassToInit.lpfnWndProc													= wndProc;
+		wndClassToInit.hInstance													= hInstance;
+		wndClassToInit.hCursor														= LoadCursor(NULL, IDC_ARROW);
+		wndClassToInit.hbrBackground												= (::HBRUSH)(COLOR_3DFACE + 1);
+		wndClassToInit.lpszClassName												= className;
+	}
+#endif
+
 	struct SDisplay {
 							::cho::SDisplayPlatformDetail							PlatformDetail								= {};
 							::cho::SCoord2<uint32_t>								PreviousSize								= {};

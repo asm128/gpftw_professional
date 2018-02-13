@@ -59,18 +59,9 @@ extern				::SApplication														* g_ApplicationInstance						;
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-					void																initWndClass								(::HINSTANCE hInstance, const TCHAR* className, ::WNDCLASSEX& wndClassToInit)	{
-	wndClassToInit																			= {sizeof(::WNDCLASSEX),};
-	wndClassToInit.lpfnWndProc																= ::mainWndProc;
-	wndClassToInit.hInstance																= hInstance;
-	wndClassToInit.hCursor																	= LoadCursor(NULL, IDC_ARROW);
-	wndClassToInit.hbrBackground															= (::HBRUSH)(COLOR_3DFACE + 1);
-	wndClassToInit.lpszClassName															= className;
-}
-
 					::cho::error_t														mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance)													{ 
 	::cho::SDisplayPlatformDetail																& displayDetail								= mainWindow.PlatformDetail;
-	::initWndClass(hInstance, displayDetail.WindowClassName, displayDetail.WindowClass);
+	::cho::initWndClass(hInstance, displayDetail.WindowClassName, displayDetail.WindowClass, ::mainWndProc);
 	::RegisterClassEx(&displayDetail.WindowClass);
 	mainWindow.Size																			= {::BMP_SCREEN_WIDTH, ::BMP_SCREEN_HEIGHT};
 	::RECT																						finalClientRect								= {100, 100, 100 + (LONG)mainWindow.Size.x, 100 + (LONG)mainWindow.Size.y};

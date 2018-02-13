@@ -54,19 +54,6 @@ struct SShipState {
 						bool													Brakes										: 1;
 };
 
-//struct STextureArray {
-//						::cho::array_pod<::cho::STexture<::cho::SColorBGRA>>	Original									= {};
-//						::cho::array_pod<::cho::STexture<::cho::SColorBGRA>>	Processed									= {};
-//};
-						//::STextureArray											TexturesShip								= {};
-						//::STextureArray											TexturesPowerup								= {};
-						//::STextureArray											TexturesCrosshair							= {};
-						//
-						//::cho::grid_view<::cho::SColorBGRA>						TextureViewShip								= {};
-						//::cho::grid_view<::cho::SColorBGRA>						TextureViewPowerup							= {};
-						//::cho::grid_view<::cho::SColorBGRA>						TextureViewCrosshair						= {};
-
-
 struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
 
@@ -79,7 +66,6 @@ struct SApplication {
 						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>			TexturePowerup								= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>			TextureCrosshair							= {};
-
 
 						::cho::SCoord2<int32_t>									TextureCenterShip							= {};
 						::cho::SCoord2<int32_t>									TextureCenterPowerup						= {};
@@ -97,9 +83,6 @@ struct SApplication {
 
 						::SShipState											ShipState									= {false, false};
 						::SWeapon												Laser										= {.15f, 2000};
-
-						::cho::array_pod<::SShipState>							ShipsStates									= {};
-						::cho::array_pod<::cho::SCoord2<float>>					ShipsPosition								= {};
 
 																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
