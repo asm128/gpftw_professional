@@ -76,9 +76,9 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 		error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair[iFrame].Original)), "Failed to load bitmap from file: %s.", bmpFileName2);
 	}
 	ree_if	(errored(::updateSizeDependentResources(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
+	applicationInstance.PositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
+	applicationInstance.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
+	applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{64,};
 	applicationInstance.TextureCenterShip									= (applicationInstance.TextureShip			.Original.View.metrics() / 2).Cast<int32_t>();
 	applicationInstance.TextureCenterPowerup								= (applicationInstance.TexturePowerup		.Original.View.metrics() / 2).Cast<int32_t>();
 	applicationInstance.TextureCenterCrosshair								= (applicationInstance.TextureCrosshair[0]	.Original.View.metrics() / 2).Cast<int32_t>();
@@ -198,7 +198,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	if(delayThrust > .01) {
 		delayThrust																= 0;
 		for(int32_t i = 0; i < particleCountToSpawn; ++i) 
-			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
+			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.PositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.TurboShip, applicationInstance.DirectionShip * -1.0);
 	}
 	if(delayStar > .1) {
 		delayStar																= 0;
@@ -207,12 +207,12 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	}
 
 	if(applicationInstance.Firing) 
-		::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip, false, {1, 0});
+		::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.PositionShip, false, {1, 0});
 
 	// update ship
-	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
-	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
-	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
+	applicationInstance.PositionShip									+= applicationInstance.DirectionShip * (float)(applicationInstance.Framework.FrameInfo.Seconds.LastFrame * 100) * (applicationInstance.TurboShip ? 2 : 1);
+	applicationInstance.PositionShip.x								= ::cho::clamp(applicationInstance.PositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
+	applicationInstance.PositionShip.y								= ::cho::clamp(applicationInstance.PositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 
 	// update background
 	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
@@ -220,7 +220,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
 	// update crosshair
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
+	applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{64,};
 
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
@@ -241,9 +241,9 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	//memset(offscreen.View.begin(), 0x1D, sizeof(::cho::SColorBGRA) * offscreen.View.size());
 	::cho::drawRectangle(offscreen.View, applicationInstance.ColorBackground, ::cho::SRectangle2D<uint32_t>{{}, offscreen.View.metrics()});
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.CenterPositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair[(uint32_t)(framework.FrameInfo.Seconds.Total * 10.0f) % 5].Original.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup	.Original.View, applicationInstance.PositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip		.Original.View, applicationInstance.PositionShip		.Cast<int32_t>() - applicationInstance.TextureCenterShip	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair[(uint32_t)(framework.FrameInfo.Seconds.Total * 10.0f) % 5].Original.View, applicationInstance.PositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.ParticleIndex;
@@ -288,7 +288,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	static double					beaconTimer			= 0;
 	beaconTimer						+= framework.FrameInfo.Seconds.LastFrame * 8;
 	
-	::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionPowerup.Cast<int32_t>();
+	::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.PositionPowerup.Cast<int32_t>();
 	::cho::SCoord2<int32_t>			lightPos []		= 
 		{ centerPowerup + ::cho::SCoord2<int32_t>{-1,-6}
 		, centerPowerup + ::cho::SCoord2<int32_t>{ 0,-6}

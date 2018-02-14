@@ -7,14 +7,14 @@
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	// Draw enemy ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, applicationInstance.Game.CenterPositionEnemy.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, applicationInstance.Game.PositionEnemy.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	{
 		static double																beaconTimer									= 0;
 		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<float>														centerPowerup								= applicationInstance.Game.CenterPositionEnemy;
-		char																		positionsX[]								= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-		int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(positionsX));
-		::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)positionsX[selectedPos], 0.0f};
+		::cho::SCoord2<float>														centerPowerup								= applicationInstance.Game.PositionEnemy;
+		int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
+		::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
 		::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 	}
 	applicationInstance.Game.GhostTimer											+= framework.FrameInfo.Seconds.LastFrame;
@@ -23,21 +23,20 @@
 	for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 		vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
 		vector.Rotate(::cho::math_2pi / 5 * iGhost + applicationInstance.Game.GhostTimer);
-		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (applicationInstance.Game.CenterPositionEnemy + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (applicationInstance.Game.PositionEnemy + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		{
 			static double																beaconTimer								= 0;
 			beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-			::cho::SCoord2<float>														centerPowerup							= applicationInstance.Game.CenterPositionEnemy + vector;
-			char																		positionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-			int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(positionsX));
-			::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)positionsX[selectedPos], 0.0f};
+			::cho::SCoord2<float>														centerPowerup							= applicationInstance.Game.PositionEnemy + vector;
+			int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
+			::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
 			::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
 		}
 	}
 
 	// Draw player ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& shipView									= applicationInstance.Textures[GAME_TEXTURE_SHIP].Processed.View;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, applicationInstance.Game.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, applicationInstance.Game.PositionShip.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	return 0;
 }
 
@@ -143,7 +142,7 @@
 	timer																	+= (float)framework.FrameInfo.Seconds.LastFrame / 2;
 	{
 		::cho::SCoord2<int32_t>		offset		= {0, 0};
-		::cho::SCoord2<int32_t>		position	= applicationInstance.Game.CenterPositionPowerup.Cast<int32_t>() + offset;
+		::cho::SCoord2<int32_t>		position	= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double					beaconTimer			= 0;
@@ -178,7 +177,7 @@
 
 	{
 		::cho::SCoord2<int32_t>		offset		= {-150, -150};
-		::cho::SCoord2<int32_t>		position	= applicationInstance.Game.CenterPositionPowerup.Cast<int32_t>() + offset;
+		::cho::SCoord2<int32_t>		position	= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double					beaconTimer			= 0;
@@ -219,7 +218,7 @@ static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& ap
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	static double																beaconTimer									= 0;
 	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 20;
-	::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.Game.CenterPositionCrosshair.Cast<int32_t>();
+	::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.Game.PositionCrosshair.Cast<int32_t>();
 	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
 	::cho::SCoord2<int32_t>														lightCrosshair []							= 
 		{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
@@ -240,7 +239,7 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	static double																beaconTimer									= 0;
 	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 10;
-	const ::cho::SCoord2<int32_t>												centerCrosshair								= applicationInstance.Game.CenterPositionCrosshair.Cast<int32_t>();
+	const ::cho::SCoord2<int32_t>												centerCrosshair								= applicationInstance.Game.PositionCrosshair.Cast<int32_t>();
 	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
 	const ::cho::SCoord2<int32_t>												lightCrosshair []							= 
 		{ centerCrosshair + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
@@ -270,7 +269,7 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 	powTimer																+= framework.FrameInfo.Seconds.LastFrame;
 	if(false == applicationInstance.Game.LineOfFire) 
 		drawCrosshairDiagonal(applicationInstance);
-	error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, applicationInstance.Game.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, applicationInstance.Game.PositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	if(applicationInstance.Game.LineOfFire) 
 		drawCrosshairAligned(applicationInstance);
 	return 0;

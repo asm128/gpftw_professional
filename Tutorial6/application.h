@@ -83,10 +83,10 @@ struct SApplication {
 						
 						::cho::SCoord2<float>									DirectionShip								= {};
 
-						::cho::SCoord2<float>									CenterPositionShip							= {};
-						::cho::SCoord2<float>									CenterPositionPowerup						= {};
-						::cho::SCoord2<float>									CenterPositionCrosshair						= {};
-						::cho::SCoord2<float>									CenterPositionEnemy							= {};
+						::cho::SCoord2<float>									PositionShip								= {};
+						::cho::SCoord2<float>									PositionPowerup								= {};
+						::cho::SCoord2<float>									PositionCrosshair							= {};
+						::cho::SCoord2<float>									PositionEnemy								= {};
 
 						::SStuffToDraw											StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};

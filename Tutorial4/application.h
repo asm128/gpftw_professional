@@ -32,9 +32,9 @@ struct SApplication {
 
 						::cho::SCoord2<float>								DirectionShip								= {};
 
-						::cho::SCoord2<float>								CenterPositionShip							= {};
-						::cho::SCoord2<float>								CenterPositionPowerup						= {};
-						::cho::SCoord2<float>								CenterPositionCrosshair						= {};
+						::cho::SCoord2<float>								PositionShip							= {};
+						::cho::SCoord2<float>								PositionPowerup						= {};
+						::cho::SCoord2<float>								PositionCrosshair						= {};
 
 						bool												TurboShip									= false;
 						bool												Firing										= false;

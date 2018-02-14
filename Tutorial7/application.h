@@ -79,7 +79,6 @@ struct SApplication {
 						::SStuffToDraw											StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};
 
-
 																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 

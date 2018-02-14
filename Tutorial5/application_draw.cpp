@@ -5,7 +5,7 @@
 					::cho::error_t										drawShips									(::SApplication& applicationInstance)											{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Processed.View, applicationInstance.CenterPositionShip.Cast<int32_t>() - applicationInstance.TextureCenterShip, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureShip.Processed.View, applicationInstance.PositionShip.Cast<int32_t>() - applicationInstance.TextureCenterShip, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	return 0;
 }
 
@@ -113,11 +113,11 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup.Processed.View, applicationInstance.CenterPositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TexturePowerup.Processed.View, applicationInstance.PositionPowerup	.Cast<int32_t>() - applicationInstance.TextureCenterPowerup	, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	{
 		static double					beaconTimer			= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
-		::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.CenterPositionPowerup.Cast<int32_t>();
+		::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.PositionPowerup.Cast<int32_t>();
 		int32_t							halfWidth		= 5; //(framework.FrameInfo.FrameNumber / 100) % 6;
 		::cho::SCoord2<int32_t>			lightPos []		= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
@@ -154,7 +154,7 @@
 	if((int32_t)framework.FrameInfo.Seconds.Total % 2) {
 		static double																beaconTimer				= 0;
 		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<int32_t>														centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+		::cho::SCoord2<int32_t>														centerPowerup			= applicationInstance.PositionCrosshair.Cast<int32_t>();
 		int32_t																		halfWidth				= 8 - ((int32_t)beaconTimer % 9);
 		::cho::SCoord2<int32_t>														lightCrosshair []		= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
@@ -168,11 +168,11 @@
 			::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 		}
 	}
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair.Processed.View, applicationInstance.CenterPositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair.Processed.View, applicationInstance.PositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	if(0 == ((int32_t)framework.FrameInfo.Seconds.Total % 2)) {
 		static double					beaconTimer				= 0;
 		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<int32_t>			centerPowerup			= applicationInstance.CenterPositionCrosshair.Cast<int32_t>();
+		::cho::SCoord2<int32_t>			centerPowerup			= applicationInstance.PositionCrosshair.Cast<int32_t>();
 		int32_t							halfWidth				= 8 - ((int32_t)beaconTimer % 9);
 		::cho::SCoord2<int32_t>			lightCrosshair []		= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}

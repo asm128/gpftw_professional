@@ -89,10 +89,10 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	::setupParticles();
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
-	applicationInstance.CenterPositionEnemy									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
+	applicationInstance.PositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
+	applicationInstance.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
+	applicationInstance.PositionEnemy									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
+	applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{64,};
 
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP].x};
 	return 0;
@@ -153,7 +153,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 				applicationInstance.PathStep = 0;
 		}
 		const ::cho::SCoord2<float>													& pathTarget							= applicationInstance.PathEnemy[applicationInstance.PathStep];
-		::cho::SCoord2<float>														directionEnemy							= (pathTarget - applicationInstance.CenterPositionEnemy);
+		::cho::SCoord2<float>														directionEnemy							= (pathTarget - applicationInstance.PositionEnemy);
 		if(directionEnemy.LengthSquared() < 0.5) {
 			timerPath = 0;
 			++applicationInstance.PathStep;
@@ -163,17 +163,17 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		else {
 			directionEnemy.Normalize();
 			// update enemy
-			applicationInstance.CenterPositionEnemy									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-			applicationInstance.CenterPositionEnemy									= 
-				{ ::cho::clamp(applicationInstance.CenterPositionEnemy.x, .1f, (float)offscreen.View.metrics().x - 1)
-				, ::cho::clamp(applicationInstance.CenterPositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1)
+			applicationInstance.PositionEnemy									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+			applicationInstance.PositionEnemy									= 
+				{ ::cho::clamp(applicationInstance.PositionEnemy.x, .1f, (float)offscreen.View.metrics().x - 1)
+				, ::cho::clamp(applicationInstance.PositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1)
 				};
 		}
 	}
 
 	{ // update crosshair 
-		applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
-		applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
+		applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{96,};
+		applicationInstance.PositionCrosshair.x							= ::cho::min(applicationInstance.PositionCrosshair.x, (float)offscreen.View.metrics().x);
 	}
 	error_if(errored(::updateShots					(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");

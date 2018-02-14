@@ -85,9 +85,9 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	applicationInstance.CenterPositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.CenterPositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{64,};
+	applicationInstance.PositionShip									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
+	applicationInstance.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
+	applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{64,};
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenterShip.x};
 	return 0;
 }
@@ -208,10 +208,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 	// update ship
-	applicationInstance.CenterPositionShip									+= applicationInstance.DirectionShip * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
+	applicationInstance.PositionShip									+= applicationInstance.DirectionShip * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
 		(applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-	applicationInstance.CenterPositionShip.x								= ::cho::clamp(applicationInstance.CenterPositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
-	applicationInstance.CenterPositionShip.y								= ::cho::clamp(applicationInstance.CenterPositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
+	applicationInstance.PositionShip.x								= ::cho::clamp(applicationInstance.PositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
+	applicationInstance.PositionShip.y								= ::cho::clamp(applicationInstance.PositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 	return 0;
 }
 
@@ -233,7 +233,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	if(delayThrust > .01) {
 		delayThrust																= 0;
 		for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) 
-			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.DirectionShip * -1.0, (float)(rand() % 400) + (isTurbo ? 400 : 0));
+			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.PositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.DirectionShip * -1.0, (float)(rand() % 400) + (isTurbo ? 400 : 0));
 	}
 	if(delayStar > .1) {
 		delayStar																= 0;
@@ -245,7 +245,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
 			const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenterShip.x), -1};
 			delayWeapon																= 0;
-			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.CenterPositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
+			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.PositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
 		}
 	}
 	return 0;
@@ -254,7 +254,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 					::cho::error_t										updateShots									(::SApplication& applicationInstance)					{ 
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionPowerup;
+		const cho::SCoord2<float>						& posXHair				= applicationInstance.PositionPowerup;
 		float											halfSizeBox				= (float)applicationInstance.TextureCenterPowerup.x / 4 * 3;
 		::cho::SLine2D<float>							rectangleSegments[]		= 
 			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1	}, posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1	}}
@@ -298,7 +298,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 					::cho::error_t										updateGUI									(::SApplication& applicationInstance)					{ 
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-		const cho::SCoord2<float>						& posXHair				= applicationInstance.CenterPositionCrosshair;
+		const cho::SCoord2<float>						& posXHair				= applicationInstance.PositionCrosshair;
 		float											halfSizeBox				= 5.0f;
 		::cho::SLine2D<float>							rectangleSegments[]		= 
 			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
@@ -350,8 +350,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	// update crosshair
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	applicationInstance.CenterPositionCrosshair								= applicationInstance.CenterPositionShip + ::cho::SCoord2<float>{96,};
-	applicationInstance.CenterPositionCrosshair.x							= ::cho::min(applicationInstance.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
+	applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{96,};
+	applicationInstance.PositionCrosshair.x							= ::cho::min(applicationInstance.PositionCrosshair.x, (float)offscreen.View.metrics().x);
 
 	error_if(errored(::updateShots					(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");

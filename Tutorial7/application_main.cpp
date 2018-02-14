@@ -89,10 +89,10 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	::setupParticles();
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	applicationInstance.Game.CenterPositionShip								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.Game.CenterPositionPowerup							= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
-	applicationInstance.Game.CenterPositionEnemy							= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
-	applicationInstance.Game.CenterPositionCrosshair						= applicationInstance.Game.CenterPositionShip + ::cho::SCoord2<float>{64,};
+	applicationInstance.Game.PositionShip								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
+	applicationInstance.Game.PositionPowerup							= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
+	applicationInstance.Game.PositionEnemy							= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
+	applicationInstance.Game.PositionCrosshair						= applicationInstance.Game.PositionShip + ::cho::SCoord2<float>{64,};
 
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP].x};
 	return 0;
@@ -153,7 +153,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 				applicationInstance.Game.PathStep = 0;
 		}
 		const ::cho::SCoord2<float>													& pathTarget							= applicationInstance.Game.PathEnemy[applicationInstance.Game.PathStep];
-		::cho::SCoord2<float>														directionEnemy							= (pathTarget - applicationInstance.Game.CenterPositionEnemy);
+		::cho::SCoord2<float>														directionEnemy							= (pathTarget - applicationInstance.Game.PositionEnemy);
 		if(directionEnemy.LengthSquared() < 0.5) {
 			timerPath = 0;
 			++applicationInstance.Game.PathStep;
@@ -163,17 +163,17 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		else {
 			directionEnemy.Normalize();
 			// update enemy
-			applicationInstance.Game.CenterPositionEnemy									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-			applicationInstance.Game.CenterPositionEnemy									= 
-				{ ::cho::clamp(applicationInstance.Game.CenterPositionEnemy.x, .1f, (float)offscreen.View.metrics().x - 1)
-				, ::cho::clamp(applicationInstance.Game.CenterPositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1)
+			applicationInstance.Game.PositionEnemy									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+			applicationInstance.Game.PositionEnemy									= 
+				{ ::cho::clamp(applicationInstance.Game.PositionEnemy.x, .1f, (float)offscreen.View.metrics().x - 1)
+				, ::cho::clamp(applicationInstance.Game.PositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1)
 				};
 		}
 	}
 
 	{ // update crosshair 
-		applicationInstance.Game.CenterPositionCrosshair						= applicationInstance.Game.CenterPositionShip + ::cho::SCoord2<float>{96,};
-		applicationInstance.Game.CenterPositionCrosshair.x						= ::cho::min(applicationInstance.Game.CenterPositionCrosshair.x, (float)offscreen.View.metrics().x);
+		applicationInstance.Game.PositionCrosshair						= applicationInstance.Game.PositionShip + ::cho::SCoord2<float>{96,};
+		applicationInstance.Game.PositionCrosshair.x						= ::cho::min(applicationInstance.Game.PositionCrosshair.x, (float)offscreen.View.metrics().x);
 	}
 	error_if(errored(::updateShots					(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");
