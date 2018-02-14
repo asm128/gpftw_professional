@@ -1,5 +1,6 @@
 #include "cho_particle.h"
 #include "cho_framework.h"
+#include "game.h"
 
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
@@ -42,17 +43,9 @@ struct SStuffToDraw {
 						::cho::array_pod<::SParticleToDraw>						Thrust										= {};
 						::cho::array_pod<::SParticleToDraw>						Debris										= {};
 						::cho::array_pod<::cho::SCoord2<float>>					CollisionPoints								= {};
-};
 
-struct SWeapon {
-						float													Delay;
-						float													Speed;
-};
-
-struct SShipState {
-						bool													Thrust										: 1;
-						bool													Firing										: 1;
-						bool													Brakes										: 1;
+						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup0							= {};
+						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup1							= {};
 };
 
 enum GAME_TEXTURE : int8_t
@@ -66,11 +59,12 @@ enum GAME_TEXTURE : int8_t
 	, GAME_TEXTURE_INVALID		= -1	
 	};
 
-
 struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
 
 						::cho::SFramework										Framework									;
+
+						::SGame													Game;
 
 						TParticleSystem											ParticleSystem								= {};
 
@@ -81,32 +75,11 @@ struct SApplication {
 
 						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
 						::cho::SCoord2<int32_t>									PSOffsetFromShipCenter						= {};
-						
-						::cho::SCoord2<float>									DirectionShip								= {};
-
-						::cho::SCoord2<float>									CenterPositionShip							= {};
-						::cho::SCoord2<float>									CenterPositionPowerup						= {};
-						::cho::SCoord2<float>									CenterPositionCrosshair						= {};
-						::cho::SCoord2<float>									CenterPositionEnemy							= {};
 
 						::SStuffToDraw											StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};
 
-						::SShipState											ShipState									= {false, false};
-						::SWeapon												Laser										= {.10f, 2000};
 
-						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup0							= {};
-						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup1							= {};
-						double													GhostTimer									= 0;
-						bool													LineOfFire									= false;
-
-						uint32_t												PathStep									= 0;
-						::cho::SCoord2<float>									PathEnemy	[4]								= 
-							{ { 10.f,  10.f}
-							, {320.f, 180.f}
-							, { 50.f, 200.f}
-							, {480.f,  10.f}
-							};
 																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 
