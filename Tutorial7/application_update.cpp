@@ -256,7 +256,7 @@ static				::cho::error_t										updateLaserCollision
 					::cho::error_t										updateGUI									(::SApplication& applicationInstance)					{ 
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = ::cho::size(gameInstance.ShipPosition); iShip < shipCount; ++iShip) {
-		{
+		{ // Calculate line of sight 
 			::SAABBCache																aabbCache;
 			::cho::SLine2D<float>														projectilePath			= {gameInstance.ShipPosition[iShip], gameInstance.ShipPosition[iShip] + ::cho::SCoord2<float>{10000, }};
 			projectilePath.A.y														-= 1;
@@ -276,10 +276,11 @@ static				::cho::error_t										updateLaserCollision
 			}
 		}
 
+		// 
 		const cho::SCoord2<float>						& posXHair				= gameInstance.CrosshairPosition[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-			float											halfSizeBox				= 5.0f;
-			::cho::SLine2D<float>							rectangleSegments[]		= 
+			float											halfSizeBox				= applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View.width() / 2.0f;
+			const ::cho::SLine2D<float>						rectangleSegments[]		= 
 				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
 				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 				};
