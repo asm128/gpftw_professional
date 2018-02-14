@@ -5,6 +5,11 @@
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
 
+enum PLAYER_TYPE 
+	{	PLAYER_TYPE_AI
+	,	PLAYER_TYPE_HUMAN
+	};
+
 enum PARTICLE_TYPE : int8_t
 	{	PARTICLE_TYPE_SNOW			= 0
 	,	PARTICLE_TYPE_SHIP_THRUST
@@ -21,6 +26,13 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_COUNT
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
+
+struct SGameParticle {
+	PARTICLE_TYPE		Type;
+	PLAYER_TYPE			PlayerType;
+	int32_t				Player;
+	::cho::SColorBGRA	Color;
+};
 
 struct SParticleToDraw {
 						int32_t													Id;
