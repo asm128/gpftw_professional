@@ -169,6 +169,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 				, ::cho::clamp(applicationInstance.Game.PositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1)
 				};
 		}
+		applicationInstance.Game.GhostTimer										+= framework.FrameInfo.Seconds.LastFrame;
 	}
 
 	{ // update crosshair 

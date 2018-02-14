@@ -17,7 +17,6 @@
 		::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
 		::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 	}
-	applicationInstance.Game.GhostTimer											+= framework.FrameInfo.Seconds.LastFrame;
 	static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
 	::cho::SCoord2<float>														vector;
 	for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {

@@ -41,7 +41,7 @@
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 		if(particleInstance.Type == PARTICLE_TYPE_LASER) {
-			::SLaserToDraw	laserToDraw	= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, applicationInstance.Game.LineOfFire ? ::cho::CYAN : ::cho::RED};
+			::SLaserToDraw																laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, applicationInstance.Game.LineOfFire ? ::cho::CYAN : ::cho::RED};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
@@ -53,7 +53,7 @@
 			--iParticle;
 		}
 		else {
-			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
+			::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
 				 if(particleInstance.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
 			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
 			else if(particleInstance.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
