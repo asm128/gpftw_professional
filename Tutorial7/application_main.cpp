@@ -64,7 +64,8 @@ static				::cho::error_t										setupSprite									(::cho::STextureProcessabl
 
 static				::cho::error_t										setupSprites								(::SApplication& applicationInstance)											{ 
 	static constexpr	const char*												bmpFileNames	[]							= 
-		{ "ship_1.bmp"
+		{ "ship_0.bmp"
+		, "ship_1.bmp"
 		, "pow_core_0.bmp"
 		, "pow_core_1.bmp"
 		, "crosshair_template.bmp"
@@ -97,7 +98,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	applicationInstance.Game.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
 	applicationInstance.Game.PositionEnemy									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
 	
-	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP].x};
+	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0].x};
 	return 0;
 }
 

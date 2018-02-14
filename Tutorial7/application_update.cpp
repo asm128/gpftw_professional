@@ -152,7 +152,7 @@ static				::cho::error_t										addParticle
 			if(gameInstance.ShipWeaponDelay[iShip] >= gameInstance.Laser.Delay) {
 				gameInstance.ShipWeaponDelay[iShip]										= 0;
 				const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
-				const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP].x), -1};
+				const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x), -1};
 				::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, gameInstance.ShipPosition[iShip] + weaponParticleOffset, {1, 0}, gameInstance.Laser.Speed, particleDefinitions);
 			}
 		}
