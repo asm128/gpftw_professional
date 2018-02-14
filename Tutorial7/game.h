@@ -41,6 +41,7 @@ struct SGame {
 						::cho::SCoord2<float>									ShipDirection		[MAX_PLAYERS]			= {};
 						::cho::SCoord2<float>									CrosshairPosition	[MAX_PLAYERS]			= {};
 						bool													ShipLineOfFire		[MAX_PLAYERS]			= {};
+						double													ShipWeaponDelay		[MAX_PLAYERS]			= {};
 
 						::cho::SCoord2<float>									EnemyPosition		[MAX_ENEMIES]			= {};
 						::cho::SCoord2<float>									EnemyDirection		[MAX_ENEMIES]			= {};
@@ -51,15 +52,10 @@ struct SGame {
 						int32_t													EnemyPathStep		[MAX_ENEMIES]			= {};
 						uint32_t												CountEnemies;
 
-						::cho::SCoord2<float>									DirectionShip								= {};
-						::cho::SCoord2<float>									PositionShip								= {};
 						::cho::SCoord2<float>									PositionPowerup								= {};
-						::cho::SCoord2<float>									PositionCrosshair							= {};
 						::cho::SCoord2<float>									PositionEnemy								= {};
 
 						double													GhostTimer									= 0;
-						bool													LineOfFire									= false;
-						::SShipState											ShipState									= {false, false};
 						::SWeapon												Laser										= {.10f, 2000};
 						uint32_t												PathStep									= 0;
 						::cho::SCoord2<float>									PathEnemy			[4]						= 

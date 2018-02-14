@@ -35,7 +35,8 @@
 
 	// Draw player ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& shipView									= applicationInstance.Textures[GAME_TEXTURE_SHIP].Processed.View;
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, applicationInstance.Game.PositionShip.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	for(uint32_t iShip = 0, shipCount = ::cho::size(applicationInstance.Game.ShipPosition); iShip < shipCount; ++iShip)
+		error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, applicationInstance.Game.ShipPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	return 0;
 }
 
@@ -118,10 +119,10 @@
 			continue;
 
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (thrustToDraw.TimeLived > .075)		? (applicationInstance.Game.ShipState.Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
-			: (thrustToDraw.TimeLived > .03 )		? (applicationInstance.Game.ShipState.Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
-			: (physicsId % 3)						? (applicationInstance.Game.ShipState.Thrust ? ::cho::CYAN		: ::cho::RED 		)
-			: (physicsId % 2)						? (applicationInstance.Game.ShipState.Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
+			= (thrustToDraw.TimeLived > .075)		? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+			: (thrustToDraw.TimeLived > .03 )		? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
+			: (physicsId % 3)						? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::CYAN		: ::cho::RED 		)
+			: (physicsId % 2)						? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
 			: ::cho::YELLOW 
 			;
 		float																	maxFactor	= .5f;
@@ -212,18 +213,17 @@
 }
 
 
-static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& applicationInstance, const ::cho::SCoord2<int32_t>	& centerCrosshair)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	static double																beaconTimer									= 0;
 	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 20;
-	::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.Game.PositionCrosshair.Cast<int32_t>();
 	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
 	::cho::SCoord2<int32_t>														lightCrosshair []							= 
-		{ centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
-		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth, -halfWidth - 1 }
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth }
+		{ centerCrosshair + ::cho::SCoord2<int32_t>{ halfWidth,  halfWidth }
+		, centerCrosshair + ::cho::SCoord2<int32_t>{ halfWidth, -halfWidth - 1 }
+		, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
+		, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth }
 		};
 
 	for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
@@ -233,12 +233,11 @@ static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& ap
 	return 0;
 }
 
-static				::cho::error_t										drawCrosshairAligned						(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+static				::cho::error_t										drawCrosshairAligned						(::SApplication& applicationInstance, const ::cho::SCoord2<int32_t>	& centerCrosshair)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	static double																beaconTimer									= 0;
 	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 10;
-	const ::cho::SCoord2<int32_t>												centerCrosshair								= applicationInstance.Game.PositionCrosshair.Cast<int32_t>();
 	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
 	const ::cho::SCoord2<int32_t>												lightCrosshair []							= 
 		{ centerCrosshair + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
@@ -264,12 +263,12 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 }
 					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	static double																powTimer									= 0;
-	powTimer																+= framework.FrameInfo.Seconds.LastFrame;
-	if(false == applicationInstance.Game.LineOfFire) 
-		drawCrosshairDiagonal(applicationInstance);
-	error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, applicationInstance.Game.PositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	if(applicationInstance.Game.LineOfFire) 
-		drawCrosshairAligned(applicationInstance);
+	for(uint32_t iShip = 0, shipCount = ::cho::size(applicationInstance.Game.ShipPosition); iShip < shipCount; ++iShip) {
+		if(false == applicationInstance.Game.ShipLineOfFire[iShip]) 
+			::drawCrosshairDiagonal(applicationInstance, applicationInstance.Game.CrosshairPosition[iShip].Cast<int32_t>());
+		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, applicationInstance.Game.CrosshairPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		if(applicationInstance.Game.ShipLineOfFire[iShip]) 
+			::drawCrosshairAligned(applicationInstance, applicationInstance.Game.CrosshairPosition[iShip].Cast<int32_t>());
+	}
 	return 0;
 }

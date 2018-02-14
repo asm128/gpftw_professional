@@ -89,11 +89,14 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	::setupParticles();
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
-	applicationInstance.Game.PositionShip								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U;
-	applicationInstance.Game.PositionPowerup							= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
-	applicationInstance.Game.PositionEnemy							= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
-	applicationInstance.Game.PositionCrosshair						= applicationInstance.Game.PositionShip + ::cho::SCoord2<float>{64,};
 
+	for(uint32_t iShip = 0, shipCount = ::cho::size(applicationInstance.Game.ShipDirection); iShip < shipCount; ++iShip) {
+		applicationInstance.Game.ShipPosition		[iShip]						= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U + ::cho::SCoord2<float>{0, (float)iShip * 64};
+		applicationInstance.Game.CrosshairPosition	[iShip]						= applicationInstance.Game.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
+	}
+	applicationInstance.Game.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
+	applicationInstance.Game.PositionEnemy									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
+	
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP].x};
 	return 0;
 }
@@ -119,7 +122,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
  					::cho::error_t										updateGUI									(::SApplication& applicationInstance);
 					::cho::error_t										updateShots									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
 					::cho::error_t										updateSpawn									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
-					::cho::error_t										updateShip									(::SApplication& applicationInstance);
+					::cho::error_t										updateShips									(::SApplication& applicationInstance);
 					::cho::error_t										updateParticles								(::SApplication& applicationInstance);
 					::cho::error_t										updateInput									(::SApplication& applicationInstance);
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
@@ -140,8 +143,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 
 	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateSpawn					(applicationInstance, particleDefinitions)), "Unknown error.");
-	error_if(errored(::updateShip					(applicationInstance)), "Unknown error.");
-
+	error_if(errored(::updateShips					(applicationInstance)), "Unknown error.");
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
 	{
 		static float																timerPath									= 0;
@@ -172,10 +174,6 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		applicationInstance.Game.GhostTimer										+= framework.FrameInfo.Seconds.LastFrame;
 	}
 
-	{ // update crosshair 
-		applicationInstance.Game.PositionCrosshair						= applicationInstance.Game.PositionShip + ::cho::SCoord2<float>{96,};
-		applicationInstance.Game.PositionCrosshair.x						= ::cho::min(applicationInstance.Game.PositionCrosshair.x, (float)offscreen.View.metrics().x);
-	}
 	error_if(errored(::updateShots					(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");
 	::cho::STimer																& timer										= framework.Timer;
