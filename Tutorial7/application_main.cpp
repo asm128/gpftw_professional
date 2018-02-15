@@ -96,7 +96,6 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		applicationInstance.Game.CrosshairPosition	[iShip]						= applicationInstance.Game.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
 	}
 	applicationInstance.Game.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
-	applicationInstance.Game.PositionEnemy									= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U;
 	
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0].x};
 	return 0;
@@ -146,33 +145,43 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	error_if(errored(::updateSpawn					(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateShips					(applicationInstance)), "Unknown error.");
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	{
-		static float																timerPath									= 0;
-		timerPath																+= (float)framework.Timer.LastTimeSeconds;
-		if(timerPath > 10.0f) {
-			timerPath = 0;
-			++applicationInstance.Game.PathStep;
-			if(applicationInstance.Game.PathStep >= ::cho::size(applicationInstance.Game.PathEnemy))
-				applicationInstance.Game.PathStep = 0;
+	applicationInstance.Game.GhostTimer										+= framework.FrameInfo.Seconds.LastFrame;
+	static float																timerSpawn									= 0;
+	timerSpawn																+= (float)framework.Timer.LastTimeSeconds;
+	if(timerSpawn > 10.0f) {
+		timerSpawn = 0;
+		if(applicationInstance.Game.CountEnemies < ::cho::size(applicationInstance.Game.EnemyPosition))
+			++applicationInstance.Game.CountEnemies;
+	}
+	for(uint32_t iEnemy = 0; iEnemy < applicationInstance.Game.CountEnemies; ++iEnemy) {
+		applicationInstance.Game.EnemySkillTimer[iEnemy]						+= framework.FrameInfo.Seconds.LastFrame;
+		{
+			static float																timerPath									= 0;
+			timerPath																+= (float)framework.Timer.LastTimeSeconds;
+			if(timerPath > 10.0f) {
+				timerPath = 0;
+				++applicationInstance.Game.EnemyPathStep[iEnemy];
+				if(applicationInstance.Game.EnemyPathStep[iEnemy] >= ::cho::size(applicationInstance.Game.PathEnemy))
+					applicationInstance.Game.EnemyPathStep[iEnemy]							= 0;
+			}
+			const ::cho::SCoord2<float>													& pathTarget								= applicationInstance.Game.PathEnemy[applicationInstance.Game.EnemyPathStep[iEnemy]];
+			::cho::SCoord2<float>														directionEnemy								= (pathTarget - applicationInstance.Game.EnemyPosition[iEnemy]);
+			if(directionEnemy.LengthSquared() < 0.5) {
+				timerPath = 0;
+				++applicationInstance.Game.EnemyPathStep[iEnemy];
+				if(applicationInstance.Game.EnemyPathStep[iEnemy] >= ::cho::size(applicationInstance.Game.PathEnemy))
+					applicationInstance.Game.EnemyPathStep[iEnemy]							= 0;
+			}
+			else {
+				directionEnemy.Normalize();
+				// update enemy
+				applicationInstance.Game.EnemyPosition[iEnemy]							+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+				applicationInstance.Game.EnemyPosition[iEnemy]							= 
+					{ ::cho::clamp(applicationInstance.Game.EnemyPosition[iEnemy].x, .1f, (float)offscreen.View.metrics().x - 1)
+					, ::cho::clamp(applicationInstance.Game.EnemyPosition[iEnemy].y, .1f, (float)offscreen.View.metrics().y - 1)
+					};
+			}
 		}
-		const ::cho::SCoord2<float>													& pathTarget							= applicationInstance.Game.PathEnemy[applicationInstance.Game.PathStep];
-		::cho::SCoord2<float>														directionEnemy							= (pathTarget - applicationInstance.Game.PositionEnemy);
-		if(directionEnemy.LengthSquared() < 0.5) {
-			timerPath = 0;
-			++applicationInstance.Game.PathStep;
-			if(applicationInstance.Game.PathStep >= ::cho::size(applicationInstance.Game.PathEnemy))
-				applicationInstance.Game.PathStep = 0;
-		}
-		else {
-			directionEnemy.Normalize();
-			// update enemy
-			applicationInstance.Game.PositionEnemy									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-			applicationInstance.Game.PositionEnemy									= 
-				{ ::cho::clamp(applicationInstance.Game.PositionEnemy.x, .1f, (float)offscreen.View.metrics().x - 1)
-				, ::cho::clamp(applicationInstance.Game.PositionEnemy.y, .1f, (float)offscreen.View.metrics().y - 1)
-				};
-		}
-		applicationInstance.Game.GhostTimer										+= framework.FrameInfo.Seconds.LastFrame;
 	}
 
 	error_if(errored(::updateShots					(applicationInstance, particleDefinitions)), "Unknown error.");

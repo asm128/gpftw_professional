@@ -231,8 +231,8 @@ static				::cho::error_t										updateLaserCollision
 			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
 			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 		}
-		{ // Check enemy
-			const cho::SCoord2<float>						& posXHair				= applicationInstance.Game.PositionEnemy;
+		for(uint32_t iEnemy = 0; iEnemy < ::cho::size(applicationInstance.Game.EnemyPosition); ++iEnemy) { // Check enemy
+			const cho::SCoord2<float>						& posXHair				= applicationInstance.Game.EnemyPosition[iEnemy];
 			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 			static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
@@ -266,8 +266,8 @@ static				::cho::error_t										updateLaserCollision
 			projectilePath.A.y														-= 1;
 			projectilePath.B.y														-= 1;
 			gameInstance.ShipLineOfFire[iShip]										= false;
-			{
-				const cho::SCoord2<float>													& posXHair				= gameInstance.PositionEnemy;
+			for(uint32_t iEnemy = 0; iEnemy < ::cho::size(applicationInstance.Game.EnemyPosition); ++iEnemy) {
+				const cho::SCoord2<float>													& posXHair				= gameInstance.EnemyPosition[iEnemy];
 				float																		halfSizeBox				= gameInstance.HalfWidthEnemy; //(float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 				if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 					gameInstance.ShipLineOfFire[iShip]										= true;

@@ -29,6 +29,13 @@ struct SShipState {
 						bool													Brakes										: 1;
 };
 
+struct SProjectile {
+						float													Delay;
+						float													Speed;
+						double													TimeLived;
+						WEAPON_TYPE												Type;
+};
+
 static constexpr	const int32_t											MAX_PLAYERS									= 2;
 static constexpr	const int32_t											MAX_POWERUP									= 32;
 static constexpr	const int32_t											MAX_ENEMIES									= 64;
@@ -69,11 +76,10 @@ struct SGame {
 						double													EnemySkillTimer		[MAX_ENEMIES]			= {};
 						int8_t													EnemyTarget			[MAX_ENEMIES]			= {};
 						::SWeapon												EnemyWeapon			[MAX_ENEMIES]			= {};
-						int32_t													EnemyPathStep		[MAX_ENEMIES]			= {};
-						uint32_t												CountEnemies;
+						uint32_t												EnemyPathStep		[MAX_ENEMIES]			= {};
+						uint32_t												CountEnemies								= 0;
 
 						::cho::SCoord2<float>									PositionPowerup								= {};
-						::cho::SCoord2<float>									PositionEnemy								= {};
 
 						double													GhostTimer									= 0;
 						::SWeapon												Laser										= {.10f, 2000};

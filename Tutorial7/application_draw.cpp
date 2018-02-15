@@ -8,28 +8,30 @@
 	// Draw enemy ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
 	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-	error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, applicationInstance.Game.PositionEnemy.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	{
-		static double																beaconTimer									= 0;
-		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-		::cho::SCoord2<float>														centerPowerup								= applicationInstance.Game.PositionEnemy;
-		int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
-		::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
-		::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
-	}
-	static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
-	::cho::SCoord2<float>														vector;
-	for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
-		vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
-		vector.Rotate(::cho::math_2pi / 5 * iGhost + applicationInstance.Game.GhostTimer);
-		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (applicationInstance.Game.PositionEnemy + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	for(uint32_t iEnemy = 0, enemyCount = applicationInstance.Game.CountEnemies; iEnemy < enemyCount; ++iEnemy) {
+		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, applicationInstance.Game.EnemyPosition[iEnemy].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		{
-			static double																beaconTimer								= 0;
+			static double																beaconTimer									= 0;
 			beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-			::cho::SCoord2<float>														centerPowerup							= applicationInstance.Game.PositionEnemy + vector;
-			int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
-			::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
-			::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
+			::cho::SCoord2<float>														centerPowerup								= applicationInstance.Game.EnemyPosition[iEnemy];
+			int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
+			::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
+			::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
+		}
+		static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
+		::cho::SCoord2<float>														vector;
+		for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
+			vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
+			vector.Rotate(::cho::math_2pi / 5 * iGhost + applicationInstance.Game.EnemySkillTimer[iEnemy]);
+			error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (applicationInstance.Game.EnemyPosition[iEnemy] + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			{
+				static double																beaconTimer								= 0;
+				beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
+				::cho::SCoord2<float>														centerPowerup							= applicationInstance.Game.EnemyPosition[iEnemy] + vector;
+				int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
+				::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
+				::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
+			}
 		}
 	}
 

@@ -28,10 +28,10 @@ enum PARTICLE_TYPE : int8_t
 	};
 
 struct SGameParticle {
-	PARTICLE_TYPE		Type;
-	PLAYER_TYPE			PlayerType;
-	int32_t				Player;
-	::cho::SColorBGRA	Color;
+						PARTICLE_TYPE											Type;
+						PLAYER_TYPE												PlayerType;
+						int32_t													Player;
+						::cho::SColorBGRA										Color;
 };
 
 struct SParticleToDraw {
