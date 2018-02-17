@@ -144,18 +144,13 @@
 	return 0;
 }
 
-					::cho::error_t										drawSquarePowerup							(::SApplication& applicationInstance, const ::cho::SCoord2<float>& powPosition)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+					::cho::error_t										drawSquarePowerup							(::SApplication& applicationInstance, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	static double																timer										= 0;
-	timer																	+= framework.FrameInfo.Seconds.LastFrame / 2;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SCoord2<int32_t>														offset										= {0, 0};
 	::cho::SCoord2<int32_t>														position									= powPosition.Cast<int32_t>() + offset;
 	for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
-		error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	static double																beaconTimer									= 0;
-	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 4;
+		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, applicationInstance.StuffToDraw.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	::cho::SCoord2<int32_t>														centerPowerup								= position;
 	int32_t																		halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
 	::cho::SCoord2<int32_t>														lightPos []									= 
@@ -168,8 +163,8 @@
 		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}
 		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}
 		};
-	::cho::SCoord2<int32_t>														selectedLightPos0							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
-		,																		selectedLightPos2							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+	::cho::SCoord2<int32_t>														selectedLightPos0							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 0]
+		,																		selectedLightPos2							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 4]
 		;
 	::cho::SColorBGRA															colors []									= 
 		{ ::cho::RED
@@ -177,22 +172,17 @@
 		, ::cho::LIGHTGREEN
 		, ::cho::LIGHTYELLOW
 		};
-	int32_t																		selectedColor								= ((int32_t)beaconTimer / 4) % ::cho::size(colors);
+	int32_t																		selectedColor								= ((int32_t)time / 4) % ::cho::size(colors);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 	return 0;
 }
-					::cho::error_t										drawDiagonalPowerup						(::SApplication& applicationInstance, const ::cho::SCoord2<float>& powPosition)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+					::cho::error_t										drawDiagonalPowerup						(::SApplication& applicationInstance, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	static double																timer										= 0;
-	timer																	+= framework.FrameInfo.Seconds.LastFrame / 2;
-	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
+	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SCoord2<int32_t>														position									= powPosition.Cast<int32_t>();
 	for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
-		error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	static double																	beaconTimer									= 0;
-	beaconTimer																	+= framework.FrameInfo.Seconds.LastFrame * 4;
+		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, applicationInstance.StuffToDraw.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	::cho::SCoord2<int32_t>															centerPowerup								= position;
 	int32_t																			halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
 	::cho::SCoord2<int32_t>															lightPos []									= 
@@ -205,8 +195,8 @@
 		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
 		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
 		};
-	::cho::SCoord2<int32_t>															selectedLightPos0							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
-		,																			selectedLightPos2							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+	::cho::SCoord2<int32_t>															selectedLightPos0							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 0]
+		,																			selectedLightPos2							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 4]
 		;
 	::cho::SColorBGRA																colors []									= 
 		{ ::cho::LIGHTYELLOW
@@ -214,7 +204,7 @@
 		, ::cho::LIGHTGREEN
 		, ::cho::LIGHTCYAN
 		};
-	int32_t																			selectedColor								= ((int32_t)beaconTimer / 4) % ::cho::size(colors);
+	int32_t																			selectedColor								= ((int32_t)time / 4) % ::cho::size(colors);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 	return 0;
@@ -222,15 +212,15 @@
 					::cho::error_t										drawPowerups								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	static double																timer										= 0;
-	timer																	+= framework.FrameInfo.Seconds.LastFrame / 2;
+	timer																	+= framework.FrameInfo.Seconds.LastFrame;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iPow = 0, powCount = gameInstance.Powerups.Alive.size(); iPow < powCount; ++iPow) {
 		if(0 == gameInstance.Powerups.Alive[iPow])
 			continue;
 		if(gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_WEAPON)
-			drawSquarePowerup(applicationInstance, gameInstance.Powerups.Position[iPow]);
+			drawSquarePowerup(applicationInstance, gameInstance.Powerups.Position[iPow], timer);
 		else
-			drawDiagonalPowerup(applicationInstance, gameInstance.Powerups.Position[iPow]);
+			drawDiagonalPowerup(applicationInstance, gameInstance.Powerups.Position[iPow], timer);
 	}
 	return 0;
 }
