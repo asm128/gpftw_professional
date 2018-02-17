@@ -155,13 +155,9 @@ static				::cho::error_t										checkLaserCollision
 				gameInstance.Ships.LineOfFire[iShip]										= true;
 		}
 		for(uint32_t iPow = 0; iPow < gameInstance.Powerups.Alive.size(); ++iPow) {
+			if(0 == gameInstance.Powerups.Alive[iPow])
+				continue;
 			const cho::SCoord2<float>													& posPow									= gameInstance.Powerups.Position[iPow];
-			float																		halfSizeBox									= gameInstance.HalfWidthPowerup;//(float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
-			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posPow, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
-				gameInstance.Ships.LineOfFire[iShip]										= true;
-		}
-		{
-			const cho::SCoord2<float>													& posPow									= gameInstance.PositionPowerup;
 			float																		halfSizeBox									= gameInstance.HalfWidthPowerup;//(float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
 			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posPow, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 				gameInstance.Ships.LineOfFire[iShip]										= true;
@@ -331,8 +327,10 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
 		const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
-		{ // Check powerup
-			const cho::SCoord2<float>													& posPowerup								= gameInstance.PositionPowerup;
+		for(uint32_t iPow = 0; iPow < gameInstance.Powerups.Alive.size(); ++iPow) { // Check powerup
+			if(0 == gameInstance.Powerups.Alive[iPow])
+				continue;
+			const cho::SCoord2<float>													& posPowerup								= gameInstance.Powerups.Position[iPow];
 			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
 			::checkLaserCollision(projectilePath, aabbCache, posPowerup, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 		}

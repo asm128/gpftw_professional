@@ -27,6 +27,16 @@ enum WEAPON_TYPE : int8_t
 	, WEAPON_TYPE_INVALID		= -1
 	};
 
+enum POWERUP_FAMILY : int8_t
+	{ POWERUP_FAMILY_WEAPON			= 0
+	, POWERUP_FAMILY_HEALTH
+	, POWERUP_FAMILY_BUFF
+	, POWERUP_FAMILY_BOMB
+	, POWERUP_FAMILY_COUNT
+	, POWERUP_FAMILY_INVALID		= -1
+	};
+
+
 struct SWeapon {
 						float																Delay;
 						float																Speed;
@@ -82,6 +92,7 @@ template<uint32_t _sizeArray>
 struct SPropertiesPowerup		{ 
 						::SArrayElementState						< _sizeArray>			Alive																	= {};			// These have to be written/read to/from disk separately as they contain pointers.
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
+						::cho::array_static<POWERUP_FAMILY			, _sizeArray>			Family																	= {};
 };
 
 template<uint32_t _sizeArray>	
@@ -122,7 +133,6 @@ struct SGame {
 						::SPropertiesProjectile	<MAX_PROJECTILES>							Projectiles																= {};
 						::SPropertiesPowerup	<MAX_POWERUP>								Powerups																= {};
 						::cho::array_static<::cho::SCoord2<float>, MAX_PLAYERS>				PositionCrosshair														= {};
-						::cho::SCoord2<float>												PositionPowerup															= {};
 
 						float																HalfWidthShip															= 5;
 						float																HalfWidthCrosshair														= 5;
