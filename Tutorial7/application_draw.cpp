@@ -141,8 +141,8 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
-	static float																timer										= 0;
-	timer																	+= (float)framework.FrameInfo.Seconds.LastFrame / 2;
+	static double																timer										= 0;
+	timer																	+= framework.FrameInfo.Seconds.LastFrame / 2;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	{
 		::cho::SCoord2<int32_t>														offset										= {0, 0};

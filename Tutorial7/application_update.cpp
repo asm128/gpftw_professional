@@ -279,7 +279,7 @@ static				::cho::error_t										updateLaserCollision
 			projectilePath.A.y														-= 1;
 			projectilePath.B.y														-= 1;
 			gameInstance.ShipLineOfFire[iShip]										= false;
-			for(uint32_t iEnemy = 0; iEnemy < ::cho::size(gameInstance.EnemyPosition); ++iEnemy) {
+			for(uint32_t iEnemy = 0; iEnemy < gameInstance.CountEnemies; ++iEnemy) {
 				const cho::SCoord2<float>													& posEnemy									= gameInstance.EnemyPosition[iEnemy];
 				float																		halfSizeBox									= gameInstance.HalfWidthEnemy; //(float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 				if(1 == ::updateLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
