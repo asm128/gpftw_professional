@@ -32,7 +32,6 @@
 
 					::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
 	typedef	::SApplication::TParticleInstance									TParticleInstance;
-	typedef	::SApplication::TParticle											TParticle;
 	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
@@ -50,6 +49,7 @@
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		typedef	::SApplication::TParticle											TParticle;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 		if(particleInstance.Type == PARTICLE_TYPE_LASER) {
