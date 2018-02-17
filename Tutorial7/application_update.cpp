@@ -31,10 +31,9 @@
 }
 
 					::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
-	typedef	::SApplication::TParticleSystem										TParticleSystem;
-	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
-	typedef	TParticleSystem::TIntegrator::TParticle								TParticle;
-	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	typedef	::SApplication::TParticleInstance									TParticleInstance;
+	typedef	::SApplication::TParticle											TParticle;
+	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
 	ree_if(errored(particleIntegrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
@@ -98,17 +97,17 @@
 
 template<typename _tParticleType>
 static				::cho::error_t										addParticle														
-	(	::PARTICLE_TYPE																		particleType
-	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>							& particleInstances
-	,	::SApplication::TParticleSystem::TIntegrator										& particleIntegrator
-	,	const ::cho::SCoord2<float>															& particlePosition
-	,	const ::cho::SCoord2<float>															& particleDirection
-	,	float																				speed
-	,	const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle>	& particleDefinitions
+	(	::PARTICLE_TYPE												particleType
+	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::SApplication::TIntegrator									& particleIntegrator
+	,	const ::cho::SCoord2<float>									& particlePosition
+	,	const ::cho::SCoord2<float>									& particleDirection
+	,	float														speed
+	,	const ::cho::array_view<::SApplication::TParticle>			& particleDefinitions
 	)														
 {
 	::cho::SParticleInstance<_tParticleType>									& newInstance								= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
-	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle								= particleIntegrator.Particle[newInstance.ParticleIndex];
+	::SApplication::TParticle													& newParticle								= particleIntegrator.Particle[newInstance.ParticleIndex];
 	newParticle.Position													= particlePosition; 
 	::cho::SCoord2<float>														newDirection								= particleDirection;
 	const float																	value										= .5;
@@ -142,17 +141,15 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 }
 
 					::cho::error_t										updateSpawn									
-	( ::SApplication																	& applicationInstance
-	, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle>	& particleDefinitions
+	( ::SApplication										& applicationInstance
+	, const ::cho::array_view<::SApplication::TParticle>	& particleDefinitions
 	)
 {
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 	// Add some effect particles
-	typedef	::SApplication::TParticleSystem										TParticleSystem;
-	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
-	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	applicationInstance.EffectsDelay.Thrust																+= framework.FrameInfo.Seconds.LastFrame;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
@@ -230,8 +227,8 @@ static				::cho::error_t										updateLaserCollision
 }
 
 					::cho::error_t										updateShots
-	( ::SApplication																	& applicationInstance
-	, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle>	& particleDefinitions
+	( ::SApplication										& applicationInstance
+	, const ::cho::array_view<::SApplication::TParticle>	& particleDefinitions
 	)
 { 
 	::SGame																		& gameInstance								= applicationInstance.Game;
@@ -246,28 +243,27 @@ static				::cho::error_t										updateLaserCollision
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
 		const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
 		{ // Check powerup
-			const cho::SCoord2<float>													& posXHair									= gameInstance.PositionPowerup;
+			const cho::SCoord2<float>													& posPowerup								= gameInstance.PositionPowerup;
 			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
-			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+			::updateLaserCollision(projectilePath, aabbCache, posPowerup, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 		}
 		for(uint32_t iEnemy = 0; iEnemy < gameInstance.CountEnemies; ++iEnemy) { // Check enemy
-			const cho::SCoord2<float>													& posXHair									= gameInstance.EnemyPosition[iEnemy];
+			const cho::SCoord2<float>													& posEnemy									= gameInstance.EnemyPosition[iEnemy];
 			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
-			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+			::updateLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 			static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
 			::cho::SCoord2<float>														vector;
 			for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 				vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
 				vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.GhostTimer);
-				::updateLaserCollision(projectilePath, aabbCache, posXHair + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+				::updateLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 			}
 		}
 	}
 
-	typedef	::SApplication::TParticleSystem										TParticleSystem;
-	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
+	typedef	::SApplication::TParticleInstance									TParticleInstance;
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	TParticleSystem::TIntegrator												& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
 		for(uint32_t i=0; i < 10; ++i) {
 			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
@@ -298,23 +294,22 @@ static				::cho::error_t										updateLaserCollision
 					gameInstance.ShipLineOfFire[iShip]										= true;
 			}
 		}
-
 		// 
 		const cho::SCoord2<float>												& posXHair									= gameInstance.CrosshairPosition[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 			float																	halfSizeBox									= gameInstance.HalfWidthCrosshair;
-			const ::cho::SLine2D<float>												rectangleSegments[]							= 
+			const ::cho::SLine2D<float>												verticalSegments[]							= 
 				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
 				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 				};
-			const ::SLaserToDraw													& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-			const ::cho::SLine2D<float>												& projectilePath								= laserToDraw.Segment;
-			::cho::SCoord2<float>													collisions	[::cho::size(rectangleSegments)]	= {};
-			for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
-				::cho::SCoord2<float>													& collision										= collisions		[iSeg];
-				const ::cho::SLine2D<float>												& segSelected									= rectangleSegments	[iSeg]; 
+			const ::SLaserToDraw													& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+			const ::cho::SLine2D<float>												& projectilePath							= laserToDraw.Segment;
+			::cho::SCoord2<float>													collisions	[::cho::size(verticalSegments)]= {};
+			for(uint32_t iSeg = 0; iSeg < ::cho::size(verticalSegments); ++iSeg) {
+				::cho::SCoord2<float>													& collision									= collisions		[iSeg];
+				const ::cho::SLine2D<float>												& segSelected								= verticalSegments	[iSeg]; 
 				if(::cho::line_line_intersect(projectilePath, segSelected, collision)) {
-					bool																	bFound											= false;
+					bool																	bFound										= false;
 					for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 						if(collision == collisions[iS2]) {
 							bFound																= true;

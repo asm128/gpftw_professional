@@ -79,6 +79,9 @@ struct SEffectsDelay {
 
 struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
+	typedef				TParticleSystem::TParticleInstance						TParticleInstance;
+	typedef				TParticleSystem::TIntegrator							TIntegrator;
+	typedef				TIntegrator::TParticle									TParticle;
 
 						::cho::SFramework										Framework									;
 
