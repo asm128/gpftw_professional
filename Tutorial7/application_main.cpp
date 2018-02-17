@@ -35,8 +35,8 @@ static				void												setupParticles								()																				{
 					::SApplication										* g_ApplicationInstance						= 0;
 
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
-	static constexpr	const ::cho::SCoord2<uint32_t>							newSize										= {640, 360};// applicationInstance.Framework.MainDisplay.Size / 4; // {1280, 720};//
-	::cho::updateSizeDependentTarget(applicationInstance.Framework.Offscreen.Texels, applicationInstance.Framework.Offscreen.View, newSize);
+	static constexpr	const ::cho::SCoord2<uint32_t>							GAME_SCREEN_SIZE							= {640, 360};
+	::cho::updateSizeDependentTarget(applicationInstance.Framework.Offscreen.Texels, applicationInstance.Framework.Offscreen.View, GAME_SCREEN_SIZE);
 	return 0;
 }
 
@@ -97,6 +97,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
 		gameInstance.Ships.Alive		[iShip]									= 1;
 		gameInstance.Ships.Position		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 + ::cho::SCoord2<float>{0, (float)iShip * 64};
+		gameInstance.Ships.Weapon		[iShip]									= {.10f, 2000};
 		gameInstance.PositionCrosshair	[iShip]									= gameInstance.Ships.Position[iShip] + ::cho::SCoord2<float>{64, };
 
 		gameInstance.Powerups.Alive		[iShip]									= 1;

@@ -36,12 +36,21 @@
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
-	timerSpawn																+= (float)framework.Timer.LastTimeSeconds;
-	if(timerSpawn > 10.0f) {
+	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
+	if(timerSpawn > 5) {
 		timerSpawn																= 0;
 		int32_t																		indexToSpawn								= firstUnused(gameInstance.Enemies.Alive);
-		if(indexToSpawn != -1)
+		if(indexToSpawn != -1) {
 			gameInstance.Enemies.Alive[indexToSpawn]									= 1;
+		}
+		else
+			warning_printf("Not enough space in enemy container to spawn more enemies!");	
+		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
+		if(indexToSpawn != -1 && gameInstance.GhostTimer > 7) {
+			gameInstance.Powerups.Alive		[indexToSpawnPow]						= 1;
+			gameInstance.Powerups.Position	[indexToSpawnPow]						= gameInstance.Enemies.Position[0];//framework.Offscreen.View.metrics().Cast<float>() / 4 * 3 + ::cho::SCoord2<float>{0, (float)indexToSpawn * 64};
+			gameInstance.Powerups.Family	[indexToSpawnPow]						= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
+		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
 	}
@@ -241,9 +250,8 @@ static				::cho::error_t										addParticle
 	return 0;
 }
 
-static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType)					{
+static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
 	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
-	const float																	projectileSpeed								= gameInstance.Laser.Speed;
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(0 == projectilesAlive[iProjectile]) {
 			projectilesAlive[iProjectile]											= 1;
@@ -268,7 +276,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	// Add some effect particles
 	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
-	applicationInstance.EffectsDelay.Thrust																+= framework.FrameInfo.Seconds.LastFrame;
+	applicationInstance.EffectsDelay.Thrust									+= framework.FrameInfo.Seconds.LastFrame;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
 		if(0 == gameInstance.Ships.Alive[iShip])
@@ -278,18 +286,18 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 				::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), gameInstance.Ships.Direction[iShip] * -1.0, (float)(rand() % 400) + (gameInstance.Ships.States[iShip].Thrust ? 400 : 0), particleDefinitions);
 			}
 		}
-		gameInstance.Ships.WeaponDelay[iShip]										+= framework.FrameInfo.Seconds.LastFrame;
+		gameInstance.Ships.WeaponDelay[iShip]									+= framework.FrameInfo.Seconds.LastFrame;
 		if(gameInstance.Ships.States[iShip].Firing) { // Add lasers / bullets.
-			if( gameInstance.Ships.WeaponDelay[iShip] >= gameInstance.Laser.Delay ) {
+			const ::SWeapon																weapon										= gameInstance.Ships.Weapon[iShip];
+			if( gameInstance.Ships.WeaponDelay[iShip] >= weapon.Delay ) {
 				gameInstance.Ships.WeaponDelay[iShip]									= 0;
-				const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
-				const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x), -1};
-				::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + weaponParticleOffset, {1, 0}, gameInstance.Laser.Speed, particleDefinitions);
-				e_if(errored(::addProjectile(gameInstance, iShip, PLAYER_TYPE_PLAYER, WEAPON_TYPE_LASER)), "Projectile storage is full. Cannot add projectile.");
+				const ::cho::SCoord2<float>													textureShipMetrics							= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
+				const ::cho::SCoord2<float>													weaponParticleOffset						= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x), -1};
+				::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + weaponParticleOffset, {1, 0}, weapon.Speed, particleDefinitions);
+				e_if(errored(::addProjectile(gameInstance, iShip, PLAYER_TYPE_PLAYER, WEAPON_TYPE_LASER, weapon.Speed)), "Projectile storage is full. Cannot add projectile.");
 			}
 		}
 	}
-
 	applicationInstance.EffectsDelay.Star									+= framework.FrameInfo.Seconds.LastFrame;
 	if(applicationInstance.EffectsDelay.Star > .1) {
 		applicationInstance.EffectsDelay.Star									= 0;

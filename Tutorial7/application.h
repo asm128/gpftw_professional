@@ -30,19 +30,15 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
-struct SGameParticle {
-						PARTICLE_TYPE											Type;
-						PLAYER_TYPE												PlayerType;
-						int32_t													Player;
-						::cho::SColorBGRA										Color;
-};
-
 struct SParticleToDraw {
 						int32_t													Id;
 						int32_t													IndexParticle;
 						float													TimeLived;
 						::cho::SCoord2<int32_t>									Position;
 						bool													Lit;
+						PLAYER_TYPE												TypePlayer;
+						WEAPON_TYPE												TypeWeapon;
+						uint32_t												OwnerIndex;
 };
 
 struct SLaserToDraw {

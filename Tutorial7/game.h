@@ -36,7 +36,6 @@ enum POWERUP_FAMILY : int8_t
 	, POWERUP_FAMILY_INVALID		= -1
 	};
 
-
 struct SWeapon {
 						float																Delay;
 						float																Speed;
@@ -101,12 +100,12 @@ struct SPropertiesProjectile	{
 						::cho::array_static<::SProjectile			, MAX_PROJECTILES>		Projectiles																= {};
 };
 
-
 template<uint32_t _sizeArray>	
 struct SPropertiesEnemy			{ 
 						::SArrayElementState						< _sizeArray>			Alive																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Direction																= {};
+						::cho::array_static<::SShipHealth			, _sizeArray>			Health																	= {};
 						::cho::array_static<double					, _sizeArray>			TimeLived																= {};
 						::cho::array_static<double					, _sizeArray>			SkillTimer																= {};
 						::cho::array_static<int8_t					, _sizeArray>			Target																	= {};
@@ -141,7 +140,6 @@ struct SGame {
 
 
 						double																GhostTimer																= 0;
-						::SWeapon															Laser																	= {.10f, 2000};
 						uint32_t															PathStep																= 0;
 						::cho::SCoord2<float>												PathEnemy					[5]											= 
 							{ { 10.f,  10.f}
