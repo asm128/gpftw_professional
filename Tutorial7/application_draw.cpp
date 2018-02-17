@@ -3,42 +3,43 @@
 #include "cho_bitmap_target.h"
 //
 					::cho::error_t										drawShips									(::SApplication& applicationInstance)											{
+	::SGame																		& gameInstance								= applicationInstance.Game;
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
-	// Draw enemy ships
+	// ---- Draw enemy ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
 	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-	for(uint32_t iEnemy = 0, enemyCount = applicationInstance.Game.CountEnemies; iEnemy < enemyCount; ++iEnemy) {
-		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, applicationInstance.Game.EnemyPosition[iEnemy].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	for(uint32_t iEnemy = 0, enemyCount = gameInstance.CountEnemies; iEnemy < enemyCount; ++iEnemy) {
+		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, gameInstance.EnemyPosition[iEnemy].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		{
 			static double																beaconTimer									= 0;
 			beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-			::cho::SCoord2<float>														centerPowerup								= applicationInstance.Game.EnemyPosition[iEnemy];
+			::cho::SCoord2<float>														centerPowerup								= gameInstance.EnemyPosition[iEnemy];
 			int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
 			::cho::SCoord2<float>														lightCrosshair								= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
 			::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 		}
+		// ---- Draw ghosts
 		static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
 		::cho::SCoord2<float>														vector;
 		for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
-			vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
-			vector.Rotate(::cho::math_2pi / 5 * iGhost + applicationInstance.Game.EnemySkillTimer[iEnemy]);
-			error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (applicationInstance.Game.EnemyPosition[iEnemy] + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			vector																	= reference * (64 * sin(framework.FrameInfo.Seconds.Total));
+			vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.EnemySkillTimer[iEnemy]);
+			error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (gameInstance.EnemyPosition[iEnemy] + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 			{
 				static double																beaconTimer								= 0;
 				beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-				::cho::SCoord2<float>														centerPowerup							= applicationInstance.Game.EnemyPosition[iEnemy] + vector;
+				::cho::SCoord2<float>														centerPowerup							= gameInstance.EnemyPosition[iEnemy] + vector;
 				int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
 				::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
 				::cho::drawPixelLight(offscreen.View, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
 			}
 		}
 	}
-
-	// Draw player ships
-	for(uint32_t iShip = 0, shipCount = ::cho::size(applicationInstance.Game.ShipPosition); iShip < shipCount; ++iShip) {
+	// ---- Draw player ships
+	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
 		const ::cho::grid_view<::cho::SColorBGRA>									& shipView									= applicationInstance.Textures[GAME_TEXTURE_SHIP0 + iShip].Processed.View;
-		error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, applicationInstance.Game.ShipPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, gameInstance.ShipPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	}
 	return 0;
 }
@@ -50,7 +51,6 @@
 		const ::cho::SCoord2<float>													& pointToDraw									= applicationInstance.StuffToDraw.CollisionPoints[iRay];
 		::cho::drawPixelLight(viewOffscreen, pointToDraw, ::cho::SColorBGRA(::cho::ORANGE), .15f, 3.0f);
 	}
-
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Debris.size(); iRay < rayCount; ++iRay) {
 		const ::SParticleToDraw														& particleToDraw								= applicationInstance.StuffToDraw.Debris[iRay];
 		const ::cho::SCoord2<float>													& pointToDraw									= particleToDraw.Position.Cast<float>();
@@ -112,6 +112,7 @@
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::STexture<::cho::SColorBGRA>											& offscreen									= framework.Offscreen;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
+	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iThrust = 0, particleCount = (uint32_t)applicationInstance.StuffToDraw.Thrust.size(); iThrust < particleCount; ++iThrust) {
 		::SParticleToDraw															& thrustToDraw								= applicationInstance.StuffToDraw.Thrust[iThrust];
 		if(false == thrustToDraw.Lit)
@@ -120,12 +121,11 @@
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
 			continue;
-
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (thrustToDraw.TimeLived > .075)		? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
-			: (thrustToDraw.TimeLived > .03 )		? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
-			: (physicsId % 3)						? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::CYAN		: ::cho::RED 		)
-			: (physicsId % 2)						? (applicationInstance.Game.ShipStates[0].Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
+			= (thrustToDraw.TimeLived > .075)		? (gameInstance.ShipStates[0].Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+			: (thrustToDraw.TimeLived > .03 )		? (gameInstance.ShipStates[0].Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
+			: (physicsId % 3)						? (gameInstance.ShipStates[0].Thrust ? ::cho::CYAN		: ::cho::RED 		)
+			: (physicsId % 2)						? (gameInstance.ShipStates[0].Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
 			: ::cho::YELLOW 
 			;
 		float																	maxFactor	= .5f;
@@ -144,15 +144,15 @@
 	static float																timer										= 0;
 	timer																	+= (float)framework.FrameInfo.Seconds.LastFrame / 2;
 	{
-		::cho::SCoord2<int32_t>		offset		= {0, 0};
-		::cho::SCoord2<int32_t>		position	= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
+		::cho::SCoord2<int32_t>														offset										= {0, 0};
+		::cho::SCoord2<int32_t>														position									= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-		static double					beaconTimer			= 0;
-		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
-		::cho::SCoord2<int32_t>			centerPowerup	= position;
-		int32_t							halfWidth		= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
-		::cho::SCoord2<int32_t>			lightPos []		= 
+		static double																beaconTimer									= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 4;
+		::cho::SCoord2<int32_t>														centerPowerup								= position;
+		int32_t																		halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
+		::cho::SCoord2<int32_t>														lightPos []									= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}
 			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}
 			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}
@@ -162,32 +162,29 @@
 			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}
 			, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}
 			};
-
-		::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
-			,						selectedLightPos2	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+		::cho::SCoord2<int32_t>														selectedLightPos0							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
+			,																		selectedLightPos2							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
 			;
-
-		::cho::SColorBGRA			colors []			= 
+		::cho::SColorBGRA															colors []									= 
 			{ ::cho::RED
 			, ::cho::LIGHTCYAN
 			, ::cho::LIGHTGREEN
 			, ::cho::LIGHTYELLOW
 			};
-		int32_t						selectedColor		= ((int32_t)beaconTimer / 4) % ::cho::size(colors);
+		int32_t																		selectedColor								= ((int32_t)beaconTimer / 4) % ::cho::size(colors);
 		::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 		::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
 	}
-
 	{
-		::cho::SCoord2<int32_t>		offset		= {-150, -150};
-		::cho::SCoord2<int32_t>		position	= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
+		::cho::SCoord2<int32_t>														offset										= {-150, -150};
+		::cho::SCoord2<int32_t>														position									= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-		static double					beaconTimer			= 0;
-		beaconTimer					+= framework.FrameInfo.Seconds.LastFrame * 4;
-		::cho::SCoord2<int32_t>			centerPowerup	= position;
-		int32_t							halfWidth		= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
-		::cho::SCoord2<int32_t>			lightPos []		= 
+		static double																	beaconTimer									= 0;
+		beaconTimer																	+= framework.FrameInfo.Seconds.LastFrame * 4;
+		::cho::SCoord2<int32_t>															centerPowerup								= position;
+		int32_t																			halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
+		::cho::SCoord2<int32_t>															lightPos []									= 
 			{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
 			, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
 			, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth, -1}
@@ -197,12 +194,10 @@
 			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
 			, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
 			};
-
-		::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
-			,						selectedLightPos2	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+		::cho::SCoord2<int32_t>															selectedLightPos0							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
+			,																			selectedLightPos2							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
 			;
-
-		::cho::SColorBGRA			colors []			= 
+		::cho::SColorBGRA																colors []									= 
 			{ ::cho::LIGHTYELLOW
 			, ::cho::RED
 			, ::cho::LIGHTGREEN
@@ -226,7 +221,6 @@ static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& ap
 		, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth - 1 }
 		, centerCrosshair + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth }
 		};
-
 	for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
 		::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
 		::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
@@ -250,13 +244,14 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 		};
 	
 	for(uint32_t iPoint = 0, pointCount = ::cho::size(lightCrosshair); iPoint < pointCount; ++iPoint) {
-		const ::cho::SCoord2<int32_t>					& pointToTest				= lightCrosshair[iPoint];
+		const ::cho::SCoord2<int32_t>												& pointToTest								= lightCrosshair[iPoint];
 		::cho::drawPixelLight(viewOffscreen, pointToTest.Cast<float>()
 			, (0 == (int32_t)beaconTimer % 5) ? ::cho::SColorBGRA(::cho::RED			) 
 			: (0 == (int32_t)beaconTimer % 3) ? ::cho::SColorBGRA(::cho::LIGHTGREEN		)
 			: (0 == (int32_t)beaconTimer % 2) ? ::cho::SColorBGRA(::cho::LIGHTYELLOW	) 
 			: ::cho::SColorBGRA(::cho::LIGHTCYAN)
-			, .2f, 3.0f);
+			, .2f, 3.0f
+			);
 	}
 	return 0;
 }

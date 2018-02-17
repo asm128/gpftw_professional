@@ -10,10 +10,12 @@
 enum PLAYER_TYPE : int8_t 
 	{ PLAYER_TYPE_PLAYER		= 0
 	, PLAYER_TYPE_ENEMY
+	, PLAYER_TYPE_COUNT
+	, PLAYER_TYPE_INVALID		= -1
 	};
 
 enum WEAPON_TYPE : int8_t
-	{ WEAPON_TYPE_LASER
+	{ WEAPON_TYPE_LASER			= 0
 	, WEAPON_TYPE_ROCK
 	, WEAPON_TYPE_ARROW
 	, WEAPON_TYPE_BULLET
@@ -61,17 +63,14 @@ static constexpr	const ::cho::SCoord2<float>								g_pathEnemy1		[4]						=
 						, {10.f,  480.f}
 						};
 
-template<size_t _sizeArray, typename _tObject>
-struct SGameObjectContainer {
-	typedef				_tObject												TObject;
-
-						uint32_t												ObjectsAliveContainer		[_sizeArray / 32]		= {};
-						::cho::bit_array_view	<uint32_t>						ObjectsAliveView									= ProjectilesAliveContainer;
-						TObject													Objects						[_sizeArray]			= {};
+template<size_t _sizeArray>
+struct SArrayElementState {
+						uint32_t												Data			[(_sizeArray / 32) + 1]	= {};	// I don't make this one private so I can do "save()" of the whole game state with a single fwrite()/memcpy().
+						::cho::bit_array_view	<uint32_t>						View									= Data;
 };
 
-template<size_t _sizeArray, typename _tObject>
-					::cho::error_t											firstUnused					(const ::SGameObjectContainer<_sizeArray, _tObject>& container)			{
+template<size_t _sizeArray>
+					::cho::error_t											firstUnused					(const ::SArrayElementState<_sizeArray>& container)			{
 	for(uint32_t iObject = 0; iObject < _sizeArray; ++iObject)
 		if(0 == container.ObjectsAliveView[iObject])
 			return iObject;
@@ -86,8 +85,8 @@ struct SGame {
 						::cho::SCoord2<float>									CrosshairPosition			[MAX_PLAYERS]			= {};
 						bool													ShipLineOfFire				[MAX_PLAYERS]			= {};
 						double													ShipWeaponDelay				[MAX_PLAYERS]			= {};
-
-						//::SGameObjectContainer<MAX_PLAYERS>						;
+						::SArrayElementState<MAX_PLAYERS>						ShipsAlive					= {};
+						uint32_t												ShipsPlaying				= 2;
 
 
 						float													HalfWidthShip										= 5;
