@@ -94,6 +94,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
+		gameInstance.ShipsAlive			[iShip]									= 1;
 		gameInstance.ShipPosition		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		gameInstance.CrosshairPosition	[iShip]									= gameInstance.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
 	}
@@ -121,12 +122,13 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	return 0;
 }
 
- 					::cho::error_t										updateGUI									(::SApplication& applicationInstance);
+					::cho::error_t										updateInput									(::SApplication& applicationInstance);
 					::cho::error_t										updateShots									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
 					::cho::error_t										updateSpawn									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
 					::cho::error_t										updateShips									(::SApplication& applicationInstance);
+					::cho::error_t										updateEnemies								(::SApplication& applicationInstance);
 					::cho::error_t										updateParticles								(::SApplication& applicationInstance);
-					::cho::error_t										updateInput									(::SApplication& applicationInstance);
+ 					::cho::error_t										updateGUI									(::SApplication& applicationInstance);
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
@@ -146,47 +148,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	error_if(errored(::updateParticles	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateSpawn		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateShips		(applicationInstance)), "Unknown error.");
-	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
-	::SGame																		& gameInstance								= applicationInstance.Game;
-	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
-	static float																timerSpawn									= 0;
-	timerSpawn																+= (float)framework.Timer.LastTimeSeconds;
-	if(timerSpawn > 10.0f) {
-		timerSpawn = 0;
-		if(gameInstance.CountEnemies < ::cho::size(gameInstance.EnemyPosition))
-			++gameInstance.CountEnemies;
-	}
-	for(uint32_t iEnemy = 0; iEnemy < gameInstance.CountEnemies; ++iEnemy) {
-		gameInstance.EnemySkillTimer[iEnemy]									+= framework.FrameInfo.Seconds.LastFrame;
-		{
-			static float																timerPath									= 0;
-			timerPath																+= (float)framework.Timer.LastTimeSeconds;
-			if(timerPath > 10.0f) {
-				timerPath																= 0;
-				++gameInstance.EnemyPathStep[iEnemy];
-				if( gameInstance.EnemyPathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
-					gameInstance.EnemyPathStep[iEnemy]										= 0;
-			}
-			const ::cho::SCoord2<float>													& pathTarget								= gameInstance.PathEnemy[gameInstance.EnemyPathStep[iEnemy]];
-			::cho::SCoord2<float>														directionEnemy								= (pathTarget - gameInstance.EnemyPosition[iEnemy]);
-			if(directionEnemy.LengthSquared() < 0.5) {
-				timerPath																= 0;
-				++gameInstance.EnemyPathStep[iEnemy];
-				if( gameInstance.EnemyPathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
-					gameInstance.EnemyPathStep[iEnemy]										= 0;
-			}
-			else {
-				directionEnemy.Normalize();
-				// update enemy
-				gameInstance.EnemyPosition[iEnemy]										+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-				gameInstance.EnemyPosition[iEnemy]										= 
-					{ ::cho::clamp(gameInstance.EnemyPosition[iEnemy].x, .1f, (float)offscreen.View.metrics().x - 1)
-					, ::cho::clamp(gameInstance.EnemyPosition[iEnemy].y, .1f, (float)offscreen.View.metrics().y - 1)
-					};
-			}
-		}
-	}
-
+	error_if(errored(::updateEnemies	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateShots	(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI	(applicationInstance)), "Unknown error.");
 	::cho::STimer																& timer										= framework.Timer;

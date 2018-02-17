@@ -9,7 +9,9 @@
 	// ---- Draw enemy ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
 	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-	for(uint32_t iEnemy = 0, enemyCount = gameInstance.CountEnemies; iEnemy < enemyCount; ++iEnemy) {
+	for(uint32_t iEnemy = 0, enemyCount = gameInstance.EnemiesAlive.size(); iEnemy < enemyCount; ++iEnemy) {
+		if(0 == gameInstance.EnemiesAlive[iEnemy])
+			continue;
 		error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, gameInstance.EnemyPosition[iEnemy].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		{
 			static double																beaconTimer									= 0;
@@ -38,6 +40,8 @@
 	}
 	// ---- Draw player ships
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
+		if(0 == gameInstance.ShipsAlive[iShip])
+			continue;
 		const ::cho::grid_view<::cho::SColorBGRA>									& shipView									= applicationInstance.Textures[GAME_TEXTURE_SHIP0 + iShip].Processed.View;
 		error_if(errored(::cho::grid_copy_alpha(offscreen.View, shipView, gameInstance.ShipPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	}
