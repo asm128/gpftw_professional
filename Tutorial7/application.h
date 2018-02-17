@@ -5,9 +5,9 @@
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
 
-enum PLAYER_TYPE 
-	{	PLAYER_TYPE_AI
-	,	PLAYER_TYPE_HUMAN
+enum SHIP_CONTROL_TYPE 
+	{	SHIP_CONTROL_TYPE_AI
+	,	SHIP_CONTROL_TYPE_HUMAN
 	};
 
 enum PARTICLE_TYPE : int8_t
@@ -72,6 +72,11 @@ enum GAME_TEXTURE : int8_t
 	, GAME_TEXTURE_INVALID		= -1	
 	};
 
+struct SEffectsDelay {
+						double													Thrust;
+						double													Star;
+};
+
 struct SApplication {
 	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
 
@@ -91,6 +96,7 @@ struct SApplication {
 
 						::SStuffToDraw											StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};
+						::SEffectsDelay											EffectsDelay								= {};
 
 																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

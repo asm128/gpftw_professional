@@ -182,7 +182,7 @@ static				::cho::error_t										updateLaserCollision
 			}
 			if(false == bFound) {
 				result																	= 1;
-				aabbCache.Collision	[iSeg]												= true;;
+				aabbCache.Collision	[iSeg]												= true;
  				collisionPoints.push_back(collision);
 			}
 		}

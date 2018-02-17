@@ -11,7 +11,7 @@ namespace cho
 					::cho::error_t											line_line_intersect			
 		( const ::cho::SLine2D<_tCoord>	& line1
 		, const ::cho::SLine2D<_tCoord>	& line2
-		, ::cho::SCoord2<_tCoord>		& out_point
+		, ::cho::SCoord2<_tCoord>		& out_intersect_point
 		)
 	{
 		double																		detL1						= ::cho::determinant(line1);
@@ -27,36 +27,40 @@ namespace cho
 		double																		ynom						= ::cho::determinant(detL1, y1my2, detL2, y3my4);
 		double																		denom						= ::cho::determinant(x1mx2, y1my2, x3mx4, y3my4);
 		if(denom == 0.0) { // Lines don't seem to cross
-			out_point.x																= NAN;
-			out_point.y																= NAN;
+			out_intersect_point.x																= NAN;
+			out_intersect_point.y																= NAN;
 			return 0;
 		}
-		out_point.x																= (_tCoord)(xnom / denom);	
-		out_point.y																= (_tCoord)(ynom / denom);
-		ree_if(!isfinite(out_point.x) 
-			|| !isfinite(out_point.y)
-			, "Probably a numerical issue");
+		out_intersect_point.x																= (_tCoord)(xnom / denom);	
+		out_intersect_point.y																= (_tCoord)(ynom / denom);
+		ree_if(!isfinite(out_intersect_point.x) 
+			|| !isfinite(out_intersect_point.y)
+			, "Probably a numerical issue.");
 		return 1; //All OK
 	}
 
+	template<typename _tCoord>
+					::cho::error_t											point_in_segment
+		( const ::cho::SLine2D<_tCoord>	& segment
+		, const ::cho::SCoord2<_tCoord>	& point
+		)
+	{
+		return (	point.x >=	::cho::min(segment.A.x, segment.B.x)
+				&&	point.y >=	::cho::min(segment.A.y, segment.B.y)
+				&&	point.x <=	::cho::max(segment.A.x, segment.B.x)
+				&&	point.y <=	::cho::max(segment.A.y, segment.B.y)
+				) ? 1 :  0;
+	}
 	// Calculate intersection of two lines. return 1 if found, 0 if not found or -1 on error
 	template<typename _tCoord>
 					::cho::error_t											line_segment_intersect			
 		( const ::cho::SLine2D<_tCoord>	& line
 		, const ::cho::SLine2D<_tCoord>	& segment
-		, ::cho::SCoord2<_tCoord>		& out_point
+		, ::cho::SCoord2<_tCoord>		& out_intersect_point
 		)
 	{
-		::cho::error_t																collision					= line_line_intersect(line, segment, out_point);
-		if(1 == collision) {
-			collision 
-				= ( out_point.x >=	::cho::min(segment.A.x, segment.B.x)
-				&&	out_point.y >=	::cho::min(segment.A.y, segment.B.y)
-				&&	out_point.x <=	::cho::max(segment.A.x, segment.B.x)
-				&&	out_point.y <=	::cho::max(segment.A.y, segment.B.y)
-				) ? 1 : 0;
-		}
-		return collision;
+		::cho::error_t																collision					= line_line_intersect(line, segment, out_intersect_point);
+		return (1 == collision) ? point_in_segment(segment, out_intersect_point) : collision;
 	}
 
 	// Calculate intersection of two lines. return 1 if found, 0 if not found or -1 on error
@@ -64,19 +68,11 @@ namespace cho
 					::cho::error_t											segment_segment_intersect			
 		( const ::cho::SLine2D<_tCoord>	& segment1
 		, const ::cho::SLine2D<_tCoord>	& segment2
-		, ::cho::SCoord2<_tCoord>		& out_point
+		, ::cho::SCoord2<_tCoord>		& out_intersect_point
 		)
 	{
-		::cho::error_t																collision					= line_segment_intersect(segment1, segment2, out_point);
-		if(1 == collision) {
-			collision 
-				= ( out_point.x >=	::cho::min(segment1.A.x, segment1.B.x)
-				&&	out_point.y >=	::cho::min(segment1.A.y, segment1.B.y)
-				&&	out_point.x <=	::cho::max(segment1.A.x, segment1.B.x)
-				&&	out_point.y <=	::cho::max(segment1.A.y, segment1.B.y)
-				) ? 1 : 0;
-		}
-		return collision;
+		::cho::error_t																collision					= line_segment_intersect(segment1, segment2, out_intersect_point);
+		return (1 == collision) ? point_in_segment(segment1, out_intersect_point) : collision;
 	}
 
 

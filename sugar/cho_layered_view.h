@@ -31,6 +31,7 @@ namespace cho
 		inline constexpr	_tElement*									begin						()																				noexcept	{ return Data;						}
 		inline constexpr	_tElement*									end							()																				noexcept	{ return Data + size();				}
 
+		inline constexpr	::cho::SCoord3<uint32_t>					metrics						()																		const	noexcept	{ return {Size.x, Size.y, Size.z};	}
 		inline constexpr	uint32_t									size						()																		const	noexcept	{ return Size.x * Size.y * Size.z;	}
 		inline constexpr	uint32_t									layer_width					()																		const	noexcept	{ return Size.x;					}
 		inline constexpr	uint32_t									layer_height				()																		const	noexcept	{ return Size.y;					}
