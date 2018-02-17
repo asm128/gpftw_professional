@@ -13,8 +13,8 @@ namespace cho
 							_tElement									& Element;
 							uint8_t										Offset;
 
-							operator									bool						()																	const				{ return Element & (1 << Offset); }
-							bit_array_view_proxy&						operator=					(bool value)																			{ value ? Element |= (1 << Offset) : Element &= ~(1 << Offset); return *this; }
+							operator									bool						()																	const				{ return Element & (1ULL << Offset); }
+							bit_array_view_proxy&						operator=					(bool value)																			{ value ? Element |= (1ULL << Offset) : Element &= ~(1ULL << Offset); return *this; }
 	};
 
 	template <typename _tElement>
@@ -87,7 +87,7 @@ namespace cho
 			const uint32_t														offsetElement				= index / ELEMENT_BITS;
 			const uint32_t														offsetLocal					= index % ELEMENT_BITS;
 			const _tElement														& selectedElement			= Data[offsetElement];
-			return selectedElement & (1 << offsetLocal); 
+			return (selectedElement & (1ULL << offsetLocal)); 
 		}
 
 		// Methods

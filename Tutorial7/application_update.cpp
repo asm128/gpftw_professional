@@ -126,16 +126,16 @@
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
-		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
-		 ) { // Remove the particle instance and related information.
+			|| ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
+			|| (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
+			) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused						= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else {
 			::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
-				 if(particleInstance.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+					if(particleInstance.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
 			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
 			else if(particleInstance.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
 			particleInstance.TimeLived												+= lastFrameSeconds;
@@ -177,7 +177,7 @@ static				::cho::error_t										addParticle
 static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType)					{
 	::cho::bit_array_view<uint32_t>												& projectilesAlive							= gameInstance.ProjectilesAlive;
 	const float																	projectileSpeed								= gameInstance.Laser.Speed;
-	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile)
+	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(0 == projectilesAlive[iProjectile]) {
 			projectilesAlive[iProjectile]											= 1;
 			gameInstance.Projectiles[iProjectile].TypeWeapon						= weaponType;
@@ -187,6 +187,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 			gameInstance.Projectiles[iProjectile].Speed								= projectileSpeed;
 			return iProjectile;
 		}
+	}
 	return -1;	// Projectile storage is full. Cannot add projectile.
 }
 
@@ -206,12 +207,13 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 		if(0 == gameInstance.ShipsAlive[iShip])
 			continue;
 		if(applicationInstance.EffectsDelay.Thrust > .01) {
-			for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) 
+			for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) {
 				::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, gameInstance.ShipPosition[iShip] + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), gameInstance.ShipDirection[iShip] * -1.0, (float)(rand() % 400) + (gameInstance.ShipStates[iShip].Thrust ? 400 : 0), particleDefinitions);
+			}
 		}
 		gameInstance.ShipWeaponDelay[iShip]										+= framework.FrameInfo.Seconds.LastFrame;
 		if(gameInstance.ShipStates[iShip].Firing) {
-			if(gameInstance.ShipWeaponDelay[iShip] >= gameInstance.Laser.Delay) {
+			if( gameInstance.ShipWeaponDelay[iShip] >= gameInstance.Laser.Delay ) {
 				gameInstance.ShipWeaponDelay[iShip]										= 0;
 				const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
 				const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x), -1};

@@ -1,4 +1,3 @@
-#include "cho_coord.h"
 #include "cho_array.h"
 #include "cho_color.h"
 #include "cho_input.h"

@@ -265,7 +265,9 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 	static double																beaconTimer									= 0;
 	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 10;
 	::SGame																		& gameInstance								= applicationInstance.Game;
-	for(uint32_t iShip = 0, shipCount = ::cho::size(gameInstance.ShipPosition); iShip < shipCount; ++iShip) {
+	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsAlive.size(); iShip < shipCount; ++iShip) {
+		if(0 == gameInstance.ShipsAlive[iShip])
+			continue;
 		if(false == gameInstance.ShipLineOfFire[iShip]) 
 			::drawCrosshairDiagonal(applicationInstance, beaconTimer, gameInstance.CrosshairPosition[iShip].Cast<int32_t>());
 		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, gameInstance.CrosshairPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");

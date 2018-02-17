@@ -68,7 +68,7 @@ struct SArrayElementState : public ::cho::bit_array_view<uint32_t> {
 public:
 						uint32_t												Data			[(_sizeArray / 32) + 1]				= {};	
 
-																				SArrayElementState									() : bit_array_view(Data) {}
+																				SArrayElementState									() : bit_array_view(Data, _sizeArray) {}
 };
 
 template<size_t _sizeArray>
@@ -79,51 +79,51 @@ template<size_t _sizeArray>
 	return -1;						
 }
 
+static constexpr	const uint32_t													MAGIC_NUMBER										= 1397704771;
+
 struct SGame {
-						::SArrayElementState<MAX_PLAYERS>						ShipsAlive											= {};			// These have to be written/read to/from disk separately as they contain pointers.
-						::SArrayElementState<MAX_ENEMIES>						EnemiesAlive										= {};			// These have to be written/read to/from disk separately as they contain pointers.
-						::SArrayElementState<MAX_PROJECTILES>					ProjectilesAlive									= {};			// These have to be written/read to/from disk separately as they contain pointers.
+						::SArrayElementState<MAX_PLAYERS>								ShipsAlive											= {};			// These have to be written/read to/from disk separately as they contain pointers.
+						::SArrayElementState<MAX_ENEMIES>								EnemiesAlive										= {};			// These have to be written/read to/from disk separately as they contain pointers.
+						::SArrayElementState<MAX_PROJECTILES>							ProjectilesAlive									= {};			// These have to be written/read to/from disk separately as they contain pointers.
 
-						uint32_t												MagicNumber											= 1397704771;	// From here, the whole thing can be saved with a signle fwrite().
-						uint32_t												ShipsPlaying										= 2;
-						::SShipState											ShipStates					[MAX_PLAYERS]			= {};
-						::SWeapon												ShipWeapon					[MAX_PLAYERS]			= {};
-						::cho::SCoord2<float>									ShipPosition				[MAX_PLAYERS]			= {};
-						::cho::SCoord2<float>									ShipDirection				[MAX_PLAYERS]			= {};
-						::cho::SCoord2<float>									CrosshairPosition			[MAX_PLAYERS]			= {};
-						bool													ShipLineOfFire				[MAX_PLAYERS]			= {};
-						double													ShipWeaponDelay				[MAX_PLAYERS]			= {};
+						uint32_t														ShipsPlaying										= 2;
+						::cho::array_static<::SShipState			, MAX_PLAYERS>		ShipStates											= {};
+						::cho::array_static<::SWeapon				, MAX_PLAYERS>		ShipWeapon											= {};
+						::cho::array_static<::cho::SCoord2<float>	, MAX_PLAYERS>		ShipPosition										= {};
+						::cho::array_static<::cho::SCoord2<float>	, MAX_PLAYERS>		ShipDirection										= {};
+						::cho::array_static<::cho::SCoord2<float>	, MAX_PLAYERS>		CrosshairPosition									= {};
+						::cho::array_static<bool					, MAX_PLAYERS>		ShipLineOfFire										= {};
+						::cho::array_static<double					, MAX_PLAYERS>		ShipWeaponDelay										= {};
 
+						float															HalfWidthShip										= 5;
+						float															HalfWidthCrosshair									= 5;
+						float															HalfWidthEnemy										= 5;
+						float															HalfWidthPowerup									= 5;
 
-						float													HalfWidthShip										= 5;
-						float													HalfWidthCrosshair									= 5;
-						float													HalfWidthEnemy										= 5;
-						float													HalfWidthPowerup									= 5;
+						::cho::array_static<::cho::SCoord2<float>	, MAX_ENEMIES>		EnemyPosition										= {};
+						::cho::array_static<::cho::SCoord2<float>	, MAX_ENEMIES>		EnemyDirection										= {};
+						::cho::array_static<double					, MAX_ENEMIES>		EnemyTimeLived										= {};
+						::cho::array_static<double					, MAX_ENEMIES>		EnemySkillTimer										= {};
+						::cho::array_static<int8_t					, MAX_ENEMIES>		EnemyTarget											= {};
+						::cho::array_static<::SWeapon				, MAX_ENEMIES>		EnemyWeapon											= {};
+						::cho::array_static<uint32_t				, MAX_ENEMIES>		EnemyPathStep										= {};
 
-						::cho::SCoord2<float>									EnemyPosition				[MAX_ENEMIES]			= {};
-						::cho::SCoord2<float>									EnemyDirection				[MAX_ENEMIES]			= {};
-						double													EnemyTimeLived				[MAX_ENEMIES]			= {};
-						double													EnemySkillTimer				[MAX_ENEMIES]			= {};
-						int8_t													EnemyTarget					[MAX_ENEMIES]			= {};
-						::SWeapon												EnemyWeapon					[MAX_ENEMIES]			= {};
-						uint32_t												EnemyPathStep				[MAX_ENEMIES]			= {};
+						::cho::array_static<::SProjectile			, MAX_PROJECTILES>	Projectiles											= {};
 
-						::SProjectile											Projectiles					[MAX_PROJECTILES]		= {};
+						::cho::SCoord2<float>											PositionPowerup										= {};
 
-						::cho::SCoord2<float>									PositionPowerup										= {};
-
-						double													GhostTimer											= 0;
-						::SWeapon												Laser												= {.10f, 2000};
-						uint32_t												PathStep											= 0;
-						::cho::SCoord2<float>									PathEnemy					[5]						= 
+						double															GhostTimer											= 0;
+						::SWeapon														Laser												= {.10f, 2000};
+						uint32_t														PathStep											= 0;
+						::cho::SCoord2<float>											PathEnemy					[5]						= 
 							{ { 10.f,  10.f}
 							, {320.f, 180.f}
 							, { 50.f, 200.f}
 							, {480.f,  10.f}
 							, { 0.0f,  0.0f}
 							};
+						uint32_t														MagicNumber25										= MAGIC_NUMBER;	// From here, the whole thing can be saved with a signle fwrite().
 };
-
 #pragma pack(pop)
 
 #endif // GAME_H_982374982374

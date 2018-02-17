@@ -9,6 +9,16 @@ namespace cho
 	template <typename... _Args>	void			clear	(_Args&&... args)						{ const int32_t results[] = {args.clear		()			..., 0}; }
 	template <typename... _Args>	void			resize	(uint32_t newSize, _Args&&... args)		{ const int32_t results[] = {args.resize	(newSize)	..., 0}; }
 
+	template<typename _tCell, uint32_t _sizeArray>
+	struct array_static : public array_view<_tCell> {
+							_tCell						Storage	[_sizeArray]						= {};
+	
+														array_static								()																						{
+			this->Data										= Storage;
+			this->Count										= _sizeArray;
+		}
+	};
+
 	// Base for arrays that keeps track of its actual size.
 	template<typename _tCell>
 	struct array_base : public array_view<_tCell> {
