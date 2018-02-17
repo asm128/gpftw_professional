@@ -144,7 +144,14 @@
 	return 0;
 }
 
-					::cho::error_t										drawSquarePowerup							(::SApplication& applicationInstance, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+static constexpr	const ::cho::SColorBGRA								powerupFamilyColorPalette []				= 
+	{ ::cho::LIGHTYELLOW
+	, ::cho::LIGHTGREEN
+	, ::cho::LIGHTCYAN
+	, ::cho::RED
+	};
+
+					::cho::error_t										drawSquarePowerup							(::SApplication& applicationInstance, POWERUP_FAMILY powFamily, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SCoord2<int32_t>														offset										= {0, 0};
@@ -166,18 +173,13 @@
 	::cho::SCoord2<int32_t>														selectedLightPos0							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 0]
 		,																		selectedLightPos2							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 4]
 		;
-	::cho::SColorBGRA															colors []									= 
-		{ ::cho::RED
-		, ::cho::LIGHTCYAN
-		, ::cho::LIGHTGREEN
-		, ::cho::LIGHTYELLOW
-		};
-	int32_t																		selectedColor								= ((int32_t)time / 4) % ::cho::size(colors);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
+	int32_t																		selectedColor								= powFamily;
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
 	return 0;
 }
-					::cho::error_t										drawDiagonalPowerup						(::SApplication& applicationInstance, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+
+					::cho::error_t										drawDiagonalPowerup						(::SApplication& applicationInstance, POWERUP_FAMILY powFamily, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SCoord2<int32_t>														position									= powPosition.Cast<int32_t>();
@@ -198,29 +200,25 @@
 	::cho::SCoord2<int32_t>															selectedLightPos0							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 0]
 		,																			selectedLightPos2							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 4]
 		;
-	::cho::SColorBGRA																colors []									= 
-		{ ::cho::LIGHTYELLOW
-		, ::cho::RED
-		, ::cho::LIGHTGREEN
-		, ::cho::LIGHTCYAN
-		};
-	int32_t																			selectedColor								= ((int32_t)time / 4) % ::cho::size(colors);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), colors[selectedColor], .3f, 3.0f);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), colors[selectedColor], .3f, 3.0f);
+	int32_t																			selectedColor								= powFamily;//((int32_t)time / 4) % ::cho::size(colors);
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
 	return 0;
 }
+
 					::cho::error_t										drawPowerups								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	static double																timer										= 0;
-	timer																	+= framework.FrameInfo.Seconds.LastFrame;
+	timer																	+= framework.FrameInfo.Seconds.LastFrame * 2;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iPow = 0, powCount = gameInstance.Powerups.Alive.size(); iPow < powCount; ++iPow) {
 		if(0 == gameInstance.Powerups.Alive[iPow])
 			continue;
+		POWERUP_FAMILY																powFamily									= gameInstance.Powerups.Family[iPow];
 		if(gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_WEAPON)
-			drawSquarePowerup(applicationInstance, gameInstance.Powerups.Position[iPow], timer);
+			drawSquarePowerup(applicationInstance, powFamily, gameInstance.Powerups.Position[iPow], timer);
 		else
-			drawDiagonalPowerup(applicationInstance, gameInstance.Powerups.Position[iPow], timer);
+			drawDiagonalPowerup(applicationInstance, powFamily, gameInstance.Powerups.Position[iPow], timer);
 	}
 	return 0;
 }
