@@ -187,8 +187,8 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		}
 	}
 
-	error_if(errored(::updateShots					(applicationInstance, particleDefinitions)), "Unknown error.");
-	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateShots	(applicationInstance, particleDefinitions)), "Unknown error.");
+	error_if(errored(::updateGUI	(applicationInstance)), "Unknown error.");
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
 	char																		buffer		[256]							= {};

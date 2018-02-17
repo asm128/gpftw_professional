@@ -84,13 +84,13 @@
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
 		::cho::SCoord2<float>														& shipPosition								= gameInstance.ShipPosition[iShip];
 		// update ship
-		shipPosition							+= gameInstance.ShipDirection[iShip] * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
+		shipPosition															+= gameInstance.ShipDirection[iShip] * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
 			(gameInstance.ShipStates[iShip].Brakes ? .25f : (gameInstance.ShipStates[iShip].Thrust ? 2 : 1));
-		shipPosition.x							= ::cho::clamp(shipPosition.x, .1f, (float)offscreen.View.metrics().x - 1);
-		shipPosition.y							= ::cho::clamp(shipPosition.y, .1f, (float)offscreen.View.metrics().y - 1);
+		shipPosition.x															= ::cho::clamp(shipPosition.x, .1f, (float)offscreen.View.metrics().x - 1);
+		shipPosition.y															= ::cho::clamp(shipPosition.y, .1f, (float)offscreen.View.metrics().y - 1);
 		{ // update crosshair 
-			gameInstance.CrosshairPosition[iShip]						= shipPosition + ::cho::SCoord2<float>{96,};
-			gameInstance.CrosshairPosition[iShip].x						= ::cho::min(gameInstance.CrosshairPosition[iShip].x, (float)offscreen.View.metrics().x);
+			gameInstance.CrosshairPosition[iShip]									= shipPosition + ::cho::SCoord2<float>{96,};
+			gameInstance.CrosshairPosition[iShip].x									= ::cho::min(gameInstance.CrosshairPosition[iShip].x, (float)offscreen.View.metrics().x);
 		}
 	}
 	return 0;
@@ -107,11 +107,11 @@ static				::cho::error_t										addParticle
 	,	const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle>	& particleDefinitions
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
-	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
+	::cho::SParticleInstance<_tParticleType>									& newInstance								= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
+	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle								= particleIntegrator.Particle[newInstance.ParticleIndex];
 	newParticle.Position													= particlePosition; 
-	::cho::SCoord2<float>														newDirection													= particleDirection;
-	const float																	value															= .5;
+	::cho::SCoord2<float>														newDirection								= particleDirection;
+	const float																	value										= .5;
 	switch(particleType) {
 	default							: break;
 	case ::PARTICLE_TYPE_DEBRIS		:	
@@ -207,11 +207,11 @@ static				::cho::error_t										updateLaserCollision
 		, aabbCache.RectangleSegments[2]
 		, aabbCache.RectangleSegments[3]
 		);
-	::cho::error_t																result											= 0;
+	::cho::error_t																result										= 0;
 	for(uint32_t iSeg = 0; iSeg < 4; ++iSeg) {
-		::cho::SCoord2<_tCoord>														& collision										= aabbCache.CollisionPoints[iSeg];
+		::cho::SCoord2<_tCoord>														& collision									= aabbCache.CollisionPoints[iSeg];
 		if(1 == ::cho::segment_segment_intersect(projectilePath, aabbCache.RectangleSegments[iSeg], collision)) {
-			bool																		bFound											= false;
+			bool																		bFound										= false;
 			for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 				if(collision == aabbCache.CollisionPoints[iS2]) {
 					bFound																	= true;
@@ -243,18 +243,18 @@ static				::cho::error_t										updateLaserCollision
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	::SAABBCache																aabbCache;
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-		const ::SLaserToDraw							& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-		const ::cho::SLine2D<float>						& projectilePath								= laserToDraw.Segment;
+		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
 		{ // Check powerup
-			const cho::SCoord2<float>						& posXHair				= gameInstance.PositionPowerup;
-			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
+			const cho::SCoord2<float>													& posXHair									= gameInstance.PositionPowerup;
+			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
 			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 		}
 		for(uint32_t iEnemy = 0; iEnemy < gameInstance.CountEnemies; ++iEnemy) { // Check enemy
-			const cho::SCoord2<float>						& posXHair				= gameInstance.EnemyPosition[iEnemy];
-			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
+			const cho::SCoord2<float>													& posXHair									= gameInstance.EnemyPosition[iEnemy];
+			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
-			static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
+			static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
 			::cho::SCoord2<float>														vector;
 			for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 				vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
@@ -300,24 +300,24 @@ static				::cho::error_t										updateLaserCollision
 		}
 
 		// 
-		const cho::SCoord2<float>												&	 posXHair									= gameInstance.CrosshairPosition[iShip];
+		const cho::SCoord2<float>												& posXHair									= gameInstance.CrosshairPosition[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-			float																		halfSizeBox										= gameInstance.HalfWidthCrosshair;
-			const ::cho::SLine2D<float>													rectangleSegments[]								= 
+			float																	halfSizeBox									= gameInstance.HalfWidthCrosshair;
+			const ::cho::SLine2D<float>												rectangleSegments[]							= 
 				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
 				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 				};
-			const ::SLaserToDraw														& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-			const ::cho::SLine2D<float>													& projectilePath								= laserToDraw.Segment;
-			::cho::SCoord2<float>														collisions	[::cho::size(rectangleSegments)]	= {};
+			const ::SLaserToDraw													& laserToDraw									= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+			const ::cho::SLine2D<float>												& projectilePath								= laserToDraw.Segment;
+			::cho::SCoord2<float>													collisions	[::cho::size(rectangleSegments)]	= {};
 			for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
-				::cho::SCoord2<float>														& collision										= collisions		[iSeg];
-				const ::cho::SLine2D<float>													& segSelected									= rectangleSegments	[iSeg]; 
+				::cho::SCoord2<float>													& collision										= collisions		[iSeg];
+				const ::cho::SLine2D<float>												& segSelected									= rectangleSegments	[iSeg]; 
 				if(::cho::line_line_intersect(projectilePath, segSelected, collision)) {
-					bool																		bFound											= false;
+					bool																	bFound											= false;
 					for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 						if(collision == collisions[iS2]) {
-							bFound																	= true;
+							bFound																= true;
 							info_printf("Discarded collision point.");
 							break;
 						}
