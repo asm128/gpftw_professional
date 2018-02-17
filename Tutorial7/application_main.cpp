@@ -94,10 +94,9 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
-		gameInstance.ShipPosition		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 2U + ::cho::SCoord2<float>{0, (float)iShip * 64};
+		gameInstance.ShipPosition		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		gameInstance.CrosshairPosition	[iShip]									= gameInstance.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
 	}
-	gameInstance.ShipPosition		[0]										= {0.5f, 0.1f};
 	gameInstance.PositionPowerup											= framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
 	
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0].x};
