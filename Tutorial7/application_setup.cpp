@@ -17,8 +17,8 @@ extern				::SApplication														* g_ApplicationInstance						;
 	switch(uMsg) {
 	default: break;		
 	case WM_CLOSE			: ::DestroyWindow(hWnd); return 0;
-	case WM_KEYDOWN			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardCurrent.KeyState[wParam]  =  1; return 0; // input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; 
-	case WM_KEYUP			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardCurrent.KeyState[wParam] &= ~1; return 0; // input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; 
+	case WM_KEYDOWN			: break_warn_if(wParam > ::cho::size(input.KeyboardPrevious.KeyState), "Key index out of range: %p.", (void*)wParam); input.KeyboardCurrent.KeyState[wParam]  =  1; return 0; // input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; 
+	case WM_KEYUP			: break_warn_if(wParam > ::cho::size(input.KeyboardPrevious.KeyState), "Key index out of range: %p.", (void*)wParam); input.KeyboardCurrent.KeyState[wParam] &= ~1; return 0; // input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; 
 	case WM_GETMINMAXINFO	:	// Catch this message so to prevent the window from becoming too small.
 		((::MINMAXINFO*)lParam)->ptMinTrackSize													= {minClientRect.right - minClientRect.left, minClientRect.bottom - minClientRect.top}; 
 		return 0;
