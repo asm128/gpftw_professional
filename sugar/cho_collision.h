@@ -1,3 +1,6 @@
+// Tip: Best viewed with zoom level at 81%.
+// Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
+//		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
 #include "cho_coord.h"
 #include "cho_log.h"
 
@@ -86,10 +89,11 @@ namespace cho
 		,		::cho::SLine2D<_tCoord>	& bottom
 		) 
 	{
-		left																	= {center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
-		top																		= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox, halfSizeBox}};
-		right																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox, halfSizeBox}, center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}};
-		bottom																	= {center + ::cho::SCoord2<_tCoord>{ halfSizeBox,-halfSizeBox}, center + ::cho::SCoord2<_tCoord>{-halfSizeBox,-halfSizeBox}};
+		typedef	::cho::SCoord2<_tCoord>												TCoord2;
+		left																	= {center + TCoord2{-halfSizeBox, halfSizeBox}, center + TCoord2{-halfSizeBox,-halfSizeBox}};
+		top																		= {center + TCoord2{ halfSizeBox, halfSizeBox}, center + TCoord2{-halfSizeBox, halfSizeBox}};
+		right																	= {center + TCoord2{ halfSizeBox, halfSizeBox}, center + TCoord2{ halfSizeBox,-halfSizeBox}};
+		bottom																	= {center + TCoord2{ halfSizeBox,-halfSizeBox}, center + TCoord2{-halfSizeBox,-halfSizeBox}};
 		return 0;
 	}
 
@@ -102,10 +106,11 @@ namespace cho
 		,		::cho::SLine2D<_tCoord>			& bottom
 		) 
 	{
-		left																	= {rect.Offset														, rect.Offset + ::cho::SCoord2<_tCoord>{0			, rect.Size.y}};
-		top																		= {rect.Offset + ::cho::SCoord2<_tCoord>{0, rect.Size.y}			, rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x	, rect.Size.y}};
-		right																	= {rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x, rect.Size.y}	, rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x, 0}};
-		bottom																	= {rect.Offset														, rect.Offset + ::cho::SCoord2<_tCoord>{rect.Size.x, 0}};
+		typedef	::cho::SCoord2<_tCoord>												TCoord2;
+		left																	= {rect.Offset										, rect.Offset + TCoord2{0			, rect.Size.y}};
+		top																		= {rect.Offset + TCoord2{0, rect.Size.y}			, rect.Offset + TCoord2{rect.Size.x	, rect.Size.y}};
+		right																	= {rect.Offset + TCoord2{rect.Size.x, rect.Size.y}	, rect.Offset + TCoord2{rect.Size.x, 0}};
+		bottom																	= {rect.Offset										, rect.Offset + TCoord2{rect.Size.x, 0}};
 		return 0;
 	}
 

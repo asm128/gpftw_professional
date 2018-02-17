@@ -1,3 +1,6 @@
+// Tip: Best viewed with zoom level at 81%.
+// Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
+//		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
 #include "cho_coord.h"
 #include "cho_bit_array_view.h"
 #include "cho_array.h"
@@ -36,6 +39,11 @@ struct SShipState {
 						bool																Brakes																	: 1;
 };
 
+struct SShipHealth {
+						int32_t																Health;
+						int32_t																Shield;
+};
+
 struct SProjectile {
 						float																Speed;
 						double																TimeLived;
@@ -70,14 +78,21 @@ template<size_t _sizeArray>
 static constexpr	const uint32_t														MAGIC_NUMBER															= 1397704771;
 				  
 
-template<uint32_t _sizeArray>	struct SPropertiesPowerup		{ ; };
-template<uint32_t _sizeArray>	struct SPropertiesProjectile	{ 
+template<uint32_t _sizeArray>	
+struct SPropertiesPowerup		{ 
+						::SArrayElementState						< _sizeArray>			Alive																	= {};			// These have to be written/read to/from disk separately as they contain pointers.
+						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
+};
+
+template<uint32_t _sizeArray>	
+struct SPropertiesProjectile	{ 
 						::SArrayElementState						< _sizeArray>			Alive																	= {};			// These have to be written/read to/from disk separately as they contain pointers.
 						::cho::array_static<::SProjectile			, MAX_PROJECTILES>		Projectiles																= {};
 };
 
 
-template<uint32_t _sizeArray>	struct SPropertiesEnemy			{ 
+template<uint32_t _sizeArray>	
+struct SPropertiesEnemy			{ 
 						::SArrayElementState						< _sizeArray>			Alive																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Direction																= {};
@@ -88,9 +103,11 @@ template<uint32_t _sizeArray>	struct SPropertiesEnemy			{
 						::cho::array_static<uint32_t				, _sizeArray>			PathStep																= {};
 };
 
-template<uint32_t _sizeArray>	struct SPropertiesShip			{ 		
+template<uint32_t _sizeArray>	
+struct SPropertiesShip			{ 		
 						::SArrayElementState						< _sizeArray>			Alive																	= {};			
 						::cho::array_static<::SShipState			, _sizeArray>			States																	= {};
+						::cho::array_static<::SShipHealth			, _sizeArray>			Health																	= {};
 						::cho::array_static<::SWeapon				, _sizeArray>			Weapon																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Direction																= {};
@@ -104,15 +121,14 @@ struct SGame {
 						::SPropertiesEnemy		<MAX_ENEMIES>								Enemies																	= {};
 						::SPropertiesProjectile	<MAX_PROJECTILES>							Projectiles																= {};
 						::SPropertiesPowerup	<MAX_POWERUP>								Powerups																= {};
-						::cho::array_static<::cho::SCoord2<float>, MAX_PLAYERS>				CrosshairPosition														= {};
+						::cho::array_static<::cho::SCoord2<float>, MAX_PLAYERS>				PositionCrosshair														= {};
+						::cho::SCoord2<float>												PositionPowerup															= {};
 
 						float																HalfWidthShip															= 5;
 						float																HalfWidthCrosshair														= 5;
 						float																HalfWidthEnemy															= 5;
 						float																HalfWidthPowerup														= 5;
 
-
-						::cho::SCoord2<float>												PositionPowerup															= {};
 
 						double																GhostTimer																= 0;
 						::SWeapon															Laser																	= {.10f, 2000};

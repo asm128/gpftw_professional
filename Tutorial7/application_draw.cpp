@@ -1,3 +1,6 @@
+// Tip: Best viewed with zoom level at 81%.
+// Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
+//		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
 #include "application.h"
 #include "cho_grid_copy.h"
 #include "cho_bitmap_target.h"
@@ -269,10 +272,10 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 		if(0 == gameInstance.Ships.Alive[iShip])
 			continue;
 		if(false == gameInstance.Ships.LineOfFire[iShip]) 
-			::drawCrosshairDiagonal(applicationInstance, beaconTimer, gameInstance.CrosshairPosition[iShip].Cast<int32_t>());
-		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, gameInstance.CrosshairPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			::drawCrosshairDiagonal(applicationInstance, beaconTimer, gameInstance.PositionCrosshair[iShip].Cast<int32_t>());
+		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, gameInstance.PositionCrosshair[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		if(gameInstance.Ships.LineOfFire[iShip]) 
-			::drawCrosshairAligned(applicationInstance, beaconTimer, gameInstance.CrosshairPosition[iShip].Cast<int32_t>());
+			::drawCrosshairAligned(applicationInstance, beaconTimer, gameInstance.PositionCrosshair[iShip].Cast<int32_t>());
 	}
 	return 0;
 }

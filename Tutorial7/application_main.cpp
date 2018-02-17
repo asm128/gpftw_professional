@@ -1,3 +1,4 @@
+// Tip: Best viewed with zoom level at 81%.
 // Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
 //		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
 #include "application.h"
@@ -96,7 +97,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
 		gameInstance.Ships.Alive		[iShip]									= 1;
 		gameInstance.Ships.Position		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 + ::cho::SCoord2<float>{0, (float)iShip * 64};
-		gameInstance.CrosshairPosition	[iShip]									= gameInstance.Ships.Position[iShip] + ::cho::SCoord2<float>{64, };
+		gameInstance.PositionCrosshair	[iShip]									= gameInstance.Ships.Position[iShip] + ::cho::SCoord2<float>{64, };
 	}
 	gameInstance.PositionPowerup											= framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
 	
@@ -149,8 +150,8 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	error_if(errored(::updateSpawn		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateShips		(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateEnemies	(applicationInstance)), "Unknown error.");
-	error_if(errored(::updateShots	(applicationInstance, particleDefinitions)), "Unknown error.");
-	error_if(errored(::updateGUI	(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateShots		(applicationInstance, particleDefinitions)), "Unknown error.");
+	error_if(errored(::updateGUI		(applicationInstance)), "Unknown error.");
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
 	char																		buffer		[256]							= {};

@@ -154,7 +154,7 @@ struct SAABBCache {
 					bool												Collision			[4]						= {};
 };
 
-static				::cho::error_t										updateLaserCollision
+static				::cho::error_t										checkLaserCollision
 	( const ::cho::SLine2D<float>														& projectilePath
 	, ::SAABBCache																		aabbCache
 	, const cho::SCoord2<float>															& posXHair	
@@ -203,18 +203,18 @@ static				::cho::error_t										updateLaserCollision
 		{ // Check powerup
 			const cho::SCoord2<float>						& posXHair				= applicationInstance.PositionPowerup;
 			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x / 4 * 3;
-			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+			::checkLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 		}
 		{ // Check enemy
 			const cho::SCoord2<float>						& posXHair				= applicationInstance.PositionEnemy;
 			float											halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x / 4 * 3;
-			::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+			::checkLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 			static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
 			::cho::SCoord2<float>														vector;
 			for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 				vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
 				vector.Rotate(::cho::math_2pi / 5 * iGhost + applicationInstance.GhostTimer);
-				::updateLaserCollision(projectilePath, aabbCache, posXHair + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+				::checkLaserCollision(projectilePath, aabbCache, posXHair + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
 			}
 		}
 	}
@@ -242,13 +242,13 @@ static				::cho::error_t										updateLaserCollision
 		{
 			const cho::SCoord2<float>													& posXHair				= applicationInstance.PositionEnemy;
 			float																		halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
-			if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
+			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 				applicationInstance.LineOfFire											= true;
 		}
 		{
 			const cho::SCoord2<float>													& posXHair				= applicationInstance.PositionPowerup;
 			float																		halfSizeBox				= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
-			if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
+			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 				applicationInstance.LineOfFire											= true;
 		}
 	}
