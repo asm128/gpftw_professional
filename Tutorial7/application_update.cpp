@@ -260,9 +260,7 @@ static				::cho::error_t										updateLaserCollision
 			}
 		}
 	}
-
-	typedef	::SApplication::TParticleInstance									TParticleInstance;
-	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
 		for(uint32_t i=0; i < 10; ++i) {
@@ -275,26 +273,26 @@ static				::cho::error_t										updateLaserCollision
 					::cho::error_t										updateGUI									(::SApplication& applicationInstance)					{ 
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
-		{ // Calculate line of sight 
+		{ // --- Calculate line of fire and set state accordingly. This causes Draw() to draw the crosshair in the right mode.
 			::SAABBCache																aabbCache;
 			::cho::SLine2D<float>														projectilePath								= {gameInstance.ShipPosition[iShip], gameInstance.ShipPosition[iShip] + ::cho::SCoord2<float>{10000, }};
 			projectilePath.A.y														-= 1;
 			projectilePath.B.y														-= 1;
 			gameInstance.ShipLineOfFire[iShip]										= false;
 			for(uint32_t iEnemy = 0; iEnemy < ::cho::size(gameInstance.EnemyPosition); ++iEnemy) {
-				const cho::SCoord2<float>													& posXHair									= gameInstance.EnemyPosition[iEnemy];
+				const cho::SCoord2<float>													& posEnemy									= gameInstance.EnemyPosition[iEnemy];
 				float																		halfSizeBox									= gameInstance.HalfWidthEnemy; //(float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
-				if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
+				if(1 == ::updateLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 					gameInstance.ShipLineOfFire[iShip]										= true;
 			}
 			{
-				const cho::SCoord2<float>													& posXHair									= gameInstance.PositionPowerup;
+				const cho::SCoord2<float>													& posPow									= gameInstance.PositionPowerup;
 				float																		halfSizeBox									= gameInstance.HalfWidthPowerup;//(float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
-				if(1 == ::updateLaserCollision(projectilePath, aabbCache, posXHair, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
+				if(1 == ::updateLaserCollision(projectilePath, aabbCache, posPow, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints))
 					gameInstance.ShipLineOfFire[iShip]										= true;
 			}
 		}
-		// 
+		//  ------ update crosshair collision points with lasers 
 		const cho::SCoord2<float>												& posXHair									= gameInstance.CrosshairPosition[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 			float																	halfSizeBox									= gameInstance.HalfWidthCrosshair;
