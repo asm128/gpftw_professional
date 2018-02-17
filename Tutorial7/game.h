@@ -101,8 +101,9 @@ struct SGame {
 						int8_t													EnemyTarget					[MAX_ENEMIES]			= {};
 						::SWeapon												EnemyWeapon					[MAX_ENEMIES]			= {};
 						uint32_t												EnemyPathStep				[MAX_ENEMIES]			= {};
-						uint32_t												CountEnemies								= 0;
-						
+						uint32_t												CountEnemies										= 0;
+						::SArrayElementState<MAX_ENEMIES>						EnemiesAlive										= {};
+
 						uint32_t												ProjectilesAliveContainer	[MAX_PROJECTILES / 32]	= {};
 						::cho::bit_array_view<uint32_t>							ProjectilesAliveView								= ProjectilesAliveContainer;
 						::SProjectile											Projectiles					[MAX_PROJECTILES]		= {};

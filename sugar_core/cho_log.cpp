@@ -1,7 +1,6 @@
 #include "cho_log.h"
 
 #include <Windows.h>
-
 #include <stdio.h>
 
 		void														cho::_base_debug_print							(const char* text, uint32_t textLen)									{
@@ -11,7 +10,6 @@
 	printf("%s", text); textLen;
 #endif 
 }
-
 
 static	::cho::error_t												getSystemErrorAsString						(const uint64_t lastError, char* buffer, uint32_t bufferSize)			{	// Get the error message, if any.
 #if defined CHO_WINDOWS

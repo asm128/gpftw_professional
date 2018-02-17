@@ -7,25 +7,25 @@
 #ifndef CHO_LOG_H_8927349654687654365
 #define CHO_LOG_H_8927349654687654365
 
-//#define NULLIFY_CHO_ALL_CONDITIONAL_ERROR_CHECKING
+//#define CHO_NULLIFY_ALL_CONDITIONAL_ERROR_CHECKING
 #if !defined(DEBUG) && !defined(_DEBUG)
-#	if defined(NULLIFY_CHO_ALL_CONDITIONAL_ERROR_CHECKING) 
-#		define	NULLIFY_CHO_NECALL
-#		define	NULLIFY_CONDITIONAL_RETERR
-#		define	NULLIFY_CONDITIONAL_LOG
-#		define	NULLIFY_CONDITIONAL_THROW
+#	if defined(CHO_NULLIFY_ALL_CONDITIONAL_ERROR_CHECKING) 
+#		define	CHO_NULLIFY_NECALL
+#		define	CHO_NULLIFY_CONDITIONAL_RETERR
+#		define	CHO_NULLIFY_CONDITIONAL_LOG
+#		define	CHO_NULLIFY_CONDITIONAL_THROW
 #	else
-#		//ifndef NULLIFY_CHO_NECALL
-#		//	define NULLIFY_CHO_NECALL
+#		//ifndef CHO_NULLIFY_NECALL
+#		//	define CHO_NULLIFY_NECALL
 #		//endif
-#		//ifndef NULLIFY_CONDITIONAL_RETERR
-#		//	define NULLIFY_CONDITIONAL_RETERR
+#		//ifndef CHO_NULLIFY_CONDITIONAL_RETERR
+#		//	define CHO_NULLIFY_CONDITIONAL_RETERR
 #		//endif
-#		//ifndef NULLIFY_CONDITIONAL_LOG
-#		//	define NULLIFY_CONDITIONAL_LOG
+#		//ifndef CHO_NULLIFY_CONDITIONAL_LOG
+#		//	define CHO_NULLIFY_CONDITIONAL_LOG
 #		//endif
-#		//ifndef NULLIFY_CONDITIONAL_THROW
-#		//	define NULLIFY_CONDITIONAL_THROW
+#		//ifndef CHO_NULLIFY_CONDITIONAL_THROW
+#		//	define CHO_NULLIFY_CONDITIONAL_THROWF
 #		//endif
 #	endif
 #endif
@@ -81,7 +81,7 @@ namespace cho
 #	define success_printf(format, ...)								do { __VA_ARGS__; } while(0)
 #endif	
 
-#ifndef NULLIFY_CONDITIONAL_THROW
+#ifndef CHO_NULLIFY_CONDITIONAL_THROW
 #define throw_if(condition, exception, format, ...)				if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); throw(exception);	}
 #else
 #pragma warning(disable:4552)	// this is required because "condition" may have no side effect.
@@ -89,7 +89,7 @@ namespace cho
 #define throw_if(condition, exception, format, ...)				do{ condition; } while(0)
 #endif
 
-#ifndef NULLIFY_CONDITIONAL_LOG
+#ifndef CHO_NULLIFY_CONDITIONAL_LOG
 #define error_if(condition, format, ...)						if(condition) { error_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); 						}
 #define warn_if(condition, format, ...)							if(condition) { warning_printf	(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); 						}
 #define info_if(condition, format, ...)							if(condition) { info_printf		(format, __VA_ARGS__); base_debug_print("Condition: " #condition, (uint32_t)-1); 						}
@@ -121,7 +121,7 @@ namespace cho
 #define retnul_warn_if(condition, format, ...)					retval_warn_if	( 0, condition, format, __VA_ARGS__)
 #define retnul_info_if(condition, format, ...)					retval_info_if	( 0, condition, format, __VA_ARGS__)
 
-#ifndef NULLIFY_CONDITIONAL_RETERR
+#ifndef CHO_NULLIFY_CONDITIONAL_RETERR
 #define reterr_error_if(condition, format, ...)					retval_error_if	(-1, condition, format, __VA_ARGS__)
 #define reterr_warn_if(condition, format, ...)					retval_warn_if	(-1, condition, format, __VA_ARGS__)
 #define reterr_info_if(condition, format, ...)					retval_info_if	(-1, condition, format, __VA_ARGS__)
@@ -250,7 +250,7 @@ namespace cho
 #	define cho_pewcall												cho_pecall			// Propagable retval_error error-warning call.
 #endif
 
-#ifndef NULLIFY_CHO_NECALL
+#ifndef CHO_NULLIFY_NECALL
 #define cho_necall(chol_call, ...)								cho_rve_ecall (-1, chol_call, __VA_ARGS__)	// Non-propagable error call.
 #define cho_newcall(chol_call, ...)								cho_rve_ewcall(-1, chol_call, __VA_ARGS__)	// Non-propagable error-warning call.
 #define cho_hrcall(hr_call)										cho_rv_hrcall (-1, hr_call)					// HRESULT call.

@@ -43,8 +43,6 @@ struct SHeaderInfoBMP {
 
 // Currently supporting only 24-bit bitmaps
 					::cho::error_t																	cho::bmpFileLoad							(const byte_t* source, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)					{
-	info_printf("sizeof(SBMPFHeader) = %u", (uint32_t)sizeof(SHeaderFileBMP));
-	info_printf("sizeof(SBMPIHeader) = %u", (uint32_t)sizeof(SHeaderInfoBMP));
 	SHeaderFileBMP																							& fileHeader								= *(SHeaderFileBMP*)*source;	
 	ree_if(0 != memcmp(fileHeader.Type, "BM", 2), "Invalid magic number for BMP file.");	
 	SHeaderInfoBMP																							& infoHeader								= *(SHeaderInfoBMP*)*(source + sizeof(SHeaderFileBMP));
@@ -96,8 +94,6 @@ struct SHeaderInfoBMP {
 
 // Currently supporting only 24-bit bitmaps
 					::cho::error_t																	cho::bmpFileLoad							(FILE* source, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)					{
-	info_printf("sizeof(SBMPFHeader) = %u", (uint32_t)sizeof(::SHeaderFileBMP));
-	info_printf("sizeof(SBMPIHeader) = %u", (uint32_t)sizeof(::SHeaderInfoBMP));
 	::SHeaderFileBMP																						fileHeader									= {};	
 	::SHeaderInfoBMP																						infoHeader									= {};
 	ree_if(fread(&fileHeader, 1, sizeof(::SHeaderFileBMP), source) != sizeof(::SHeaderFileBMP), "Failed to read file! File corrupt?");
