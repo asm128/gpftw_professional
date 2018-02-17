@@ -128,10 +128,10 @@
 			: (physicsId % 2)						? (gameInstance.ShipStates[0].Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
 			: ::cho::YELLOW 
 			;
-		float																	maxFactor	= .5f;
-		float																	range		= 3.f;
-		maxFactor															*= (1.0f - ::cho::min(1.0f, thrustToDraw.TimeLived / 4));
-		range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, thrustToDraw.TimeLived / 4));
+		float																		maxFactor	= .5f;
+		float																		range		= 3.f;
+		maxFactor																*= (1.0f - ::cho::min(1.0f, thrustToDraw.TimeLived / 4));
+		range																	= physicsId % 2 + (1.0f - ::cho::min(1.0f, thrustToDraw.TimeLived / 4));
 		::cho::drawPixelLight(viewOffscreen, particlePosition, viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 	}
 	return 0;

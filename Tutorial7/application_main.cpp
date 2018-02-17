@@ -86,16 +86,18 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	//_CrtSetBreakAlloc(120);
 	g_ApplicationInstance													= &applicationInstance;
-	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	error_if(errored(::mainWindowCreate(framework.MainDisplay, framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 
+	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
-		applicationInstance.Game.ShipPosition		[iShip]						= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U + ::cho::SCoord2<float>{0, (float)iShip * 64};
-		applicationInstance.Game.CrosshairPosition	[iShip]						= applicationInstance.Game.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
+		gameInstance.ShipPosition		[iShip]						= framework.Offscreen.View.metrics().Cast<float>() / 2U + ::cho::SCoord2<float>{0, (float)iShip * 64};
+		gameInstance.CrosshairPosition	[iShip]						= gameInstance.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
 	}
-	applicationInstance.Game.PositionPowerup								= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
+	gameInstance.PositionPowerup								= framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
 	
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0].x};
 	return 0;
@@ -141,44 +143,45 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
-	error_if(errored(::updateParticles				(applicationInstance)), "Unknown error.");
-	error_if(errored(::updateSpawn					(applicationInstance, particleDefinitions)), "Unknown error.");
-	error_if(errored(::updateShips					(applicationInstance)), "Unknown error.");
-	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	applicationInstance.Game.GhostTimer										+= framework.FrameInfo.Seconds.LastFrame;
+	error_if(errored(::updateParticles	(applicationInstance)), "Unknown error.");
+	error_if(errored(::updateSpawn		(applicationInstance, particleDefinitions)), "Unknown error.");
+	error_if(errored(::updateShips		(applicationInstance)), "Unknown error.");
+	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
+	::SGame																		& gameInstance								= applicationInstance.Game;
+	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.Timer.LastTimeSeconds;
 	if(timerSpawn > 10.0f) {
 		timerSpawn = 0;
-		if(applicationInstance.Game.CountEnemies < ::cho::size(applicationInstance.Game.EnemyPosition))
-			++applicationInstance.Game.CountEnemies;
+		if(gameInstance.CountEnemies < ::cho::size(gameInstance.EnemyPosition))
+			++gameInstance.CountEnemies;
 	}
-	for(uint32_t iEnemy = 0; iEnemy < applicationInstance.Game.CountEnemies; ++iEnemy) {
-		applicationInstance.Game.EnemySkillTimer[iEnemy]						+= framework.FrameInfo.Seconds.LastFrame;
+	for(uint32_t iEnemy = 0; iEnemy < gameInstance.CountEnemies; ++iEnemy) {
+		gameInstance.EnemySkillTimer[iEnemy]						+= framework.FrameInfo.Seconds.LastFrame;
 		{
 			static float																timerPath									= 0;
 			timerPath																+= (float)framework.Timer.LastTimeSeconds;
 			if(timerPath > 10.0f) {
 				timerPath = 0;
-				++applicationInstance.Game.EnemyPathStep[iEnemy];
-				if(applicationInstance.Game.EnemyPathStep[iEnemy] >= ::cho::size(applicationInstance.Game.PathEnemy))
-					applicationInstance.Game.EnemyPathStep[iEnemy]							= 0;
+				++gameInstance.EnemyPathStep[iEnemy];
+				if( gameInstance.EnemyPathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
+					gameInstance.EnemyPathStep[iEnemy]							= 0;
 			}
-			const ::cho::SCoord2<float>													& pathTarget								= applicationInstance.Game.PathEnemy[applicationInstance.Game.EnemyPathStep[iEnemy]];
-			::cho::SCoord2<float>														directionEnemy								= (pathTarget - applicationInstance.Game.EnemyPosition[iEnemy]);
+			const ::cho::SCoord2<float>													& pathTarget								= gameInstance.PathEnemy[gameInstance.EnemyPathStep[iEnemy]];
+			::cho::SCoord2<float>														directionEnemy								= (pathTarget - gameInstance.EnemyPosition[iEnemy]);
 			if(directionEnemy.LengthSquared() < 0.5) {
 				timerPath = 0;
-				++applicationInstance.Game.EnemyPathStep[iEnemy];
-				if(applicationInstance.Game.EnemyPathStep[iEnemy] >= ::cho::size(applicationInstance.Game.PathEnemy))
-					applicationInstance.Game.EnemyPathStep[iEnemy]							= 0;
+				++gameInstance.EnemyPathStep[iEnemy];
+				if( gameInstance.EnemyPathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
+					gameInstance.EnemyPathStep[iEnemy]							= 0;
 			}
 			else {
 				directionEnemy.Normalize();
 				// update enemy
-				applicationInstance.Game.EnemyPosition[iEnemy]							+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-				applicationInstance.Game.EnemyPosition[iEnemy]							= 
-					{ ::cho::clamp(applicationInstance.Game.EnemyPosition[iEnemy].x, .1f, (float)offscreen.View.metrics().x - 1)
-					, ::cho::clamp(applicationInstance.Game.EnemyPosition[iEnemy].y, .1f, (float)offscreen.View.metrics().y - 1)
+				gameInstance.EnemyPosition[iEnemy]							+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+				gameInstance.EnemyPosition[iEnemy]							= 
+					{ ::cho::clamp(gameInstance.EnemyPosition[iEnemy].x, .1f, (float)offscreen.View.metrics().x - 1)
+					, ::cho::clamp(gameInstance.EnemyPosition[iEnemy].y, .1f, (float)offscreen.View.metrics().y - 1)
 					};
 			}
 		}

@@ -147,7 +147,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	)
 {
 	::cho::SFramework															& framework									= applicationInstance.Framework;
-	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
+	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 	// Add some effect particles
 	typedef	::SApplication::TParticleSystem										TParticleSystem;
 	typedef	TParticleSystem::TParticleInstance									TParticleInstance;
