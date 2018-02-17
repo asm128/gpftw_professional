@@ -143,9 +143,10 @@
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= offscreen.View;
 	static float																timer										= 0;
 	timer																	+= (float)framework.FrameInfo.Seconds.LastFrame / 2;
+	::SGame																		& gameInstance								= applicationInstance.Game;
 	{
 		::cho::SCoord2<int32_t>														offset										= {0, 0};
-		::cho::SCoord2<int32_t>														position									= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
+		::cho::SCoord2<int32_t>														position									= gameInstance.PositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double																beaconTimer									= 0;
@@ -177,7 +178,7 @@
 	}
 	{
 		::cho::SCoord2<int32_t>														offset										= {-150, -150};
-		::cho::SCoord2<int32_t>														position									= applicationInstance.Game.PositionPowerup.Cast<int32_t>() + offset;
+		::cho::SCoord2<int32_t>														position									= gameInstance.PositionPowerup.Cast<int32_t>() + offset;
 		for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.StuffToDraw.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		static double																	beaconTimer									= 0;
@@ -259,12 +260,13 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	static double																beaconTimer									= 0;
 	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 10;
-	for(uint32_t iShip = 0, shipCount = ::cho::size(applicationInstance.Game.ShipPosition); iShip < shipCount; ++iShip) {
-		if(false == applicationInstance.Game.ShipLineOfFire[iShip]) 
-			::drawCrosshairDiagonal(applicationInstance, beaconTimer, applicationInstance.Game.CrosshairPosition[iShip].Cast<int32_t>());
-		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, applicationInstance.Game.CrosshairPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-		if(applicationInstance.Game.ShipLineOfFire[iShip]) 
-			::drawCrosshairAligned(applicationInstance, beaconTimer, applicationInstance.Game.CrosshairPosition[iShip].Cast<int32_t>());
+	::SGame																		& gameInstance								= applicationInstance.Game;
+	for(uint32_t iShip = 0, shipCount = ::cho::size(gameInstance.ShipPosition); iShip < shipCount; ++iShip) {
+		if(false == gameInstance.ShipLineOfFire[iShip]) 
+			::drawCrosshairDiagonal(applicationInstance, beaconTimer, gameInstance.CrosshairPosition[iShip].Cast<int32_t>());
+		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, gameInstance.CrosshairPosition[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		if(gameInstance.ShipLineOfFire[iShip]) 
+			::drawCrosshairAligned(applicationInstance, beaconTimer, gameInstance.CrosshairPosition[iShip].Cast<int32_t>());
 	}
 	return 0;
 }

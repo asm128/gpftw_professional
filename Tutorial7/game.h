@@ -49,19 +49,19 @@ static constexpr	const int32_t											MAX_POWERUP									= 32;
 static constexpr	const int32_t											MAX_ENEMIES									= 64;
 static constexpr	const int32_t											MAX_PROJECTILES								= 512;
 
-static constexpr	const ::cho::SCoord2<float>								g_pathEnemy0		[4]						= 
-						{ { 10.f,  10.f}
-						, {320.f, 180.f}
-						, { 50.f, 200.f}
-						, {480.f,  10.f}
-						};
-
-static constexpr	const ::cho::SCoord2<float>								g_pathEnemy1		[4]						= 
-						{ { 10.f,  10.f}
-						, {180.f, 320.f}
-						, {200.f,  50.f}
-						, {10.f,  480.f}
-						};
+//static constexpr	const ::cho::SCoord2<float>								g_pathEnemy0		[4]						= 
+//						{ { 10.f,  10.f}
+//						, {320.f, 180.f}
+//						, { 50.f, 200.f}
+//						, {480.f,  10.f}
+//						};
+//
+//static constexpr	const ::cho::SCoord2<float>								g_pathEnemy1		[4]						= 
+//						{ { 10.f,  10.f}
+//						, {180.f, 320.f}
+//						, {200.f,  50.f}
+//						, {10.f,  480.f}
+//						};
 
 template<size_t _sizeArray>
 struct SArrayElementState {
@@ -112,11 +112,12 @@ struct SGame {
 						double													GhostTimer											= 0;
 						::SWeapon												Laser												= {.10f, 2000};
 						uint32_t												PathStep											= 0;
-						::cho::SCoord2<float>									PathEnemy					[4]						= 
+						::cho::SCoord2<float>									PathEnemy					[5]						= 
 							{ { 10.f,  10.f}
 							, {320.f, 180.f}
 							, { 50.f, 200.f}
 							, {480.f,  10.f}
+							, { 0.0f,  0.0f}
 							};
 };
 

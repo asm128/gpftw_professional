@@ -91,7 +91,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 
-	for(uint32_t iShip = 0, shipCount = ::cho::size(applicationInstance.Game.ShipDirection); iShip < shipCount; ++iShip) {
+	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
 		applicationInstance.Game.ShipPosition		[iShip]						= applicationInstance.Framework.Offscreen.View.metrics().Cast<float>() / 2U + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		applicationInstance.Game.CrosshairPosition	[iShip]						= applicationInstance.Game.ShipPosition[iShip] + ::cho::SCoord2<float>{64, };
 	}
