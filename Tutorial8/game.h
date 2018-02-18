@@ -105,6 +105,7 @@ struct SPropertiesProjectile	{
 template<uint32_t _sizeArray>	
 struct SPropertiesEnemy			{ 
 						::SArrayElementState						< _sizeArray>			Alive																	= {};
+						::cho::array_static<::SShipState			, _sizeArray>			States																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Direction																= {};
 						::cho::array_static<::SHealthPoints			, _sizeArray>			Health																	= {};
@@ -112,6 +113,7 @@ struct SPropertiesEnemy			{
 						::cho::array_static<double					, _sizeArray>			SkillTimer																= {};
 						::cho::array_static<int8_t					, _sizeArray>			Target																	= {};
 						::cho::array_static<::SWeapon				, _sizeArray>			Weapon																	= {};
+						::cho::array_static<double					, _sizeArray>			WeaponDelay																= {};
 						::cho::array_static<uint32_t				, _sizeArray>			PathStep																= {};
 };
 

@@ -262,12 +262,35 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 				gameParticle.Lit														= true;
 				gameParticle.TypePlayer													= PLAYER_TYPE_PLAYER;
 				gameParticle.TypeWeapon													= gameInstance.Ships.Weapon[iShip].Type;
-				const ::cho::SCoord2<float>													textureShipMetrics							= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
+				const ::cho::SCoord2<float>													textureShipMetrics							= applicationInstance.Textures[GAME_TEXTURE_SHIP0 + iShip].Processed.View.metrics().Cast<float>();
 				const ::cho::SCoord2<float>													weaponParticleOffset						= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x), -1};
 				::addParticle(gameParticle, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + weaponParticleOffset, {1, 0}, weapon.Speed, particleDefinitions);
 				e_if(errored(::addProjectile(gameInstance, iShip, gameParticle.TypePlayer, gameParticle.TypeWeapon, weapon.Speed)), "Projectile storage is full. Cannot add projectile.");
 			}
 		}
+	}
+	for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) {
+		if(0 == gameInstance.Enemies.Alive[iEnemy])
+			continue;
+		gameInstance.Enemies.WeaponDelay[iEnemy]									+= framework.FrameInfo.Seconds.LastFrame;
+		if(gameInstance.Enemies.States[iEnemy].Firing) { // Add lasers / bullets.
+			const ::SWeapon																weapon										= gameInstance.Enemies.Weapon[iEnemy];
+			if( gameInstance.Enemies.WeaponDelay[iEnemy] >= weapon.Delay ) {
+				gameInstance.Enemies.WeaponDelay[iEnemy]									= 0;
+				::SGameParticle																gameParticle;
+				gameParticle.OwnerIndex													= iEnemy;
+				gameParticle.TimeLived													= 0;
+				gameParticle.Type														= PARTICLE_TYPE_PROJECTILE;
+				gameParticle.Lit														= true;
+				gameParticle.TypePlayer													= PLAYER_TYPE_ENEMY;
+				gameParticle.TypeWeapon													= gameInstance.Enemies.Weapon[iEnemy].Type;
+				const ::cho::SCoord2<float>													textureShipMetrics							= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View.metrics().Cast<float>();
+				const ::cho::SCoord2<float>													weaponParticleOffset						= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x), -1};
+				::addParticle(gameParticle, particleInstances, particleIntegrator, gameInstance.Enemies.Position[iEnemy] + weaponParticleOffset, (gameInstance.Ships.Position[rand() % gameInstance.ShipsPlaying] - gameInstance.Enemies.Position[iEnemy]).Normalize(), weapon.Speed, particleDefinitions);
+				e_if(errored(::addProjectile(gameInstance, iEnemy, gameParticle.TypePlayer, gameParticle.TypeWeapon, weapon.Speed)), "Projectile storage is full. Cannot add projectile.");
+			}
+		}
+
 	}
 	applicationInstance.EffectsDelay.Star									+= framework.FrameInfo.Seconds.LastFrame;
 	if(applicationInstance.EffectsDelay.Star > .1) {
@@ -319,28 +342,65 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 			
 			}
 		}
-		for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) { // Check enemy
-			if(0 == gameInstance.Enemies.Alive[iEnemy])
-				continue;
-			const cho::SCoord2<float>													& posEnemy									= gameInstance.Enemies.Position[iEnemy];
-			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
-			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
-				float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
-				gameInstance.Enemies.Health[iEnemy].Health								-= (int32_t)(gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Type.OwnerIndex].Speed * (1.0f - damegePorportion)	);
-				gameInstance.Enemies.Health[iEnemy].Shield								-= (int32_t)(gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Type.OwnerIndex].Speed * damegePorportion			);
-				if(gameInstance.Enemies.Health[iEnemy].Health < 0) gameInstance.Enemies.Health[iEnemy].Health = 0;
-				if(gameInstance.Enemies.Health[iEnemy].Shield < 0) gameInstance.Enemies.Health[iEnemy].Shield = 0;
+		const ::SApplication::TParticleInstance										& particleInstance							= particleInstances[laserToDraw.IndexParticle];
+		if(particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) {
+			for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) { // Check enemy
+				if(0 == gameInstance.Enemies.Alive[iEnemy])
+					continue;
+				const cho::SCoord2<float>													& posEnemy									= gameInstance.Enemies.Position[iEnemy];
+				float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
+				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
+					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
+					float																		weaponSpeed									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) 
+						? gameInstance.Ships	.Weapon[particleInstance.Type.OwnerIndex].Speed 
+						: gameInstance.Enemies	.Weapon[particleInstance.Type.OwnerIndex].Speed
+						;
+					gameInstance.Enemies.Health[iEnemy].Health								-= (int32_t)(weaponSpeed * (1.0f - damegePorportion));
+					gameInstance.Enemies.Health[iEnemy].Shield								-= (int32_t)(weaponSpeed * damegePorportion);
+					if(gameInstance.Enemies.Health[iEnemy].Health < 0) gameInstance.Enemies.Health[iEnemy].Health = 0;
+					if(gameInstance.Enemies.Health[iEnemy].Shield < 0) gameInstance.Enemies.Health[iEnemy].Shield = 0;
+				}
+				if(0 >= gameInstance.Enemies.Health[iEnemy].Health) {
+					gameInstance.Enemies.Alive[iEnemy] = 0;
+					continue;
+				}
+				static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
+				::cho::SCoord2<float>														vector;
+				for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
+					vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
+					vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.GhostTimer);
+					::checkLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+				}
 			}
-			if(0 >= gameInstance.Enemies.Health[iEnemy].Health) {
-				gameInstance.Enemies.Alive[iEnemy] = 0;
-				continue;
-			}
-			static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
-			::cho::SCoord2<float>														vector;
-			for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
-				vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
-				vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.GhostTimer);
-				::checkLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+		} 
+		else {
+			for(uint32_t iShip = 0; iShip < gameInstance.Ships.Alive.size(); ++iShip) { // Check enemy
+				if(0 == gameInstance.Ships.Alive[iShip])
+					continue;
+				const cho::SCoord2<float>													& posEnemy									= gameInstance.Ships.Position[iShip];
+				float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x;
+				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
+					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
+					float																		weaponSpeed									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) 
+						? gameInstance.Ships	.Weapon[particleInstance.Type.OwnerIndex].Speed 
+						: gameInstance.Enemies	.Weapon[particleInstance.Type.OwnerIndex].Speed
+						;
+					gameInstance.Ships.Health[iShip].Health								-= (int32_t)(weaponSpeed * (1.0f - damegePorportion));
+					gameInstance.Ships.Health[iShip].Shield								-= (int32_t)(weaponSpeed * damegePorportion);
+					if(gameInstance.Ships.Health[iShip].Health < 0) gameInstance.Ships.Health[iShip].Health = 0;
+					if(gameInstance.Ships.Health[iShip].Shield < 0) gameInstance.Ships.Health[iShip].Shield = 0;
+				}
+				if(0 >= gameInstance.Ships.Health[iShip].Health) {
+					//gameInstance.Ships.Alive[iEnemy] = 0;
+					continue;
+				}
+				//static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
+				//::cho::SCoord2<float>														vector;
+				//for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
+				//	vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
+				//	vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.GhostTimer);
+				//	::checkLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+				//}
 			}
 		}
 	}
@@ -349,7 +409,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 		for(uint32_t i=0; i < 10; ++i) {
 			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
 			angle.Normalize();
-				::SGameParticle																gameParticle;
+			::SGameParticle																gameParticle;
 			gameParticle.TimeLived													= 0;
 			gameParticle.Type														= PARTICLE_TYPE_DEBRIS;
 			gameParticle.Lit														= 0 == (rand()% 2);
@@ -367,7 +427,8 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 		const cho::SCoord2<float>													& posXHair									= gameInstance.PositionCrosshair[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 			const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-			if(applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Type.OwnerIndex != iShip)
+			const ::SApplication::TParticleInstance										& particleInstance							= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle];
+			if(particleInstance.Type.OwnerIndex != iShip || particleInstance.Type.TypePlayer != PLAYER_TYPE_PLAYER)
 				continue;
 			float																		halfSizeBox									= gameInstance.HalfWidthCrosshair;
 			const ::cho::SLine2D<float>													verticalSegments[]							= 
@@ -405,13 +466,16 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
-	if(timerSpawn > 1) {
+	if(timerSpawn > 10) {
 		timerSpawn																= 0;
 		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 		if(indexToSpawnEnemy != -1) {
-			gameInstance.Enemies.Alive		[indexToSpawnEnemy]								= 1;
-			gameInstance.Enemies.Position	[indexToSpawnEnemy]								= {offscreenMetrics.x - 200.0f, (float)offscreenMetrics.y};//{(float)(rand() % offscreenMetrics.x), (float)(rand() % offscreenMetrics.y)};
-			gameInstance.Enemies.Health		[indexToSpawnEnemy]								= {5000, 5000};
+			gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
+			gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 200.0f, (float)offscreenMetrics.y};//{(float)(rand() % offscreenMetrics.x), (float)(rand() % offscreenMetrics.y)};
+			gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
+			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {2, 100, WEAPON_TYPE(rand()% WEAPON_TYPE_COUNT)};
+			gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
+			gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	

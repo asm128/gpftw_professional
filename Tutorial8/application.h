@@ -90,10 +90,10 @@ struct SApplication {
 
 						::cho::SColorBGRA										ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
 
-						::cho::STextureProcessable<::cho::SColorBGRA>			Textures		[GAME_TEXTURE_COUNT]		= {};
-						::cho::SCoord2<int32_t>									TextureCenters	[GAME_TEXTURE_COUNT]		= {};
+						::cho::array_static<::cho::STextureProcessable<::cho::SColorBGRA>	, GAME_TEXTURE_COUNT>		Textures		= {};
+						::cho::array_static<::cho::SCoord2<int32_t>							, GAME_TEXTURE_COUNT>		TextureCenters	= {};
 
-						::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
+						//::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
 						::cho::SCoord2<int32_t>									PSOffsetFromShipCenter						= {};
 
 						::SStuffToDraw											StuffToDraw									= {};

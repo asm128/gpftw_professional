@@ -126,7 +126,7 @@ static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weapon
 		const ::cho::SColorBGRA														finalColor									= weaponTypeColorPalette[gameParticle.Type.TypeWeapon];
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
-			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 3.0f);
+			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, (gameParticle.Type.TypePlayer == PLAYER_TYPE_PLAYER) ? .15f : .95f, 3.0f);
 		}
 	}
 	return 0;
