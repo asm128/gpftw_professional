@@ -368,7 +368,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	return 0;
 }
 
-										::cho::error_t										updateEnemies								(::SApplication & applicationInstance)			{
+					::cho::error_t										updateEnemies								(::SApplication & applicationInstance)			{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
