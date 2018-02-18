@@ -141,14 +141,20 @@ static				::cho::error_t										checkLaserCollision
 		typedef	::SApplication::TParticle											TParticle;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
+		const bool																	nextPosOutOfRange								 
+			= (	((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
+			||	((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
+			);
+		const bool																	currentPosOutOfRange								 
+			= (	((uint32_t)particleCurrent.Position.x) >= framework.Offscreen.View.width	()
+			||	((uint32_t)particleCurrent.Position.y) >= framework.Offscreen.View.height	()
+			);
+		const bool																	instanceTimeout									= (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST);
 		if(particleInstance.Type.Type == PARTICLE_TYPE_PROJECTILE) {
 			::SLaserToDraw																laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, ::cho::LIGHTCYAN};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
-		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
-			|| ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-			|| (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST)
-			) { // Remove the particle instance and related information.
+		if((currentPosOutOfRange && nextPosOutOfRange) || instanceTimeout) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused						= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
