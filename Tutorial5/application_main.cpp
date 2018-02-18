@@ -124,15 +124,12 @@ static				::cho::error_t										addParticle
 	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
 	newParticle.Position													= particlePosition; 
 	::cho::SCoord2<float>														newDirection													= particleDirection;
-	const float value = .5;
+	const float																	value															= .5;
 	switch(particleType.Type) {
 	default							: break;
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
 		newParticle.Position.y													+= rand() % 3 - 1;
 		newDirection.Rotate(((rand() % 32767) / 32766.0f) * value - value / 2);
-		break;
-	case ::PARTICLE_TYPE_DEBRIS		:	
-	case ::PARTICLE_TYPE_STAR		:	
 		break;
 	}
 	newParticle.Forces.Velocity												= newDirection * speed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};

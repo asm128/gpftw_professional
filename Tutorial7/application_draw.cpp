@@ -80,7 +80,7 @@
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iRay];
 		applicationInstance.CacheLinePoints.clear();
 		::cho::drawLine(viewOffscreen.metrics(), laserToDraw.Segment, applicationInstance.CacheLinePoints);
-		::cho::SColorBGRA															finalColor									= laserToDraw.Color;
+		const ::cho::SColorBGRA														finalColor									= (applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Type.TypeWeapon == WEAPON_TYPE_PLASMA) ? ::cho::LIGHTCYAN : ::cho::RED;
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 3.0f);
