@@ -396,21 +396,24 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 
 					::cho::error_t										updateEnemies								(::SApplication & applicationInstance)			{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
+	//::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= framework.Offscreen.View;
+	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= framework.Offscreen.View.metrics();
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
-	if(timerSpawn > .2) {
+	if(timerSpawn > 1) {
 		timerSpawn																= 0;
 		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 		if(indexToSpawnEnemy != -1) {
-			gameInstance.Enemies.Alive	[indexToSpawnEnemy]								= 1;
-			gameInstance.Enemies.Health	[indexToSpawnEnemy]								= {5000, 5000};
+			gameInstance.Enemies.Alive		[indexToSpawnEnemy]								= 1;
+			gameInstance.Enemies.Position	[indexToSpawnEnemy]								= {(float)(rand() % offscreenMetrics.x), (float)(rand() % offscreenMetrics.y)};
+			gameInstance.Enemies.Health		[indexToSpawnEnemy]								= {5000, 5000};
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
 		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
-		if(indexToSpawnPow != -1 && gameInstance.GhostTimer > 7) {
+		if(indexToSpawnPow != -1 && (0 == (rand() % 5))) {
 			gameInstance.Powerups.Alive		[indexToSpawnPow]						= 1;
 			gameInstance.Powerups.Position	[indexToSpawnPow]						= gameInstance.Enemies.Position[0];
 			gameInstance.Powerups.Family	[indexToSpawnPow]						= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
