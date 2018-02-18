@@ -29,7 +29,7 @@
 		::cho::SCoord2<float>														vector;
 		for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 			vector																	= reference * (64 * sin(framework.FrameInfo.Seconds.Total));
-			vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.Enemies.SkillTimer[iEnemy]);
+			vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.Enemies.TimeLived[iEnemy]);
 			error_if(errored(::cho::grid_copy_alpha(offscreen.View, enemyView, (gameInstance.Enemies.Position[iEnemy] + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 			{
 				static double																beaconTimer								= 0;
