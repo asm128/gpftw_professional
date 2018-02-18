@@ -3,7 +3,7 @@
 //		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
 #include "cho_coord.h"
 #include "cho_bit_array_view.h"
-#include "cho_array.h"
+#include "cho_array_static.h"
 
 #ifndef GAME_H_982374982374
 #define GAME_H_982374982374
@@ -20,10 +20,11 @@ enum PLAYER_TYPE : int8_t
 enum WEAPON_TYPE : int8_t
 	{ WEAPON_TYPE_LASER			= 0
 	, WEAPON_TYPE_PLASMA
+	, WEAPON_TYPE_POISON
+	, WEAPON_TYPE_BULLET
+	, WEAPON_TYPE_SPARK
 	, WEAPON_TYPE_ROCK
 	, WEAPON_TYPE_ARROW
-	, WEAPON_TYPE_BULLET
-	, WEAPON_TYPE_POISON
 	, WEAPON_TYPE_COUNT
 	, WEAPON_TYPE_INVALID		= -1
 	};

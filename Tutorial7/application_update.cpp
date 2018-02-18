@@ -26,6 +26,12 @@
 	if(inputSystem.KeyboardCurrent.KeyState[VK_DOWN		]) gameInstance.Ships.Direction[1].y -= 1;
 	if(inputSystem.KeyboardCurrent.KeyState[VK_RIGHT	]) gameInstance.Ships.Direction[1].x += 1;
 	if(inputSystem.KeyboardCurrent.KeyState[VK_LEFT		]) gameInstance.Ships.Direction[1].x -= 1;
+	for(uint32_t iWeaponSelect = 0; iWeaponSelect < WEAPON_TYPE_COUNT; ++iWeaponSelect) {
+		if(inputSystem.KeyboardCurrent.KeyState['1' + iWeaponSelect]) {
+			gameInstance.Ships.Weapon[0].Type										= (WEAPON_TYPE)iWeaponSelect;
+			break;
+		}
+	}
 
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip)
 		gameInstance.Ships.Direction[iShip].Normalize();
@@ -135,12 +141,12 @@ static				::cho::error_t										checkLaserCollision
 		, applicationInstance.StuffToDraw.Thrust			
 		, applicationInstance.StuffToDraw.Stars				
 		);
+
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		typedef	::SApplication::TParticle											TParticle;
-		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
-		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
+		TParticleInstance															& particleInstance							= particleInstances[iParticle];
+		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.ParticleIndex];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.ParticleIndex];
 		const bool																	nextPosOutOfRange								 
 			= (	((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 			||	((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
@@ -150,23 +156,29 @@ static				::cho::error_t										checkLaserCollision
 			||	((uint32_t)particleCurrent.Position.y) >= framework.Offscreen.View.height	()
 			);
 		const bool																	instanceTimeout									= (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST);
-		if(particleInstance.Type.Type == PARTICLE_TYPE_PROJECTILE) {
-			::SLaserToDraw																laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, ::cho::LIGHTCYAN};
-			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
-		}
 		if((currentPosOutOfRange && nextPosOutOfRange) || instanceTimeout) { // Remove the particle instance and related information.
-			particleIntegrator.ParticleState[physicsId].Unused						= true;
+			particleIntegrator.ParticleState[particleInstance.ParticleIndex].Unused	= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
-		else {
-			::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>()};
-				 if(particleInstance.Type.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
-			else if(particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
-			else if(particleInstance.Type.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-			particleInstance.Type.TimeLived											+= lastFrameSeconds;
-			particleCurrent															= particleNext;
+	}
+
+	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
+		TParticleInstance															& particleInstance							= particleInstances[iParticle];
+		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		typedef	::SApplication::TParticle											TParticle;
+		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
+		if(particleInstance.Type.Type == PARTICLE_TYPE_PROJECTILE) {
+			const ::SLaserToDraw														laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, ::cho::LIGHTCYAN};
+			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
+		::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>()};
+			 if(particleInstance.Type.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+		else if(particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
+		else if(particleInstance.Type.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
+		particleInstance.Type.TimeLived											+= lastFrameSeconds;
+		particleCurrent															= particleNext;
 	}
 	return 0;
 }

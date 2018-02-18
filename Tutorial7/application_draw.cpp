@@ -74,13 +74,24 @@
 	return 0;
 }
 
+static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weaponTypeColorPalette			= 
+	{ ::cho::SColorBGRA{::cho::RED		  	}
+	, ::cho::SColorBGRA{::cho::LIGHTCYAN  	}
+	, ::cho::SColorBGRA{::cho::LIGHTGREEN 	}
+	, ::cho::SColorBGRA{::cho::LIGHTGRAY	}
+	, ::cho::SColorBGRA{::cho::LIGHTYELLOW	}
+	, ::cho::SColorBGRA{::cho::DARKGRAY		}
+	, ::cho::SColorBGRA{::cho::WHITE		}
+	};
+
 					::cho::error_t										drawShots									(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iRay < rayCount; ++iRay) {
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iRay];
 		applicationInstance.CacheLinePoints.clear();
 		::cho::drawLine(viewOffscreen.metrics(), laserToDraw.Segment, applicationInstance.CacheLinePoints);
-		const ::cho::SColorBGRA														finalColor									= (applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Type.TypeWeapon == WEAPON_TYPE_PLASMA) ? ::cho::LIGHTCYAN : ::cho::RED;
+		const ::cho::SParticleInstance<::SGameParticle>								& gameParticle								= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle];
+		const ::cho::SColorBGRA														finalColor									= weaponTypeColorPalette[gameParticle.Type.TypeWeapon];
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 3.0f);
