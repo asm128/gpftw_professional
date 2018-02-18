@@ -38,7 +38,6 @@
 	return 0;
 }
 
-
 struct SAABBCache {	
 						::cho::SLine2D<float>								RectangleSegments	[4]						= {};
 						::cho::SCoord2<float>								CollisionPoints		[4]						= {};
@@ -291,7 +290,6 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	return 0;
 }
 
-
 					::cho::error_t										updateShots
 	( ::SApplication										& applicationInstance
 	, const ::cho::array_view<::SApplication::TParticle>	& particleDefinitions
@@ -308,6 +306,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	}
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	::SAABBCache																aabbCache;
+	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
 		const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
@@ -316,14 +315,23 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 				continue;
 			const cho::SCoord2<float>													& posPowerup								= gameInstance.Powerups.Position[iPow];
 			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
-			::checkLaserCollision(projectilePath, aabbCache, posPowerup, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posPowerup, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
+			
+			}
 		}
 		for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) { // Check enemy
 			if(0 == gameInstance.Enemies.Alive[iEnemy])
 				continue;
 			const cho::SCoord2<float>													& posEnemy									= gameInstance.Enemies.Position[iEnemy];
 			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
-			::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
+				gameInstance.Enemies.Health[iEnemy].Health								-= (int32_t)gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Type.OwnerIndex].Speed;
+				gameInstance.Enemies.Health[iEnemy].Shield								-= (int32_t)gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Type.OwnerIndex].Speed;
+			}
+			if(0 >= gameInstance.Enemies.Health[iEnemy].Health) {
+				gameInstance.Enemies.Alive[iEnemy] = 0;
+				continue;
+			}
 			static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
 			::cho::SCoord2<float>														vector;
 			for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
@@ -333,7 +341,6 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 			}
 		}
 	}
-	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
 		for(uint32_t i=0; i < 10; ++i) {
@@ -347,32 +354,33 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 			::addParticle(gameParticle, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100, particleDefinitions);
 		}
 	return 0;
-} 
+}
+
 					::cho::error_t										updateGUI									(::SApplication& applicationInstance)					{ 
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {	//  ------ update crosshair collision points with lasers 
 		if(0 == gameInstance.Ships.Alive[iShip])
 			continue;
-		const cho::SCoord2<float>												& posXHair									= gameInstance.PositionCrosshair[iShip];
+		const cho::SCoord2<float>													& posXHair									= gameInstance.PositionCrosshair[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-			const ::SLaserToDraw													& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+			const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
 			if(applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Type.OwnerIndex != iShip)
 				continue;
-			float																	halfSizeBox									= gameInstance.HalfWidthCrosshair;
-			const ::cho::SLine2D<float>												verticalSegments[]							= 
+			float																		halfSizeBox									= gameInstance.HalfWidthCrosshair;
+			const ::cho::SLine2D<float>													verticalSegments[]							= 
 				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
 				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 				};
-			const ::cho::SLine2D<float>												& projectilePath							= laserToDraw.Segment;
-			::cho::SCoord2<float>													collisions	[::cho::size(verticalSegments)]= {};
+			const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
+			::cho::SCoord2<float>														collisions	[::cho::size(verticalSegments)]= {};
 			for(uint32_t iSeg = 0; iSeg < ::cho::size(verticalSegments); ++iSeg) {
-				::cho::SCoord2<float>													& collision									= collisions		[iSeg];
-				const ::cho::SLine2D<float>												& segSelected								= verticalSegments	[iSeg]; 
+				::cho::SCoord2<float>														& collision									= collisions		[iSeg];
+				const ::cho::SLine2D<float>													& segSelected								= verticalSegments	[iSeg]; 
 				if(::cho::line_line_intersect(projectilePath, segSelected, collision)) {
-					bool																	bFound										= false;
+					bool																		bFound										= false;
 					for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 						if(collision == collisions[iS2]) {
-							bFound																= true;
+							bFound																	= true;
 							info_printf("Discarded collision point.");
 							break;
 						}
@@ -392,16 +400,17 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
-	if(timerSpawn > 5) {
+	if(timerSpawn > .2) {
 		timerSpawn																= 0;
-		int32_t																		indexToSpawn								= firstUnused(gameInstance.Enemies.Alive);
-		if(indexToSpawn != -1) {
-			gameInstance.Enemies.Alive[indexToSpawn]									= 1;
+		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
+		if(indexToSpawnEnemy != -1) {
+			gameInstance.Enemies.Alive	[indexToSpawnEnemy]								= 1;
+			gameInstance.Enemies.Health	[indexToSpawnEnemy]								= {5000, 5000};
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
 		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
-		if(indexToSpawn != -1 && gameInstance.GhostTimer > 7) {
+		if(indexToSpawnPow != -1 && gameInstance.GhostTimer > 7) {
 			gameInstance.Powerups.Alive		[indexToSpawnPow]						= 1;
 			gameInstance.Powerups.Position	[indexToSpawnPow]						= gameInstance.Enemies.Position[0];
 			gameInstance.Powerups.Family	[indexToSpawnPow]						= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);

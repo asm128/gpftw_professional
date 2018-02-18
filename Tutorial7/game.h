@@ -50,7 +50,7 @@ struct SShipState {
 						bool																Brakes																	: 1;
 };
 
-struct SShipHealth {
+struct SHealthPoints {
 						int32_t																Health;
 						int32_t																Shield;
 };
@@ -90,15 +90,16 @@ static constexpr	const uint32_t														MAGIC_NUMBER															= 139770
 
 template<uint32_t _sizeArray>	
 struct SPropertiesPowerup		{ 
-						::SArrayElementState						< _sizeArray>			Alive																	= {};			// These have to be written/read to/from disk separately as they contain pointers.
+						::SArrayElementState						< _sizeArray>			Alive																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<POWERUP_FAMILY			, _sizeArray>			Family																	= {};
 };
 
 template<uint32_t _sizeArray>	
 struct SPropertiesProjectile	{ 
-						::SArrayElementState						< _sizeArray>			Alive																	= {};			// These have to be written/read to/from disk separately as they contain pointers.
+						::SArrayElementState						< _sizeArray>			Alive																	= {};
 						::cho::array_static<::SProjectile			, MAX_PROJECTILES>		Projectiles																= {};
+						::cho::array_static<::SHealthPoints			, _sizeArray>			Health																	= {};
 };
 
 template<uint32_t _sizeArray>	
@@ -106,7 +107,7 @@ struct SPropertiesEnemy			{
 						::SArrayElementState						< _sizeArray>			Alive																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Direction																= {};
-						::cho::array_static<::SShipHealth			, _sizeArray>			Health																	= {};
+						::cho::array_static<::SHealthPoints			, _sizeArray>			Health																	= {};
 						::cho::array_static<double					, _sizeArray>			TimeLived																= {};
 						::cho::array_static<double					, _sizeArray>			SkillTimer																= {};
 						::cho::array_static<int8_t					, _sizeArray>			Target																	= {};
@@ -118,7 +119,7 @@ template<uint32_t _sizeArray>
 struct SPropertiesShip			{ 		
 						::SArrayElementState						< _sizeArray>			Alive																	= {};			
 						::cho::array_static<::SShipState			, _sizeArray>			States																	= {};
-						::cho::array_static<::SShipHealth			, _sizeArray>			Health																	= {};
+						::cho::array_static<::SHealthPoints			, _sizeArray>			Health																	= {};
 						::cho::array_static<::SWeapon				, _sizeArray>			Weapon																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Direction																= {};

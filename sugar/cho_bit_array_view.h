@@ -74,7 +74,7 @@ namespace cho
 		// Operators
 							bit_array_view_proxy<_tElement>				operator[]					(uint32_t index)																		{ 
 			throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); 
-			throw_if(index >= Count, ::std::exception(""), "Invalid index."); 
+			throw_if(index >= Count, ::std::exception(""), "Invalid index: %u.", index); 
 			const uint32_t														offsetRow					= index / ELEMENT_BITS;
 			const uint32_t														offsetBit					= index % ELEMENT_BITS;
 			_tElement															& selectedElement			= Data[offsetRow];
@@ -83,7 +83,7 @@ namespace cho
 
 							bool										operator[]					(uint32_t index)													const				{ 
 			throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); 
-			throw_if(index >= Count, ::std::exception(""), "Invalid index."); 
+			throw_if(index >= Count, ::std::exception(""), "Invalid index: %u.", index); 
 			const uint32_t														offsetElement				= index / ELEMENT_BITS;
 			const uint32_t														offsetLocal					= index % ELEMENT_BITS;
 			const _tElement														& selectedElement			= Data[offsetElement];
