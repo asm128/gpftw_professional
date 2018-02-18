@@ -21,6 +21,12 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
+struct SGameParticle {
+						PARTICLE_TYPE											Type										= (PARTICLE_TYPE)-1;
+						float													TimeLived									= 0;
+						bool													Lit											= true;
+};
+
 struct SParticleToDraw {
 						int32_t													Id;
 						int32_t													IndexParticle;
@@ -55,7 +61,7 @@ struct SShipState {
 };
 
 struct SApplication {
-	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
+	typedef				::cho::SParticleSystem<::SGameParticle, float>			TParticleSystem;
 
 						::cho::SFramework										Framework									;
 

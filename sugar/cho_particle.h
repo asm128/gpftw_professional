@@ -125,7 +125,7 @@ namespace cho
 
 	template<typename _tParticleType, typename _tCoord>
 							::cho::error_t									addParticle														
-		(	_tParticleType												particleType
+		(	const _tParticleType										& particleType
 		,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
 		,	::cho::SParticle2Integrator<_tCoord>						& particleIntegrator
 		,	const ::cho::SParticle2<_tCoord>							& particleDefinition
@@ -147,7 +147,7 @@ namespace cho
 	};
 
 	template<typename _tParticleType, typename _tCoord>
-	static inline			::cho::error_t									addParticle									(_tParticleType particleType, ::cho::SParticleSystem<_tParticleType, _tCoord> & particleSystem,	const ::cho::SParticle2<_tCoord> & particleDefinition)	{
+	static inline			::cho::error_t									addParticle									(const _tParticleType& particleType, ::cho::SParticleSystem<_tParticleType, _tCoord> & particleSystem,	const ::cho::SParticle2<_tCoord> & particleDefinition)	{
 		return addParticle(particleType, particleSystem.Instances, particleSystem.Integrator, particleDefinition);
 	}
 } // namespace

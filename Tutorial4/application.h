@@ -12,8 +12,14 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
+struct SGameParticle {
+						PARTICLE_TYPE											Type										= (PARTICLE_TYPE)-1;
+						float													TimeLived									= 0;
+						bool													Lit											= true;
+};
+
 struct SApplication {
-	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>		TParticleSystem;
+	typedef				::cho::SParticleSystem<::SGameParticle, float>		TParticleSystem;
 
 						::cho::SFramework									Framework									;
 
@@ -32,9 +38,9 @@ struct SApplication {
 
 						::cho::SCoord2<float>								DirectionShip								= {};
 
-						::cho::SCoord2<float>								PositionShip							= {};
-						::cho::SCoord2<float>								PositionPowerup						= {};
-						::cho::SCoord2<float>								PositionCrosshair						= {};
+						::cho::SCoord2<float>								PositionShip								= {};
+						::cho::SCoord2<float>								PositionPowerup								= {};
+						::cho::SCoord2<float>								PositionCrosshair							= {};
 
 						bool												TurboShip									= false;
 						bool												Firing										= false;

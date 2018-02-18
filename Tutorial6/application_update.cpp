@@ -46,18 +46,18 @@
 		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
+		 || (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST)
 		 ) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused						= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else {
-			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
+			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
 				 if(particleInstance.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
 			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
 			else if(particleInstance.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-			particleInstance.TimeLived												+= lastFrameSeconds;
+			particleInstance.Type.TimeLived												+= lastFrameSeconds;
 			particleCurrent															= particleNext;
 		}
 	}
