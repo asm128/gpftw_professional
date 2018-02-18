@@ -337,12 +337,14 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 			continue;
 		const cho::SCoord2<float>												& posXHair									= gameInstance.PositionCrosshair[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
+			const ::SLaserToDraw													& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+			if(applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Type.OwnerIndex != iShip)
+				continue;
 			float																	halfSizeBox									= gameInstance.HalfWidthCrosshair;
 			const ::cho::SLine2D<float>												verticalSegments[]							= 
 				{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
 				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 				};
-			const ::SLaserToDraw													& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
 			const ::cho::SLine2D<float>												& projectilePath							= laserToDraw.Segment;
 			::cho::SCoord2<float>													collisions	[::cho::size(verticalSegments)]= {};
 			for(uint32_t iSeg = 0; iSeg < ::cho::size(verticalSegments); ++iSeg) {
