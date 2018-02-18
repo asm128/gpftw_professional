@@ -112,7 +112,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 template<typename _tParticleType>
 static				::cho::error_t										addParticle														
-	(	::PARTICLE_TYPE												particleType
+	(	::SGameParticle												particleType
 	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
 	,	::SApplication::TParticleSystem::TIntegrator				& particleIntegrator
 	,	const ::cho::SCoord2<float>									& particlePosition
@@ -120,21 +120,19 @@ static				::cho::error_t										addParticle
 	,	float														speed
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType])]; 
+	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
 	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
 	newParticle.Position													= particlePosition; 
 	::cho::SCoord2<float>														newDirection													= particleDirection;
 	const float value = .5;
-	switch(particleType) {
+	switch(particleType.Type) {
 	default							: break;
 	case ::PARTICLE_TYPE_SHIP_THRUST:	
 		newParticle.Position.y													+= rand() % 3 - 1;
 		newDirection.Rotate(((rand() % 32767) / 32766.0f) * value - value / 2);
-		newInstance.Lit															= 0 == (rand() % 2);
 		break;
 	case ::PARTICLE_TYPE_DEBRIS		:	
 	case ::PARTICLE_TYPE_STAR		:	
-		newInstance.Lit															= 0 == (rand() % 3);
 		break;
 	}
 	newParticle.Forces.Velocity												= newDirection * speed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
@@ -180,24 +178,24 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		int32_t																		physicsId									= particleInstance.ParticleIndex;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-		if(particleInstance.Type == PARTICLE_TYPE_LASER) {
+		if(particleInstance.Type.Type == PARTICLE_TYPE_LASER) {
 			::SLaserToDraw	laserToDraw	= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-		 || (particleInstance.TimeLived >= .125 && particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST)
+		 || (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST)
 		 ) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused						= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else {
-			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Lit};
-				 if(particleInstance.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
-			else if(particleInstance.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
-			else if(particleInstance.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-			particleInstance.TimeLived												+= lastFrameSeconds;
+			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Type.Lit};
+				 if(particleInstance.Type.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+			else if(particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
+			else if(particleInstance.Type.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
+			particleInstance.Type.TimeLived											+= lastFrameSeconds;
 			particleCurrent															= particleNext;
 		}
 	}
@@ -208,10 +206,10 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 	// update ship
-	applicationInstance.PositionShip									+= applicationInstance.DirectionShip * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
+	applicationInstance.PositionShip										+= applicationInstance.DirectionShip * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
 		(applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-	applicationInstance.PositionShip.x								= ::cho::clamp(applicationInstance.PositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
-	applicationInstance.PositionShip.y								= ::cho::clamp(applicationInstance.PositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
+	applicationInstance.PositionShip.x										= ::cho::clamp(applicationInstance.PositionShip.x, .1f, (float)offscreen.View.metrics().x - 1);
+	applicationInstance.PositionShip.y										= ::cho::clamp(applicationInstance.PositionShip.y, .1f, (float)offscreen.View.metrics().y - 1);
 	return 0;
 }
 
@@ -232,12 +230,21 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	bool																		isTurbo										= applicationInstance.ShipState.Thrust;
 	if(delayThrust > .01) {
 		delayThrust																= 0;
-		for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) 
-			::addParticle(PARTICLE_TYPE_SHIP_THRUST, particleInstances, particleIntegrator, applicationInstance.PositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.DirectionShip * -1.0, (float)(rand() % 400) + (isTurbo ? 400 : 0));
+		for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) {
+			::SGameParticle																gameParticle;
+			gameParticle.TimeLived													= 0;
+			gameParticle.Type														= PARTICLE_TYPE_SHIP_THRUST;
+			gameParticle.Lit														= 0 == (rand() % 2);
+			::addParticle(gameParticle, particleInstances, particleIntegrator, applicationInstance.PositionShip + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), applicationInstance.DirectionShip * -1.0, (float)(rand() % 400) + (isTurbo ? 400 : 0));
+		}
 	}
 	if(delayStar > .1) {
 		delayStar																= 0;
-		::addParticle(PARTICLE_TYPE_STAR, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, {-1, 0}, (float)(rand() % (isTurbo ? 400 : 75)) + 25);
+		::SGameParticle																gameParticle;
+		gameParticle.TimeLived													= 0;
+		gameParticle.Type														= PARTICLE_TYPE_STAR;
+		gameParticle.Lit														= 0 == (rand() % 3);
+		::addParticle(gameParticle, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, {-1, 0}, (float)(rand() % (isTurbo ? 400 : 75)) + 25);
 	}
 
 	if(applicationInstance.ShipState.Firing) {
@@ -245,7 +252,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 			const ::cho::SCoord2<float>													textureShipMetrics					= applicationInstance.TextureShip.Processed.View.metrics().Cast<float>();
 			const ::cho::SCoord2<float>													weaponParticleOffset				= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenterShip.x), -1};
 			delayWeapon																= 0;
-			::addParticle(PARTICLE_TYPE_LASER, particleInstances, particleIntegrator, applicationInstance.PositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
+			::SGameParticle																gameParticle;
+			gameParticle.TimeLived													= 0;
+			gameParticle.Type														= PARTICLE_TYPE_LASER;
+			gameParticle.Lit														= true;
+			::addParticle(gameParticle, particleInstances, particleIntegrator, applicationInstance.PositionShip + weaponParticleOffset, {1, 0}, applicationInstance.Laser.Speed);
 		}
 	}
 	return 0;
@@ -272,7 +283,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 				bool											bFound											= false;
 				for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 					if(collision == collisions[iS2]) {
-						bFound = true;
+						bFound										= true;
 						info_printf("Discarded collision point.");
 						break;
 					}
@@ -291,7 +302,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		for(uint32_t i=0; i < 10; ++i) {
 			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
 			angle.Normalize();
-			::addParticle(PARTICLE_TYPE_DEBRIS, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100);
+			::SGameParticle																gameParticle;
+			gameParticle.TimeLived													= 0;
+			gameParticle.Type														= PARTICLE_TYPE_DEBRIS;
+			gameParticle.Lit														= 0 == rand() % 3;
+			::addParticle(gameParticle, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100);
 		}
 	return 0;
 } 
@@ -350,8 +365,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 
 	// update crosshair
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
-	applicationInstance.PositionCrosshair								= applicationInstance.PositionShip + ::cho::SCoord2<float>{96,};
-	applicationInstance.PositionCrosshair.x							= ::cho::min(applicationInstance.PositionCrosshair.x, (float)offscreen.View.metrics().x);
+	applicationInstance.PositionCrosshair									= applicationInstance.PositionShip + ::cho::SCoord2<float>{96,};
+	applicationInstance.PositionCrosshair.x									= ::cho::min(applicationInstance.PositionCrosshair.x, (float)offscreen.View.metrics().x);
 
 	error_if(errored(::updateShots					(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateGUI					(applicationInstance)), "Unknown error.");

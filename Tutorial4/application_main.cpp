@@ -192,7 +192,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	static double																delayStar									= 0;
 	delayThrust																+= framework.FrameInfo.Seconds.LastFrame;
 	delayStar																+= framework.FrameInfo.Seconds.LastFrame;
-	int particleCountToSpawn = 1 + rand() % 4;
+	const int																	particleCountToSpawn						= 1 + rand() % 4;
 	if(delayThrust > .01) {
 		delayThrust																= 0;
 		for(int32_t i = 0; i < particleCountToSpawn; ++i) {
@@ -211,12 +211,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		gameParticle.Lit														= 0 == (rand() % 3);
 		::addParticle(gameParticle, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, false, {-1, 0});
 	}
-
 	if(applicationInstance.Firing) {
 		::SGameParticle																gameParticle;
 		gameParticle.TimeLived													= 0;
 		gameParticle.Type														= PARTICLE_TYPE_LASER;
-		gameParticle.Lit														= 0 == (rand() % 3);
+		gameParticle.Lit														= true;
 		::addParticle(gameParticle, particleInstances, particleIntegrator, applicationInstance.PositionShip, false, {1, 0});
 	}
 
