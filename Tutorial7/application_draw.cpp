@@ -61,7 +61,7 @@
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Debris.size(); iRay < rayCount; ++iRay) {
 		const ::SParticleToDraw														& particleToDraw								= applicationInstance.StuffToDraw.Debris[iRay];
 		const ::cho::SCoord2<float>													& pointToDraw									= particleToDraw.Position.Cast<float>();
-		if(particleToDraw.Lit) {
+		if(applicationInstance.ParticleSystem.Instances[particleToDraw.IndexParticle].Type.Lit) {
 			::cho::SColorBGRA															finalColor										
 				= (0 == (particleToDraw.Id % 3)) ? ::cho::SColorBGRA(::cho::YELLOW) 
 				: (0 == (particleToDraw.Id % 2)) ? ::cho::SColorBGRA(::cho::RED) 
@@ -95,7 +95,7 @@
 	::cho::drawRectangle(offscreen.View, applicationInstance.ColorBackground, ::cho::SRectangle2D<uint32_t>{{}, offscreen.View.metrics()});
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Stars.size(); iRay < rayCount; ++iRay) {
 		::SParticleToDraw															& starToDraw								= applicationInstance.StuffToDraw.Stars[iRay];
-		if(false == starToDraw.Lit)
+		if(false == applicationInstance.ParticleSystem.Instances[starToDraw.IndexParticle].Type.Lit)
 			continue;
 		::cho::SCoord2<int32_t>														& particlePosition							= starToDraw.Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
@@ -122,7 +122,7 @@
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iThrust = 0, particleCount = (uint32_t)applicationInstance.StuffToDraw.Thrust.size(); iThrust < particleCount; ++iThrust) {
 		::SParticleToDraw															& thrustToDraw								= applicationInstance.StuffToDraw.Thrust[iThrust];
-		if(false == thrustToDraw.Lit)
+		if(false == applicationInstance.ParticleSystem.Instances[thrustToDraw.IndexParticle].Type.Lit)
 			continue;
 		const int32_t																physicsId									= thrustToDraw.Id;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;

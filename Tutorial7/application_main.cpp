@@ -15,19 +15,19 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 static ::SApplication::TParticleSystem::TIntegrator::TParticle			particleDefinitions	[::PARTICLE_TYPE_COUNT]	= {};
 
 static				void												setupParticles								()																				{
-	particleDefinitions	[::PARTICLE_TYPE_LASER		].Position				= 
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].Position				= 
 	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Position				= 
 	particleDefinitions	[::PARTICLE_TYPE_STAR		].Position				= {};
 
-	particleDefinitions	[::PARTICLE_TYPE_LASER		].SetMass				(1);
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].SetMass				(1);
 	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].SetMass				(1);
 	particleDefinitions	[::PARTICLE_TYPE_STAR		].SetMass				(1);
 
-	particleDefinitions	[::PARTICLE_TYPE_LASER		].Damping				= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].Damping				= 1.0f;
 	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Damping				= 0.80f;
 	particleDefinitions	[::PARTICLE_TYPE_STAR		].Damping				= 1.0f;
 
-	particleDefinitions	[::PARTICLE_TYPE_LASER		].Forces.Velocity		= {};
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].Forces.Velocity		= {};
 	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Forces.Velocity		= {};
 	particleDefinitions	[::PARTICLE_TYPE_STAR		].Forces.Velocity		= {};
 }

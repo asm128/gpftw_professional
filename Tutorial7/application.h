@@ -17,28 +17,28 @@ enum PARTICLE_TYPE : int8_t
 	{	PARTICLE_TYPE_SNOW			= 0
 	,	PARTICLE_TYPE_SHIP_THRUST
 	,	PARTICLE_TYPE_STAR
-	,	PARTICLE_TYPE_LASER
-	,	PARTICLE_TYPE_ROCK
-	,	PARTICLE_TYPE_ARROW
-	,	PARTICLE_TYPE_POISON
-	,	PARTICLE_TYPE_FIREBALL
-	,	PARTICLE_TYPE_BULLET
-	,	PARTICLE_TYPE_PLASMA
+	,	PARTICLE_TYPE_PROJECTILE
 	,	PARTICLE_TYPE_BOMB
 	,	PARTICLE_TYPE_DEBRIS
 	,	PARTICLE_TYPE_COUNT
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
+struct SGameParticle {
+						PARTICLE_TYPE											Type										= (PARTICLE_TYPE)-1;
+						PLAYER_TYPE												TypePlayer									= (PLAYER_TYPE	)-1;
+						WEAPON_TYPE												TypeWeapon									= (WEAPON_TYPE	)-1;
+						uint32_t												OwnerIndex									= (uint32_t		)-1;
+						float													TimeLived									= 0;
+						bool													Lit											= true;
+};
+
 struct SParticleToDraw {
 						int32_t													Id;
 						int32_t													IndexParticle;
 						float													TimeLived;
 						::cho::SCoord2<int32_t>									Position;
-						bool													Lit;
-						PLAYER_TYPE												TypePlayer;
-						WEAPON_TYPE												TypeWeapon;
-						uint32_t												OwnerIndex;
+						//bool													Lit;
 };
 
 struct SLaserToDraw {
@@ -77,7 +77,7 @@ struct SEffectsDelay {
 };
 
 struct SApplication {
-	typedef				::cho::SParticleSystem<::PARTICLE_TYPE, float>			TParticleSystem;
+	typedef				::cho::SParticleSystem<::SGameParticle, float>			TParticleSystem;
 	typedef				TParticleSystem::TParticleInstance						TParticleInstance;
 	typedef				TParticleSystem::TIntegrator							TIntegrator;
 	typedef				TIntegrator::TParticle									TParticle;

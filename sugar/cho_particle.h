@@ -119,10 +119,8 @@ namespace cho
 	struct SParticleInstance {
 		typedef					_tParticleType									TParticleType;
 
-								TParticleType									Type										= (TParticleType)-1;
+								TParticleType									Type										= {};
 								int32_t											ParticleIndex								= -1;
-								float											TimeLived									= 0;
-								bool											Lit											= true;
 	};
 
 	template<typename _tParticleType, typename _tCoord>

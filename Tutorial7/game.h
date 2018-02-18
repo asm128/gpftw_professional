@@ -19,6 +19,7 @@ enum PLAYER_TYPE : int8_t
 
 enum WEAPON_TYPE : int8_t
 	{ WEAPON_TYPE_LASER			= 0
+	, WEAPON_TYPE_PLASMA
 	, WEAPON_TYPE_ROCK
 	, WEAPON_TYPE_ARROW
 	, WEAPON_TYPE_BULLET
@@ -85,7 +86,6 @@ template<size_t _sizeArray>
 }
 
 static constexpr	const uint32_t														MAGIC_NUMBER															= 1397704771;
-				  
 
 template<uint32_t _sizeArray>	
 struct SPropertiesPowerup		{ 
@@ -137,7 +137,6 @@ struct SGame {
 						float																HalfWidthCrosshair														= 5;
 						float																HalfWidthEnemy															= 5;
 						float																HalfWidthPowerup														= 5;
-
 
 						double																GhostTimer																= 0;
 						uint32_t															PathStep																= 0;
