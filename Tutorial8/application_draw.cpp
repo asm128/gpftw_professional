@@ -220,34 +220,35 @@ static				::cho::error_t										drawPowerup						(::SApplication& applicationI
 			continue;
 		POWERUP_FAMILY																powFamily									= gameInstance.Powerups.Family[iPow];
 		::cho::SCoord2<int32_t>														position									= gameInstance.Powerups.Position[iPow].Cast<int32_t>();
-		int32_t																		halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
-
-		if(gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_HEALTH || gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_BUFF) {
-			const ::cho::SCoord2<int32_t>												lightPosSquare []							= 
-				{ position + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}
-				, position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}
-				, position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}
-				, position + ::cho::SCoord2<int32_t>{-halfWidth	,  halfWidth}
-				, position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  halfWidth}
-				, position + ::cho::SCoord2<int32_t>{ halfWidth	,  halfWidth - 1}
-				, position + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}
-				, position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}
-				};
-			::drawPowerup(applicationInstance, powFamily, applicationInstance.StuffToDraw.TexturesPowerup0, applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], position.Cast<float>(), lightPosSquare, timer);
+		int32_t																		halfWidth									= 6;
+		::cho::SCoord2<int32_t>														lightPos [8]								;
+		::cho::array_view<::cho::grid_view<::cho::SColorBGRA>>						texturePowerup								;
+		::cho::SCoord2<int32_t>														textureCenterPowerup						;
+		if(powFamily == POWERUP_FAMILY_HEALTH || powFamily == POWERUP_FAMILY_BUFF) { // draw square powerup box
+			lightPos[0]																= position + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}		;
+			lightPos[1]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}		;
+			lightPos[2]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}	;
+			lightPos[3]																= position + ::cho::SCoord2<int32_t>{-halfWidth	,  halfWidth}			;
+			lightPos[4]																= position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  halfWidth}		;
+			lightPos[5]																= position + ::cho::SCoord2<int32_t>{ halfWidth	,  halfWidth - 1}		;
+			lightPos[6]																= position + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}			;
+			lightPos[7]																= position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}	;
+			texturePowerup															= applicationInstance.StuffToDraw.TexturesPowerup0;
+			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0];
 		}
-		else {
-			const ::cho::SCoord2<int32_t>												lightPosDiagonal []							= 
-					{ position + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
-					, position + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
-					, position + ::cho::SCoord2<int32_t>{halfWidth, -1}
-					, position + ::cho::SCoord2<int32_t>{halfWidth,  0}
-					, position + ::cho::SCoord2<int32_t>{ 0, halfWidth}
-					, position + ::cho::SCoord2<int32_t>{-1, halfWidth}
-					, position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
-					, position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
-					};
-			::drawPowerup(applicationInstance, powFamily, applicationInstance.StuffToDraw.TexturesPowerup1, applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], position.Cast<float>(), lightPosDiagonal, timer);
+		else { // draw diagonal powerup box
+			lightPos[0]																= position + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1};
+			lightPos[1]																= position + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1};
+			lightPos[2]																= position + ::cho::SCoord2<int32_t>{halfWidth, -1}		;
+			lightPos[3]																= position + ::cho::SCoord2<int32_t>{halfWidth,  0}		;
+			lightPos[4]																= position + ::cho::SCoord2<int32_t>{ 0, halfWidth}		;
+			lightPos[5]																= position + ::cho::SCoord2<int32_t>{-1, halfWidth}		;
+			lightPos[6]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0};
+			lightPos[7]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1};
+			texturePowerup															= applicationInstance.StuffToDraw.TexturesPowerup1;
+			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1];
 		}
+		::drawPowerup(applicationInstance, powFamily, texturePowerup, textureCenterPowerup, position.Cast<float>(), lightPos, timer);
 	}
 	return 0;
 }
