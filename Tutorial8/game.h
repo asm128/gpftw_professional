@@ -115,6 +115,7 @@ struct SPropertiesEnemy			{
 						::cho::array_static<::SWeapon				, _sizeArray>			Weapon																	= {};
 						::cho::array_static<double					, _sizeArray>			WeaponDelay																= {};
 						::cho::array_static<uint32_t				, _sizeArray>			PathStep																= {};
+						::cho::array_static<float					, _sizeArray>			TimerPath																= {};
 };
 
 template<uint32_t _sizeArray>	

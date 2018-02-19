@@ -225,7 +225,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 }
 
 template <size_t _sizeAlive>
-					::cho::error_t										updateSpawnShots							
+static				::cho::error_t										updateSpawnShots							
 	( ::SApplication												& applicationInstance
 	, const ::cho::array_view<::SApplication::TParticle>			& particleDefinitions
 	, uint32_t														maxShips
@@ -488,16 +488,16 @@ template <size_t _sizeAlive>
 	for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])
 			continue;
+		float																		& timerPath									= gameInstance.Enemies.TimerPath[iEnemy];
 		gameInstance.Enemies.SkillTimer[iEnemy]									+= framework.FrameInfo.Seconds.LastFrame;
+		timerPath																+= (float)framework.Timer.LastTimeSeconds;
+		if(timerPath > 10.0f) {
+			timerPath																= 0;
+			++gameInstance.Enemies.PathStep[iEnemy];
+			if( gameInstance.Enemies.PathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
+				gameInstance.Enemies.PathStep[iEnemy]										= 0;
+		}
 		{
-			static float																timerPath									= 0;
-			timerPath																+= (float)framework.Timer.LastTimeSeconds;
-			if(timerPath > 10.0f) {
-				timerPath																= 0;
-				++gameInstance.Enemies.PathStep[iEnemy];
-				if( gameInstance.Enemies.PathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
-					gameInstance.Enemies.PathStep[iEnemy]										= 0;
-			}
 			const ::cho::SCoord2<float>													& pathTarget								= gameInstance.PathEnemy[gameInstance.Enemies.PathStep[iEnemy]];
 			::cho::SCoord2<float>														directionEnemy								= (pathTarget - gameInstance.Enemies.Position[iEnemy]);
 			if(directionEnemy.LengthSquared() < 0.5) {

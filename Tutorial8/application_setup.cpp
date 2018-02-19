@@ -9,7 +9,7 @@ static				::RECT																minClientRect								= {100, 100, 100 + 320, 100
 
 extern				::SApplication														* g_ApplicationInstance						;
 
-					LRESULT WINAPI														mainWndProc									(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)							{
+static				LRESULT WINAPI														mainWndProc									(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)							{
 	::SApplication																				& applicationInstance						= *g_ApplicationInstance;
 	static	const int																			adjustedMinRect								= ::AdjustWindowRectEx(&minClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 
