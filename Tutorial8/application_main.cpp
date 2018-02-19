@@ -98,8 +98,9 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		gameInstance.Ships.Alive		[iShip]									= 1;
 		gameInstance.Ships.Position		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		gameInstance.Ships.Weapon		[iShip]									= {.10f, 2000, iShip ? WEAPON_TYPE_PLASMA : WEAPON_TYPE_LASER};
+		gameInstance.Ships.Health		[iShip].Health							= 5000;
+		gameInstance.Ships.Health		[iShip].Shield							= 5000;
 		gameInstance.PositionCrosshair	[iShip]									= gameInstance.Ships.Position[iShip] + ::cho::SCoord2<float>{64, };
-
 		gameInstance.Powerups.Alive		[iShip]									= 1;
 		gameInstance.Powerups.Position	[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 * 3 + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		gameInstance.Powerups.Family	[iShip]									= (POWERUP_FAMILY)iShip;
