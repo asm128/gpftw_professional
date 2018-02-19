@@ -21,8 +21,9 @@ namespace cho
 				 ) {
 					::cho::SCoord2<_tCoord>													brightDistance									= blendPos - sourcePosition;
 					double																	brightDistanceLength							= brightDistance.Length();
-					double																	colorFactor										= ::cho::min(fabs(brightDistanceLength * colorUnit), 1.0);
-					viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x]			= ::cho::interpolate_linear(viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x], colorLight, factor * (1.0f - colorFactor));
+					double																	colorFactor										= brightDistanceLength * colorUnit;
+					if(colorFactor <= 1.0)
+						viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x]			= ::cho::interpolate_linear(viewOffscreen[(uint32_t)blendPos.y][(uint32_t)blendPos.x], colorLight, factor * (1.0f - colorFactor));
 				}
 			}
 		}

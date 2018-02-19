@@ -5,7 +5,7 @@
 #include "cho_grid_copy.h"
 #include "cho_bitmap_target.h"
 
-static				::cho::error_t										drawShipHealthBar								(::SApplication& applicationInstance, const ::cho::SCoord2<float> & centerEnemy, const ::cho::SCoord2<int32_t> & halfMetrics, uint32_t health, int32_t yOffset, const ::cho::SColorBGRA & finalColor)											{
+static				::cho::error_t										drawShipHealthBar							(::SApplication& applicationInstance, const ::cho::SCoord2<float> & centerEnemy, const ::cho::SCoord2<int32_t> & halfMetrics, uint32_t health, int32_t yOffset, const ::cho::SColorBGRA & finalColor)											{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SLine2D<int32_t>														healthBar									= {};
@@ -17,7 +17,7 @@ static				::cho::error_t										drawShipHealthBar								(::SApplication& appl
 	::cho::drawLine(viewOffscreen.metrics(), healthBar, applicationInstance.CacheLinePoints);
 	for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 		const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
-		::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .15f, 2.0f);
+		::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, .2f, 1.5f);
 	}
 	return 0;
 }
@@ -29,50 +29,61 @@ static				::cho::error_t										drawShipHealthBar								(::SApplication& appl
 	// ---- Draw enemy ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
 	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
+	::cho::SCoord2<int32_t>														halfMetricsEnemy							= (enemyView.metrics() / 2).Cast<int32_t>();
+	int32_t																		halfMetricsEnemy2y							= 2 * halfMetricsEnemy.y;
+	// ---- Draw ghosts.
+	for(uint32_t iEnemy = 0, enemyCount = gameInstance.Enemies.Alive.size(); iEnemy < enemyCount; ++iEnemy) {
+		if(0 == gameInstance.Enemies.Alive[iEnemy])
+			continue;
+		static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
+		::cho::SCoord2<float>														vector;
+		static double																beaconTimer								= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
+		int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
+		for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
+			vector																	= reference * (64 * sin(framework.FrameInfo.Seconds.Total));
+			vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.Enemies.TimeLived[iEnemy]);
+			error_if(errored(::cho::grid_copy_alpha(viewOffscreen, enemyView, (gameInstance.Enemies.Position[iEnemy] + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			{ // Draw ghost light
+				::cho::SCoord2<float>														centerPowerup							= gameInstance.Enemies.Position[iEnemy] + vector;
+				::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
+				::cho::drawPixelLight(viewOffscreen, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
+			}
+		}
+	}
+	// --- Draw enemy ships.
 	for(uint32_t iEnemy = 0, enemyCount = gameInstance.Enemies.Alive.size(); iEnemy < enemyCount; ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])
 			continue;
 		const ::cho::SCoord2<float>													& centerEnemy								= gameInstance.Enemies.Position[iEnemy];
 		const ::SHealthPoints														& enemyHealth								= gameInstance.Enemies.Health[iEnemy];
 		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, enemyView, centerEnemy.Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-		{
-			static double																beaconTimer									= 0;
-			beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-			int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
-			::cho::SCoord2<float>														lightCrosshair								= centerEnemy + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
-			::cho::drawPixelLight(viewOffscreen, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
-			::cho::SCoord2<int32_t>														halfMetrics									= (enemyView.metrics() / 2).Cast<int32_t>();
-			::drawShipHealthBar(applicationInstance, centerEnemy, halfMetrics, enemyHealth.Health, (int32_t)(halfMetrics.y * 2		), ::cho::GREEN);
-			::drawShipHealthBar(applicationInstance, centerEnemy, halfMetrics, enemyHealth.Shield, (int32_t)(halfMetrics.y * 1.75	), ::cho::CYAN );
-		}
-		// ---- Draw ghosts
-		static constexpr const ::cho::SCoord2<float>								reference	= {1, 0};
-		::cho::SCoord2<float>														vector;
-		for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
-			vector																	= reference * (64 * sin(framework.FrameInfo.Seconds.Total));
-			vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.Enemies.TimeLived[iEnemy]);
-			error_if(errored(::cho::grid_copy_alpha(viewOffscreen, enemyView, (gameInstance.Enemies.Position[iEnemy] + vector).Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-			{
-				static double																beaconTimer								= 0;
-				beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
-				::cho::SCoord2<float>														centerPowerup							= gameInstance.Enemies.Position[iEnemy] + vector;
-				int32_t																		selectedPos								= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
-				::cho::SCoord2<float>														lightCrosshair							= centerPowerup + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
-				::cho::drawPixelLight(viewOffscreen, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::YELLOW), .2f, 3.0f);
-			}
-		}
+		::drawShipHealthBar(applicationInstance, centerEnemy, halfMetricsEnemy, enemyHealth.Health, (int32_t)(halfMetricsEnemy2y	), ::cho::GREEN);
+		::drawShipHealthBar(applicationInstance, centerEnemy, halfMetricsEnemy, enemyHealth.Shield, (int32_t)(halfMetricsEnemy2y - 2), ::cho::CYAN );
 	}
-	// ---- Draw player ships
+	// --- Draw player ships.
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
 		if(0 == gameInstance.Ships.Alive[iShip])
 			continue;
 		const ::cho::grid_view<::cho::SColorBGRA>									& shipView									= applicationInstance.Textures[GAME_TEXTURE_SHIP0 + iShip].Processed.View;
-		const ::cho::SCoord2<float>													& centerEnemy								= gameInstance.Ships.Position	[iShip];
+		const ::cho::SCoord2<float>													& centerShip								= gameInstance.Ships.Position	[iShip];
 		const ::SHealthPoints														& enemyHealth								= gameInstance.Ships.Health	[iShip];
-		::cho::SCoord2<int32_t>														halfMetrics									= (shipView.metrics() / 2).Cast<int32_t>();
-		::drawShipHealthBar(applicationInstance, centerEnemy, halfMetrics, enemyHealth.Health, (int32_t)(halfMetrics.y * 2		), ::cho::GREEN);
-		::drawShipHealthBar(applicationInstance, centerEnemy, halfMetrics, enemyHealth.Shield, (int32_t)(halfMetrics.y * 1.75	), ::cho::CYAN );
+		::cho::SCoord2<int32_t>														halfMetricsShip								= (shipView.metrics() / 2).Cast<int32_t>();
+		int32_t																		halfMetricsShip2y							= 2 * halfMetricsEnemy.y;
 		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, shipView, gameInstance.Ships.Position[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+		::drawShipHealthBar(applicationInstance, centerShip, halfMetricsShip, enemyHealth.Health, (int32_t)(halfMetricsShip2y		), ::cho::GREEN);
+		::drawShipHealthBar(applicationInstance, centerShip, halfMetricsShip, enemyHealth.Shield, (int32_t)(halfMetricsShip2y - 2	), ::cho::CYAN );
+	}
+	// --- Draw enemy ship lights.
+	for(uint32_t iEnemy = 0, enemyCount = gameInstance.Enemies.Alive.size(); iEnemy < enemyCount; ++iEnemy) {
+		if(0 == gameInstance.Enemies.Alive[iEnemy])
+			continue;
+		const ::cho::SCoord2<float>													& centerEnemy								= gameInstance.Enemies.Position[iEnemy];
+		static double																beaconTimer									= 0;
+		beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
+		int32_t																		selectedPos									= ((int32_t)beaconTimer % ::cho::size(indexPositionsX));
+		::cho::SCoord2<float>														lightCrosshair								= centerEnemy + ::cho::SCoord2<float>{(float)indexPositionsX[selectedPos], 0.0f};
+		::cho::drawPixelLight(viewOffscreen, lightCrosshair.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .2f, 3.0f);
 	}
 	return 0;
 }
@@ -117,10 +128,12 @@ static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weapon
 		applicationInstance.CacheLinePoints.clear();
 		::cho::drawLine(viewOffscreen.metrics(), laserToDraw.Segment, applicationInstance.CacheLinePoints);
 		const ::cho::SParticleInstance<::SGameParticle>								& gameParticle								= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle];
+		const float																	lightRange									= (gameParticle.Type.TypePlayer == PLAYER_TYPE_PLAYER) ? 3.0f : 2.5f;
+		const float																	lightValue									= (gameParticle.Type.TypePlayer == PLAYER_TYPE_PLAYER) ? .15f : 1.0f;
 		const ::cho::SColorBGRA														finalColor									= weaponTypeColorPalette[gameParticle.Type.TypeWeapon];
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
-			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, (gameParticle.Type.TypePlayer == PLAYER_TYPE_PLAYER) ? .15f : .95f, 3.0f);
+			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, lightValue, lightRange);
 		}
 	}
 	return 0;

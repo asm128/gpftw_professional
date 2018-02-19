@@ -253,7 +253,7 @@ static				::cho::error_t										updateSpawnShots
 		uint32_t																	textureIndex								= (playerType == PLAYER_TYPE_PLAYER) ? GAME_TEXTURE_SHIP0 + iShip : GAME_TEXTURE_ENEMY;
 		weaponDelay[iShip]														+= framework.FrameInfo.Seconds.LastFrame;
 		if(shipState[iShip].Firing) { // Add lasers / bullets.
-			const ::SWeapon																weapon										= weapons[iShip];
+			const ::SWeapon																& weapon										= weapons[iShip];
 			if( weaponDelay[iShip] >= weapon.Delay ) {
 				weaponDelay[iShip]														= 0;
 				::SGameParticle																gameParticle;
@@ -469,14 +469,14 @@ static				::cho::error_t										updateSpawnShots
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
-	if(timerSpawn > 10) {
+	if(timerSpawn > 5) {
 		timerSpawn																= 0;
 		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 		if(indexToSpawnEnemy != -1) {
 			gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
 			gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 200.0f, (float)offscreenMetrics.y};//{(float)(rand() % offscreenMetrics.x), (float)(rand() % offscreenMetrics.y)};
 			gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
-			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {2, 100, WEAPON_TYPE(rand()% WEAPON_TYPE_COUNT)};
+			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {2, 250, WEAPON_TYPE(rand()% WEAPON_TYPE_COUNT)};
 			gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
 			gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
 		}
@@ -487,6 +487,15 @@ static				::cho::error_t										updateSpawnShots
 			gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
 			gameInstance.Powerups.Position		[indexToSpawnPow]					= gameInstance.Enemies.Position[0];
 			gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
+			::SPowerup																	& powerup									= gameInstance.Powerups.Type[indexToSpawnPow];
+			powerup.TypeBuff														= BUFF_TYPE_INVALID;
+			powerup.TypeHealth														= HEALTH_TYPE_INVALID;
+			powerup.TypeWeapon														= WEAPON_TYPE_INVALID;
+			switch(rand() % 3) {
+			case 0: powerup.TypeBuff	= BUFF_TYPE_FIRE_RATIO	; break;
+			case 1:	powerup.TypeHealth	= HEALTH_TYPE_LIFE		; break;
+			case 2:	powerup.TypeWeapon	= WEAPON_TYPE_SPARK		; break;
+			}
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	

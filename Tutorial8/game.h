@@ -11,14 +11,14 @@
 #pragma pack(push, 1)
 
 enum PLAYER_TYPE : int8_t 
-	{ PLAYER_TYPE_PLAYER		= 0
+	{ PLAYER_TYPE_PLAYER				= 0
 	, PLAYER_TYPE_ENEMY
 	, PLAYER_TYPE_COUNT
-	, PLAYER_TYPE_INVALID		= -1
+	, PLAYER_TYPE_INVALID				= -1
 	};
 
 enum WEAPON_TYPE : int8_t
-	{ WEAPON_TYPE_LASER			= 0
+	{ WEAPON_TYPE_LASER					= 0
 	, WEAPON_TYPE_PLASMA
 	, WEAPON_TYPE_POISON
 	, WEAPON_TYPE_BULLET
@@ -26,17 +26,41 @@ enum WEAPON_TYPE : int8_t
 	, WEAPON_TYPE_ROCK
 	, WEAPON_TYPE_ARROW
 	, WEAPON_TYPE_COUNT
-	, WEAPON_TYPE_INVALID		= -1
+	, WEAPON_TYPE_INVALID				= -1
+	};
+
+enum HEALTH_TYPE : int8_t
+	{ HEALTH_TYPE_HEALTH				= 0
+	, HEALTH_TYPE_SHIELD
+	, HEALTH_TYPE_LIFE
+	, HEALTH_TYPE_WEAPON_LEVEL
+	, HEALTH_TYPE_SHIP_LEVEL
+	, HEALTH_TYPE_COUNT
+	, HEALTH_TYPE_INVALID				= -1
+	};
+
+enum BUFF_TYPE : int8_t
+	{ BUFF_TYPE_POINTS					= 0
+	, BUFF_TYPE_FORCE_FIELD					
+	, BUFF_TYPE_FIRE_RATIO
+	, BUFF_TYPE_COUNT
+	, BUFF_TYPE_INVALID					= -1
 	};
 
 enum POWERUP_FAMILY : int8_t
-	{ POWERUP_FAMILY_WEAPON			= 0
+	{ POWERUP_FAMILY_WEAPON				= 0
 	, POWERUP_FAMILY_HEALTH
 	, POWERUP_FAMILY_BUFF
 	, POWERUP_FAMILY_BOMB
 	, POWERUP_FAMILY_COUNT
-	, POWERUP_FAMILY_INVALID		= -1
+	, POWERUP_FAMILY_INVALID			= -1
 	};
+
+struct SPowerup {
+						BUFF_TYPE															TypeBuff																= BUFF_TYPE_INVALID;
+						HEALTH_TYPE															TypeHealth																= HEALTH_TYPE_INVALID;
+						WEAPON_TYPE															TypeWeapon																= WEAPON_TYPE_INVALID;
+};
 
 struct SWeapon {
 						float																Delay;
@@ -93,6 +117,7 @@ struct SPropertiesPowerup		{
 						::SArrayElementState						< _sizeArray>			Alive																	= {};
 						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>			Position																= {};
 						::cho::array_static<POWERUP_FAMILY			, _sizeArray>			Family																	= {};
+						::cho::array_static<::SPowerup				, _sizeArray>			Type																	= {};
 };
 
 template<uint32_t _sizeArray>	

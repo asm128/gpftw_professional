@@ -16,7 +16,7 @@ namespace cho
 			array_view<_tCell>::Data						= Storage;
 			array_view<_tCell>::Count						= _sizeArray;
 			throw_if(errored(init.size() > _sizeArray), ::std::exception(), "Failed to resize array! Why?");
-			for(uint32_t i = 0, count = init.size(); i < count; ++i)
+			for(uint32_t i = 0, count = (uint32_t)init.size(); i < count; ++i)
 				Storage[i]										= *(init.begin() + i);
 		}
 	};
