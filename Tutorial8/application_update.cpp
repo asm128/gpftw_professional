@@ -7,25 +7,29 @@
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
 	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
 	::SGame																		& gameInstance								= applicationInstance.Game;
-	gameInstance.Ships.States[0].Firing										= inputSystem.KeyboardCurrent.KeyState['T'] != 0;
-	gameInstance.Ships.States[0].Thrust										= inputSystem.KeyboardCurrent.KeyState['Y'] != 0;
-	gameInstance.Ships.States[0].Brakes										= inputSystem.KeyboardCurrent.KeyState['U'] != 0;
+	::SShipState																& ship0State								= gameInstance.Ships.States[0];
+	ship0State.Firing														= inputSystem.KeyboardCurrent.KeyState['T'] != 0;
+	ship0State.Thrust														= inputSystem.KeyboardCurrent.KeyState['Y'] != 0;
+	ship0State.Brakes														= inputSystem.KeyboardCurrent.KeyState['U'] != 0;
 
-	gameInstance.Ships.States[1].Firing										= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD1] != 0;
-	gameInstance.Ships.States[1].Thrust										= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD2] != 0;
-	gameInstance.Ships.States[1].Brakes										= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD3] != 0;
+	::SShipState																& ship1State								= gameInstance.Ships.States[1];
+	ship1State.Firing														= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD1] != 0;
+	ship1State.Thrust														= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD2] != 0;
+	ship1State.Brakes														= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD3] != 0;
 
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip)
 		gameInstance.Ships.Direction[iShip]										= {};
 
-	if(inputSystem.KeyboardCurrent.KeyState['W'			]) gameInstance.Ships.Direction[0].y += 1;
-	if(inputSystem.KeyboardCurrent.KeyState['S'			]) gameInstance.Ships.Direction[0].y -= 1;
-	if(inputSystem.KeyboardCurrent.KeyState['D'			]) gameInstance.Ships.Direction[0].x += 1;
-	if(inputSystem.KeyboardCurrent.KeyState['A'			]) gameInstance.Ships.Direction[0].x -= 1;
-	if(inputSystem.KeyboardCurrent.KeyState[VK_UP		]) gameInstance.Ships.Direction[1].y += 1;
-	if(inputSystem.KeyboardCurrent.KeyState[VK_DOWN		]) gameInstance.Ships.Direction[1].y -= 1;
-	if(inputSystem.KeyboardCurrent.KeyState[VK_RIGHT	]) gameInstance.Ships.Direction[1].x += 1;
-	if(inputSystem.KeyboardCurrent.KeyState[VK_LEFT		]) gameInstance.Ships.Direction[1].x -= 1;
+	::cho::SCoord2<float>														& ship0Direction							= gameInstance.Ships.Direction[0];
+	::cho::SCoord2<float>														& ship1Direction							= gameInstance.Ships.Direction[1];
+	if(inputSystem.KeyboardCurrent.KeyState['W'			]) ship0Direction.y	+= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['S'			]) ship0Direction.y	-= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['D'			]) ship0Direction.x	+= 1;
+	if(inputSystem.KeyboardCurrent.KeyState['A'			]) ship0Direction.x	-= 1;
+	if(inputSystem.KeyboardCurrent.KeyState[VK_UP		]) ship1Direction.y	+= 1;
+	if(inputSystem.KeyboardCurrent.KeyState[VK_DOWN		]) ship1Direction.y	-= 1;
+	if(inputSystem.KeyboardCurrent.KeyState[VK_RIGHT	]) ship1Direction.x	+= 1;
+	if(inputSystem.KeyboardCurrent.KeyState[VK_LEFT		]) ship1Direction.x	-= 1;
 	for(uint32_t iWeaponSelect = 0; iWeaponSelect < WEAPON_TYPE_COUNT; ++iWeaponSelect) {
 		if(inputSystem.KeyboardCurrent.KeyState['1' + iWeaponSelect]) {
 			gameInstance.Ships.Weapon[0].Type										= (WEAPON_TYPE)iWeaponSelect;
@@ -112,8 +116,9 @@ template <size_t _sizeAlive>
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {	// --- Calculate line of fire and set state accordingly. This causes Draw() to draw the crosshair in the right mode.
 		if(0 == gameInstance.Ships.Alive[iShip])
 			continue;
+		::cho::SCoord2<float>														& shipPosition								= gameInstance.Ships.Position[iShip];
 		::SAABBCache																aabbCache;
-		::cho::SLine2D<float>														projectilePath								= {gameInstance.Ships.Position[iShip], gameInstance.Ships.Position[iShip] + ::cho::SCoord2<float>{10000, }};
+		::cho::SLine2D<float>														projectilePath								= {shipPosition, shipPosition + ::cho::SCoord2<float>{10000, }};
 		projectilePath.A.y														-= 1;
 		projectilePath.B.y														-= 1;
 		gameInstance.Ships.LineOfFire[iShip]										= false;
@@ -213,11 +218,12 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(0 == projectilesAlive[iProjectile]) {
 			projectilesAlive[iProjectile]											= 1;
-			gameInstance.Projectiles.Projectiles[iProjectile].TypeWeapon			= weaponType;
-			gameInstance.Projectiles.Projectiles[iProjectile].TypePlayer			= playerType;
-			gameInstance.Projectiles.Projectiles[iProjectile].ShipIndex				= iShip;
-			gameInstance.Projectiles.Projectiles[iProjectile].TimeLived				= 0;
-			gameInstance.Projectiles.Projectiles[iProjectile].Speed					= projectileSpeed;
+			::SProjectile																& projectile							= gameInstance.Projectiles.Projectiles[iProjectile];
+			projectile.TypeWeapon													= weaponType;
+			projectile.TypePlayer													= playerType;
+			projectile.ShipIndex													= iShip;
+			projectile.TimeLived													= 0;
+			projectile.Speed														= projectileSpeed;
 			return iProjectile;
 		}
 	}
@@ -290,6 +296,7 @@ static				::cho::error_t										updateSpawnShots
 				gameParticle.OwnerIndex													= iShip;
 				gameParticle.TimeLived													= 0;
 				gameParticle.Type														= PARTICLE_TYPE_SHIP_THRUST;
+				gameParticle.TypePlayer													= PLAYER_TYPE_PLAYER;
 				gameParticle.Lit														= 0 == (rand() % 2);
 				::addParticle(gameParticle, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), gameInstance.Ships.Direction[iShip] * -1.0, (float)(rand() % 400) + (gameInstance.Ships.States[iShip].Thrust ? 400 : 0), particleDefinitions);
 			}
@@ -328,8 +335,9 @@ static				::cho::error_t										updateSpawnShots
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(0 == projectilesAlive[iProjectile]) 
 			continue;
-		gameInstance.Projectiles.Projectiles[iProjectile].TimeLived				+= applicationInstance.Framework.FrameInfo.Seconds.LastFrame;
-		if(gameInstance.Projectiles.Projectiles[iProjectile].TimeLived > 0.01) 
+		::SProjectile																& projectile								= gameInstance.Projectiles.Projectiles[iProjectile];
+		projectile.TimeLived													+= applicationInstance.Framework.FrameInfo.Seconds.LastFrame;
+		if(projectile.TimeLived > 0.01) 
 			projectilesAlive[iProjectile]											= 0;
 	}
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
@@ -348,24 +356,25 @@ static				::cho::error_t										updateSpawnShots
 			}
 		}
 		const ::SApplication::TParticleInstance										& particleInstance							= particleInstances[laserToDraw.IndexParticle];
+		::SWeapon																	& weapon									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER)
+			? gameInstance.Ships	.Weapon[particleInstance.Type.OwnerIndex]
+			: gameInstance.Enemies	.Weapon[particleInstance.Type.OwnerIndex]
+			;
 		if(particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) {
 			for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) { // Check enemy
 				if(0 == gameInstance.Enemies.Alive[iEnemy])
 					continue;
 				const cho::SCoord2<float>													& posEnemy									= gameInstance.Enemies.Position[iEnemy];
 				float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
+				::SHealthPoints																& enemyHealth								= gameInstance.Enemies.Health[iEnemy];
 				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
-					float																		weaponSpeed									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) 
-						? gameInstance.Ships	.Weapon[particleInstance.Type.OwnerIndex].Speed 
-						: gameInstance.Enemies	.Weapon[particleInstance.Type.OwnerIndex].Speed
-						;
-					gameInstance.Enemies.Health[iEnemy].Health								-= (int32_t)(weaponSpeed * (1.0f - damegePorportion));
-					gameInstance.Enemies.Health[iEnemy].Shield								-= (int32_t)(weaponSpeed * damegePorportion);
-					if(gameInstance.Enemies.Health[iEnemy].Health < 0) gameInstance.Enemies.Health[iEnemy].Health = 0;
-					if(gameInstance.Enemies.Health[iEnemy].Shield < 0) gameInstance.Enemies.Health[iEnemy].Shield = 0;
+					enemyHealth.Health														-= (int32_t)(weapon.Speed * (1.0f - damegePorportion));
+					enemyHealth.Shield														-= (int32_t)(weapon.Speed * damegePorportion);
+					if(enemyHealth.Health < 0) enemyHealth.Health = 0;
+					if(enemyHealth.Shield < 0) enemyHealth.Shield = 0;
 				}
-				if(0 >= gameInstance.Enemies.Health[iEnemy].Health) {
+				if(0 >= enemyHealth.Health) {
 					gameInstance.Enemies.Alive[iEnemy] = 0;
 					continue;
 				}
@@ -384,18 +393,15 @@ static				::cho::error_t										updateSpawnShots
 					continue;
 				const cho::SCoord2<float>													& posEnemy									= gameInstance.Ships.Position[iShip];
 				float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x;
+				::SHealthPoints																& enemyHealth								= gameInstance.Ships.Health[iShip];
 				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
-					float																		weaponSpeed									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) 
-						? gameInstance.Ships	.Weapon[particleInstance.Type.OwnerIndex].Speed 
-						: gameInstance.Enemies	.Weapon[particleInstance.Type.OwnerIndex].Speed
-						;
-					gameInstance.Ships.Health[iShip].Health								-= (int32_t)(weaponSpeed * (1.0f - damegePorportion));
-					gameInstance.Ships.Health[iShip].Shield								-= (int32_t)(weaponSpeed * damegePorportion);
-					if(gameInstance.Ships.Health[iShip].Health < 0) gameInstance.Ships.Health[iShip].Health = 0;
-					if(gameInstance.Ships.Health[iShip].Shield < 0) gameInstance.Ships.Health[iShip].Shield = 0;
+					enemyHealth.Health														-= (int32_t)(weapon.Speed * (1.0f - damegePorportion));
+					enemyHealth.Shield														-= (int32_t)(weapon.Speed * damegePorportion);
+					if(enemyHealth.Health < 0) enemyHealth.Health = 0;
+					if(enemyHealth.Shield < 0) enemyHealth.Shield = 0;
 				}
-				if(0 >= gameInstance.Ships.Health[iShip].Health) {
+				if(0 >= enemyHealth.Health) {
 					gameInstance.Ships.Alive[iShip] = 0;
 					continue;
 				}
@@ -478,9 +484,9 @@ static				::cho::error_t										updateSpawnShots
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
 		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
 		if(indexToSpawnPow != -1 && (0 == (rand() % 5))) {
-			gameInstance.Powerups.Alive		[indexToSpawnPow]						= 1;
-			gameInstance.Powerups.Position	[indexToSpawnPow]						= gameInstance.Enemies.Position[0];
-			gameInstance.Powerups.Family	[indexToSpawnPow]						= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
+			gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
+			gameInstance.Powerups.Position		[indexToSpawnPow]					= gameInstance.Enemies.Position[0];
+			gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
@@ -491,29 +497,30 @@ static				::cho::error_t										updateSpawnShots
 		float																		& timerPath									= gameInstance.Enemies.TimerPath[iEnemy];
 		gameInstance.Enemies.SkillTimer[iEnemy]									+= framework.FrameInfo.Seconds.LastFrame;
 		timerPath																+= (float)framework.Timer.LastTimeSeconds;
+		uint32_t																	& enemyPathStep								= gameInstance.Enemies.PathStep[iEnemy];
 		if(timerPath > 10.0f) {
 			timerPath																= 0;
-			++gameInstance.Enemies.PathStep[iEnemy];
-			if( gameInstance.Enemies.PathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
-				gameInstance.Enemies.PathStep[iEnemy]										= 0;
+			++enemyPathStep;
+			if( enemyPathStep >= ::cho::size(gameInstance.PathEnemy) )
+				enemyPathStep										= 0;
 		}
 		{
-			const ::cho::SCoord2<float>													& pathTarget								= gameInstance.PathEnemy[gameInstance.Enemies.PathStep[iEnemy]];
-			::cho::SCoord2<float>														directionEnemy								= (pathTarget - gameInstance.Enemies.Position[iEnemy]);
+			::cho::SCoord2<float>														& enemyPosition								= gameInstance.Enemies.Position[iEnemy];
+			const ::cho::SCoord2<float>													& pathTarget								= gameInstance.PathEnemy[enemyPathStep];
+			::cho::SCoord2<float>														directionEnemy								= (pathTarget - enemyPosition);
 			if(directionEnemy.LengthSquared() < 0.5) {
 				timerPath																= 0;
-				++gameInstance.Enemies.PathStep[iEnemy];
-				if( gameInstance.Enemies.PathStep[iEnemy] >= ::cho::size(gameInstance.PathEnemy) )
-					gameInstance.Enemies.PathStep[iEnemy]										= 0;
+				++enemyPathStep;
+				if( enemyPathStep >= ::cho::size(gameInstance.PathEnemy) )
+					enemyPathStep															= 0;
 			}
 			else {
 				directionEnemy.Normalize();
-				// update enemy
 				::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 				gameInstance.Enemies.Position[iEnemy]									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
 				gameInstance.Enemies.Position[iEnemy]									= 
-					{ ::cho::clamp(gameInstance.Enemies.Position[iEnemy].x, .1f, (float)offscreen.View.metrics().x - 1)
-					, ::cho::clamp(gameInstance.Enemies.Position[iEnemy].y, .1f, (float)offscreen.View.metrics().y - 1)
+					{ ::cho::clamp(enemyPosition.x, .1f, (float)offscreen.View.metrics().x - 1)
+					, ::cho::clamp(enemyPosition.y, .1f, (float)offscreen.View.metrics().y - 1)
 					};
 			}
 		}

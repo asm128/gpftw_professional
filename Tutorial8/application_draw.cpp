@@ -159,17 +159,22 @@ static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weapon
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iThrust = 0, particleCount = (uint32_t)applicationInstance.StuffToDraw.Thrust.size(); iThrust < particleCount; ++iThrust) {
 		::SParticleToDraw															& thrustToDraw								= applicationInstance.StuffToDraw.Thrust[iThrust];
-		if(false == applicationInstance.ParticleSystem.Instances[thrustToDraw.IndexParticle].Type.Lit)
+		::SApplication::TParticleInstance											& particleInstance							= applicationInstance.ParticleSystem.Instances[thrustToDraw.IndexParticle];
+		if(false == particleInstance.Type.Lit)
 			continue;
+		::SShipState																& shipState									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) 
+			? gameInstance.Ships	.States[particleInstance.Type.OwnerIndex] 
+			: gameInstance.Enemies	.States[particleInstance.Type.OwnerIndex]
+			;
 		const int32_t																physicsId									= thrustToDraw.Id;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
 			continue;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (thrustToDraw.TimeLived > .075)		? (gameInstance.Ships.States[0].Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
-			: (thrustToDraw.TimeLived > .03 )		? (gameInstance.Ships.States[0].Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
-			: (physicsId % 3)						? (gameInstance.Ships.States[0].Thrust ? ::cho::CYAN		: ::cho::RED 		)
-			: (physicsId % 2)						? (gameInstance.Ships.States[0].Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
+			= (thrustToDraw.TimeLived > .075)		? (shipState.Thrust ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+			: (thrustToDraw.TimeLived > .03 )		? (shipState.Thrust ? ::cho::GRAY		: ::cho::GRAY 		)
+			: (physicsId % 3)						? (shipState.Thrust ? ::cho::CYAN		: ::cho::RED 		)
+			: (physicsId % 2)						? (shipState.Thrust ? ::cho::WHITE		: ::cho::ORANGE		)
 			: ::cho::YELLOW 
 			;
 		float																		maxFactor	= .5f;
@@ -188,74 +193,61 @@ static constexpr	const ::cho::SColorBGRA								powerupFamilyColorPalette []				
 	, ::cho::RED
 	};
 
-static				::cho::error_t										drawSquarePowerup							(::SApplication& applicationInstance, POWERUP_FAMILY powFamily, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	::cho::SFramework															& framework									= applicationInstance.Framework;
-	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
-	::cho::SCoord2<int32_t>														offset										= {0, 0};
-	::cho::SCoord2<int32_t>														position									= powPosition.Cast<int32_t>() + offset;
-	for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup0.size(); iTex < textureCount; ++iTex)
-		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, applicationInstance.StuffToDraw.TexturesPowerup0[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
-	::cho::SCoord2<int32_t>														centerPowerup								= position;
-	int32_t																		halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
-	::cho::SCoord2<int32_t>														lightPos []									= 
-		{ centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth	,  halfWidth}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth - 1,  halfWidth}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth	,  halfWidth - 1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}
-		};
-	::cho::SCoord2<int32_t>														selectedLightPos0							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 0]
-		,																		selectedLightPos2							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 4]
-		;
-	int32_t																		selectedColor								= powFamily;
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
-	return 0;
-}
-
-static				::cho::error_t										drawDiagonalPowerup						(::SApplication& applicationInstance, POWERUP_FAMILY powFamily, const ::cho::SCoord2<float>& powPosition, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+static				::cho::error_t										drawPowerup						(::SApplication& applicationInstance, POWERUP_FAMILY powFamily, const ::cho::array_view<::cho::grid_view<::cho::SColorBGRA>>& texturePowerup, const ::cho::SCoord2<int32_t>& textureCenterPowerup, const ::cho::SCoord2<float>& powPosition, const ::cho::array_view<const ::cho::SCoord2<int32_t>>& lightPos, double time)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SCoord2<int32_t>														position									= powPosition.Cast<int32_t>();
-	for(uint32_t iTex = 0, textureCount = applicationInstance.StuffToDraw.TexturesPowerup1.size(); iTex < textureCount; ++iTex)
-		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, applicationInstance.StuffToDraw.TexturesPowerup1[iTex], position - applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+	for(uint32_t iTex = 0, textureCount = texturePowerup.size(); iTex < textureCount; ++iTex)
+		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, texturePowerup[iTex], position - textureCenterPowerup, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	::cho::SCoord2<int32_t>															centerPowerup								= position;
-	int32_t																			halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
-	::cho::SCoord2<int32_t>															lightPos []									= 
-		{ centerPowerup + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth, -1}
-		, centerPowerup + ::cho::SCoord2<int32_t>{halfWidth,  0}
-		, centerPowerup + ::cho::SCoord2<int32_t>{ 0, halfWidth}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-1, halfWidth}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
-		, centerPowerup + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
-		};
-	::cho::SCoord2<int32_t>															selectedLightPos0							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 0]
-		,																			selectedLightPos2							= lightPos[((uint32_t)time % (::cho::size(lightPos) / 2)) + 4]
+	uint32_t																	lightIndex									= (uint32_t)time % (lightPos.size() / 2); 
+	const ::cho::SCoord2<int32_t>												& selectedLightPos0							= lightPos[lightIndex + 0]
+		,																		& selectedLightPos2							= lightPos[lightIndex + 4]
 		;
-	int32_t																			selectedColor								= powFamily;//((int32_t)time / 4) % ::cho::size(colors);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
-	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), powerupFamilyColorPalette[selectedColor], .3f, 3.0f);
+	const ::cho::SColorBGRA														& selectedColor								= powerupFamilyColorPalette[powFamily];
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), selectedColor, .3f, 3.0f);
+	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), selectedColor, .3f, 3.0f);
 	return 0;
 }
-
 					::cho::error_t										drawPowerups								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	static double																timer										= 0;
 	timer																	+= framework.FrameInfo.Seconds.LastFrame * 2;
 	::SGame																		& gameInstance								= applicationInstance.Game;
+
 	for(uint32_t iPow = 0, powCount = gameInstance.Powerups.Alive.size(); iPow < powCount; ++iPow) {
 		if(0 == gameInstance.Powerups.Alive[iPow])
 			continue;
 		POWERUP_FAMILY																powFamily									= gameInstance.Powerups.Family[iPow];
-		if(gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_WEAPON)
-			drawSquarePowerup(applicationInstance, powFamily, gameInstance.Powerups.Position[iPow], timer);
-		else
-			drawDiagonalPowerup(applicationInstance, powFamily, gameInstance.Powerups.Position[iPow], timer);
+		::cho::SCoord2<int32_t>														position									= gameInstance.Powerups.Position[iPow].Cast<int32_t>();
+		int32_t																		halfWidth									= 6; //(framework.FrameInfo.FrameNumber / 100) % 6;
+
+		if(gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_HEALTH || gameInstance.Powerups.Family[iPow] == POWERUP_FAMILY_BUFF) {
+			const ::cho::SCoord2<int32_t>												lightPosSquare []							= 
+				{ position + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}
+				, position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}
+				, position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}
+				, position + ::cho::SCoord2<int32_t>{-halfWidth	,  halfWidth}
+				, position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  halfWidth}
+				, position + ::cho::SCoord2<int32_t>{ halfWidth	,  halfWidth - 1}
+				, position + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}
+				, position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}
+				};
+			::drawPowerup(applicationInstance, powFamily, applicationInstance.StuffToDraw.TexturesPowerup0, applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0], position.Cast<float>(), lightPosSquare, timer);
+		}
+		else {
+			const ::cho::SCoord2<int32_t>												lightPosDiagonal []							= 
+					{ position + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
+					, position + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}
+					, position + ::cho::SCoord2<int32_t>{halfWidth, -1}
+					, position + ::cho::SCoord2<int32_t>{halfWidth,  0}
+					, position + ::cho::SCoord2<int32_t>{ 0, halfWidth}
+					, position + ::cho::SCoord2<int32_t>{-1, halfWidth}
+					, position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0}
+					, position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1}
+					};
+			::drawPowerup(applicationInstance, powFamily, applicationInstance.StuffToDraw.TexturesPowerup1, applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1], position.Cast<float>(), lightPosDiagonal, timer);
+		}
 	}
 	return 0;
 }
@@ -313,11 +305,12 @@ static				::cho::error_t										drawCrosshairAligned						(::SApplication& app
 	for(uint32_t iShip = 0, shipCount = gameInstance.Ships.Alive.size(); iShip < shipCount; ++iShip) {
 		if(0 == gameInstance.Ships.Alive[iShip])
 			continue;
+		::cho::SCoord2<int32_t>														posXHair									= gameInstance.PositionCrosshair[iShip].Cast<int32_t>();
 		if(false == gameInstance.Ships.LineOfFire[iShip]) 
-			::drawCrosshairDiagonal(applicationInstance, beaconTimer, gameInstance.PositionCrosshair[iShip].Cast<int32_t>());
-		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, gameInstance.PositionCrosshair[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
+			::drawCrosshairDiagonal(applicationInstance, beaconTimer, posXHair);
+		error_if(errored(::cho::grid_copy_alpha(framework.Offscreen.View, applicationInstance.Textures[GAME_TEXTURE_CROSSHAIR].Processed.View, posXHair - applicationInstance.TextureCenters[GAME_TEXTURE_CROSSHAIR], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		if(gameInstance.Ships.LineOfFire[iShip]) 
-			::drawCrosshairAligned(applicationInstance, beaconTimer, gameInstance.PositionCrosshair[iShip].Cast<int32_t>());
+			::drawCrosshairAligned(applicationInstance, beaconTimer, posXHair);
 	}
 	return 0;
 }

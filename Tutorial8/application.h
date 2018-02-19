@@ -25,38 +25,38 @@ enum PARTICLE_TYPE : int8_t
 	};
 
 struct SGameParticle {
-						PARTICLE_TYPE											Type										= (PARTICLE_TYPE)-1;
-						PLAYER_TYPE												TypePlayer									= (PLAYER_TYPE	)-1;
-						WEAPON_TYPE												TypeWeapon									= (WEAPON_TYPE	)-1;
-						uint32_t												OwnerIndex									= (uint32_t		)-1;
-						float													TimeLived									= 0;
-						bool													Lit											= true;
+						PARTICLE_TYPE																				Type										= (PARTICLE_TYPE)-1;
+						PLAYER_TYPE																					TypePlayer									= (PLAYER_TYPE	)-1;
+						WEAPON_TYPE																					TypeWeapon									= (WEAPON_TYPE	)-1;
+						uint32_t																					OwnerIndex									= (uint32_t		)-1;
+						float																						TimeLived									= 0;
+						bool																						Lit											= true;
 };
 
 struct SParticleToDraw {
-						int32_t													Id;
-						int32_t													IndexParticle;
-						float													TimeLived;
-						::cho::SCoord2<int32_t>									Position;
-						//bool													Lit;
+						int32_t																						Id;
+						int32_t																						IndexParticle;
+						float																						TimeLived;
+						::cho::SCoord2<int32_t>																		Position;
+						//bool																						Lit;
 };
 
 struct SLaserToDraw {
-						int32_t													Id;
-						int32_t													IndexParticle;
-						::cho::SLine2D<float>									Segment;
-						::cho::SColorBGRA										Color;
+						int32_t																						Id;
+						int32_t																						IndexParticle;
+						::cho::SLine2D<float>																		Segment;
+						::cho::SColorBGRA																			Color;
 };
 
 struct SStuffToDraw {
-						::cho::array_pod<::SLaserToDraw>						ProjectilePaths								= {};
-						::cho::array_pod<::SParticleToDraw>						Stars										= {};
-						::cho::array_pod<::SParticleToDraw>						Thrust										= {};
-						::cho::array_pod<::SParticleToDraw>						Debris										= {};
-						::cho::array_pod<::cho::SCoord2<float>>					CollisionPoints								= {};
+						::cho::array_pod<::SLaserToDraw>															ProjectilePaths								= {};
+						::cho::array_pod<::SParticleToDraw>															Stars										= {};
+						::cho::array_pod<::SParticleToDraw>															Thrust										= {};
+						::cho::array_pod<::SParticleToDraw>															Debris										= {};
+						::cho::array_pod<::cho::SCoord2<float>>														CollisionPoints								= {};
 
-						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup0							= {};
-						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>	TexturesPowerup1							= {};
+						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>										TexturesPowerup0							= {};
+						::cho::array_obj<::cho::grid_view<::cho::SColorBGRA>>										TexturesPowerup1							= {};
 };
 
 enum GAME_TEXTURE : int8_t
@@ -72,35 +72,33 @@ enum GAME_TEXTURE : int8_t
 	};
 
 struct SEffectsDelay {
-						double													Thrust;
-						double													Star;
+						double																						Thrust;
+						double																						Star;
 };
 
 struct SApplication {
-	typedef				::cho::SParticleSystem<::SGameParticle, float>			TParticleSystem;
-	typedef				TParticleSystem::TParticleInstance						TParticleInstance;
-	typedef				TParticleSystem::TIntegrator							TIntegrator;
-	typedef				TIntegrator::TParticle									TParticle;
+	typedef				::cho::SParticleSystem<::SGameParticle, float>												TParticleSystem;
+	typedef				TParticleSystem::TParticleInstance															TParticleInstance;
+	typedef				TParticleSystem::TIntegrator																TIntegrator;
+	typedef				TIntegrator::TParticle																		TParticle;
 
-						::cho::SFramework										Framework									;
+						::cho::SFramework																			Framework									;
 
-						::SGame													Game;
+						::SGame																						Game;
 
-						TParticleSystem											ParticleSystem								= {};
+						TParticleSystem																				ParticleSystem								= {};
 
-						::cho::SColorBGRA										ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
+						::cho::SColorBGRA																			ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
 
-						::cho::array_static<::cho::STextureProcessable<::cho::SColorBGRA>	, GAME_TEXTURE_COUNT>		Textures		= {};
-						::cho::array_static<::cho::SCoord2<int32_t>							, GAME_TEXTURE_COUNT>		TextureCenters	= {};
+						::cho::array_static<::cho::STextureProcessable<::cho::SColorBGRA>	, GAME_TEXTURE_COUNT>	Textures									= {};
+						::cho::array_static<::cho::SCoord2<int32_t>							, GAME_TEXTURE_COUNT>	TextureCenters								= {};
+						::cho::SCoord2<int32_t>																		PSOffsetFromShipCenter						= {};
 
-						//::cho::STextureProcessable<::cho::SColorBGRA>			TextureShip									= {};
-						::cho::SCoord2<int32_t>									PSOffsetFromShipCenter						= {};
+						::SStuffToDraw																				StuffToDraw									= {};
+						::cho::array_pod<::cho::SCoord2<int32_t>>													CacheLinePoints								= {};
+						::SEffectsDelay																				EffectsDelay								= {};
 
-						::SStuffToDraw											StuffToDraw									= {};
-						::cho::array_pod<::cho::SCoord2<int32_t>>				CacheLinePoints								= {};
-						::SEffectsDelay											EffectsDelay								= {};
-
-																				SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
+																													SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };
 
 #endif // APPLICATION_H_098273498237423
