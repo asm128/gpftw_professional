@@ -365,7 +365,7 @@ static				::cho::error_t										updateSpawnShots
 				if(0 == gameInstance.Enemies.Alive[iEnemy])
 					continue;
 				const cho::SCoord2<float>													& posEnemy									= gameInstance.Enemies.Position[iEnemy];
-				float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
+				const float																	halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 				::SHealthPoints																& enemyHealth								= gameInstance.Enemies.Health[iEnemy];
 				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
@@ -392,7 +392,7 @@ static				::cho::error_t										updateSpawnShots
 				if(0 == gameInstance.Ships.Alive[iShip])
 					continue;
 				const cho::SCoord2<float>													& posEnemy									= gameInstance.Ships.Position[iShip];
-				float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x;
+				const float																	halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip].x;
 				::SHealthPoints																& enemyHealth								= gameInstance.Ships.Health[iShip];
 				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
@@ -469,7 +469,7 @@ static				::cho::error_t										updateSpawnShots
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
-	if(timerSpawn > 5) {
+	if(timerSpawn > 2.5) {
 		timerSpawn																= 0;
 		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 		if(indexToSpawnEnemy != -1) {
@@ -483,7 +483,7 @@ static				::cho::error_t										updateSpawnShots
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
 		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
-		if(indexToSpawnPow != -1 && (0 == (rand() % 5))) {
+		if(indexToSpawnPow != -1 && gameInstance.Enemies.Alive[0] && 0 == (rand() % 5)) {
 			gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
 			gameInstance.Powerups.Position		[indexToSpawnPow]					= gameInstance.Enemies.Position[0];
 			gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
@@ -492,9 +492,9 @@ static				::cho::error_t										updateSpawnShots
 			powerup.TypeHealth														= HEALTH_TYPE_INVALID;
 			powerup.TypeWeapon														= WEAPON_TYPE_INVALID;
 			switch(rand() % 3) {
-			case 0: powerup.TypeBuff	= BUFF_TYPE_FIRE_RATIO	; break;
-			case 1:	powerup.TypeHealth	= HEALTH_TYPE_LIFE		; break;
-			case 2:	powerup.TypeWeapon	= WEAPON_TYPE_SPARK		; break;
+			case 0: powerup.TypeBuff													= BUFF_TYPE_FIRE_RATIO	; break;
+			case 1:	powerup.TypeHealth													= HEALTH_TYPE_LIFE		; break;
+			case 2:	powerup.TypeWeapon													= WEAPON_TYPE_SPARK		; break;
 			}
 		}
 		else

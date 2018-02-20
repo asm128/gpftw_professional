@@ -30,7 +30,7 @@ static				::cho::error_t										drawShipHealthBar							(::SApplication& appli
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
 	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
 	::cho::SCoord2<int32_t>														halfMetricsEnemy							= (enemyView.metrics() / 2).Cast<int32_t>();
-	int32_t																		halfMetricsEnemy2y							= 2 * halfMetricsEnemy.y;
+	int32_t																		halfMetricsEnemy2y							= halfMetricsEnemy.y;
 	// ---- Draw ghosts.
 	for(uint32_t iEnemy = 0, enemyCount = gameInstance.Enemies.Alive.size(); iEnemy < enemyCount; ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])
@@ -69,7 +69,7 @@ static				::cho::error_t										drawShipHealthBar							(::SApplication& appli
 		const ::cho::SCoord2<float>													& centerShip								= gameInstance.Ships.Position	[iShip];
 		const ::SHealthPoints														& enemyHealth								= gameInstance.Ships.Health	[iShip];
 		::cho::SCoord2<int32_t>														halfMetricsShip								= (shipView.metrics() / 2).Cast<int32_t>();
-		int32_t																		halfMetricsShip2y							= 2 * halfMetricsEnemy.y;
+		int32_t																		halfMetricsShip2y							= halfMetricsShip.y;
 		error_if(errored(::cho::grid_copy_alpha(viewOffscreen, shipView, gameInstance.Ships.Position[iShip].Cast<int32_t>() - applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0 + iShip], {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 		::drawShipHealthBar(applicationInstance, centerShip, halfMetricsShip, enemyHealth.Health, (int32_t)(halfMetricsShip2y		), ::cho::GREEN);
 		::drawShipHealthBar(applicationInstance, centerShip, halfMetricsShip, enemyHealth.Shield, (int32_t)(halfMetricsShip2y - 2	), ::cho::CYAN );
