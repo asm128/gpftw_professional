@@ -34,16 +34,16 @@ struct SGameParticle {
 };
 
 struct SParticleToDraw {
-						int32_t																						Id;
-						int32_t																						IndexParticle;
+						int32_t																						IndexParticlePhysics;
+						int32_t																						IndexParticleInstance;
 						float																						TimeLived;
 						::cho::SCoord2<int32_t>																		Position;
 						//bool																						Lit;
 };
 
 struct SLaserToDraw {
-						int32_t																						Id;
-						int32_t																						IndexParticle;
+						int32_t																						IndexParticlePhysics;
+						int32_t																						IndexParticleInstance;
 						::cho::SLine2D<float>																		Segment;
 						::cho::SColorBGRA																			Color;
 };

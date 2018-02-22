@@ -85,6 +85,7 @@ struct SProjectile {
 						WEAPON_TYPE															TypeWeapon;
 						PLAYER_TYPE															TypePlayer;
 						int32_t																ShipIndex;
+						int32_t																ParticleIndex;
 };
 
 static constexpr	const int32_t														MAX_PLAYERS																= 4;
@@ -162,6 +163,9 @@ struct SGame {
 						::SPropertiesProjectile	<MAX_PROJECTILES>							Projectiles																= {};
 						::SPropertiesPowerup	<MAX_POWERUP>								Powerups																= {};
 						::cho::array_static<::cho::SCoord2<float>, MAX_PLAYERS>				PositionCrosshair														= {};
+						uint32_t															CountEnemies															= 0;
+						uint32_t															CountProjectiles														= 0;
+						uint32_t															CountPowerups															= 0;
 
 						float																HalfWidthShip															= 5;
 						float																HalfWidthCrosshair														= 5;

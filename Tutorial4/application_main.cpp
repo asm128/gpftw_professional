@@ -91,15 +91,15 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 template<typename _tParticleType>
 static				::cho::error_t										addParticle														
 	(	const ::SGameParticle										& particleType
-	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::array_pod<::cho::SParticleBinding<_tParticleType>>	& particleInstances
 	,	::SApplication::TParticleSystem::TIntegrator				& particleIntegrator
 	,	const ::cho::SCoord2<float>									& particlePosition
 	,	bool														isTurbo
 	,	const ::cho::SCoord2<float>									& particleDirection
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
-	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
+	::cho::SParticleBinding<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
+	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.IndexParticlePhysics];
 	newParticle.Position													= particlePosition; 
 	float																		particleSpeed													= 1;
 	::cho::SCoord2<float>														newDirection													= particleDirection;
@@ -151,18 +151,18 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-		 || (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST)
+		 || (particleInstance.Binding.TimeLived >= .125 && particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST)
 		 ) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused						= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else {
-			particleInstance.Type.TimeLived												+= lastFrameSeconds;
+			particleInstance.Binding.TimeLived										+= lastFrameSeconds;
 			TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
 			particleCurrent															= particleIntegrator.ParticleNext[physicsId];
 		}
@@ -256,35 +256,35 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	error_if(errored(::cho::grid_copy_alpha(offscreen.View, applicationInstance.TextureCrosshair[(uint32_t)(framework.FrameInfo.Seconds.Total * 10.0f) % 5].Original.View, applicationInstance.PositionCrosshair.Cast<int32_t>() - applicationInstance.TextureCenterCrosshair, {0xFF, 0, 0xFF, 0xFF})), "I believe this never fails.");
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		const int32_t																physicsId									= particleInstance.ParticleIndex;
+		const int32_t																physicsId									= particleInstance.IndexParticlePhysics;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
 			continue;
 
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (particleInstance.Type.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
-			: (particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.Type.TimeLived > .075)	? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
-																			: (particleInstance.Type.TimeLived > .03 )	? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
-																			: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
-																			: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::WHITE		: ::cho::ORANGE		)
-																			: ::cho::YELLOW 
-			: (particleInstance.Type.Type == PARTICLE_TYPE_STAR				)	? (0 == (physicsId % 7))						? ::cho::DARKYELLOW	/ 2.0f
-																			: (0 == (physicsId % 6))						? ::cho::GRAY 
-																			: (0 == (physicsId % 5))						? ::cho::WHITE
-																			: (0 == (physicsId % 4))						? ::cho::DARKGRAY 
-																			: (0 == (physicsId % 3))						? ::cho::GRAY 
-																			: (0 == (physicsId % 2))						? ::cho::WHITE
-																			: ::cho::DARKGRAY 
+			= (particleInstance.Binding.Type == PARTICLE_TYPE_LASER			)	? ::cho::LIGHTRED
+			: (particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST	)	? (particleInstance.Binding.TimeLived > .075)	? (applicationInstance.TurboShip ? ::cho::DARKGRAY	: ::cho::DARKGRAY	)
+																				: (particleInstance.Binding.TimeLived > .03 )	? (applicationInstance.TurboShip ? ::cho::GRAY		: ::cho::GRAY 		)
+																				: (physicsId % 3)						? (applicationInstance.TurboShip ? ::cho::CYAN		: ::cho::RED 		)
+																				: (physicsId % 2)						? (applicationInstance.TurboShip ? ::cho::WHITE		: ::cho::ORANGE		)
+																				: ::cho::YELLOW 
+			: (particleInstance.Binding.Type == PARTICLE_TYPE_STAR			)	? (0 == (physicsId % 7))						? ::cho::DARKYELLOW	/ 2.0f
+																				: (0 == (physicsId % 6))						? ::cho::GRAY 
+																				: (0 == (physicsId % 5))						? ::cho::WHITE
+																				: (0 == (physicsId % 4))						? ::cho::DARKGRAY 
+																				: (0 == (physicsId % 3))						? ::cho::GRAY 
+																				: (0 == (physicsId % 2))						? ::cho::WHITE
+																				: ::cho::DARKGRAY 
 			: ::cho::MAGENTA
 			;
-		if(particleInstance.Type.Lit) { 
+		if(particleInstance.Binding.Lit) { 
 			float																	maxFactor	= .5f;
 			float																	range		= 3.f;
-			switch(particleInstance.Type.Type) {
+			switch(particleInstance.Binding.Type) {
 			case PARTICLE_TYPE_LASER		: break;
 			case PARTICLE_TYPE_SHIP_THRUST	:
-				maxFactor															*= (1.0f - ::cho::min(1.0f, particleInstance.Type.TimeLived / 4));
-				range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, particleInstance.Type.TimeLived / 4));
+				maxFactor															*= (1.0f - ::cho::min(1.0f, particleInstance.Binding.TimeLived / 4));
+				range																= physicsId % 2 + (1.0f - ::cho::min(1.0f, particleInstance.Binding.TimeLived / 4));
 				break;
 			default							:
 				maxFactor															= (rand() % 3 + 1) * 0.15f;
@@ -295,11 +295,11 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		}
 	}
 
-	static double					beaconTimer			= 0;
-	beaconTimer						+= framework.FrameInfo.Seconds.LastFrame * 8;
+	static double																beaconTimer									= 0;
+	beaconTimer																+= framework.FrameInfo.Seconds.LastFrame * 8;
 	
-	::cho::SCoord2<int32_t>			centerPowerup	= applicationInstance.PositionPowerup.Cast<int32_t>();
-	::cho::SCoord2<int32_t>			lightPos []		= 
+	::cho::SCoord2<int32_t>														centerPowerup								= applicationInstance.PositionPowerup.Cast<int32_t>();
+	::cho::SCoord2<int32_t>														lightPos []									= 
 		{ centerPowerup + ::cho::SCoord2<int32_t>{-1,-6}
 		, centerPowerup + ::cho::SCoord2<int32_t>{ 0,-6}
 		, centerPowerup + ::cho::SCoord2<int32_t>{ 5,-1}
@@ -310,8 +310,8 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		, centerPowerup + ::cho::SCoord2<int32_t>{-6,-1}
 		};
 
-	::cho::SCoord2<int32_t>		selectedLightPos0	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
-		,						selectedLightPos2	= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
+	::cho::SCoord2<int32_t>														selectedLightPos0							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 0]
+		,																		selectedLightPos2							= lightPos[((uint32_t)beaconTimer % (::cho::size(lightPos) / 2)) + 4]
 		;
 
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos0.Cast<float>(), ::cho::SColorBGRA(::cho::RED), .3f, 3.0f);

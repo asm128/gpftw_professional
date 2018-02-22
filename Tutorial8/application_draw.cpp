@@ -98,10 +98,10 @@ static				::cho::error_t										drawShipHealthBar							(::SApplication& appli
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Debris.size(); iRay < rayCount; ++iRay) {
 		const ::SParticleToDraw														& particleToDraw								= applicationInstance.StuffToDraw.Debris[iRay];
 		const ::cho::SCoord2<float>													& pointToDraw									= particleToDraw.Position.Cast<float>();
-		if(applicationInstance.ParticleSystem.Instances[particleToDraw.IndexParticle].Type.Lit) {
+		if(applicationInstance.ParticleSystem.Instances[particleToDraw.IndexParticleInstance].Binding.Lit) {
 			::cho::SColorBGRA															finalColor										
-				= (0 == (particleToDraw.Id % 3)) ? ::cho::SColorBGRA(::cho::YELLOW) 
-				: (0 == (particleToDraw.Id % 2)) ? ::cho::SColorBGRA(::cho::RED) 
+				= (0 == (particleToDraw.IndexParticlePhysics % 3)) ? ::cho::SColorBGRA(::cho::YELLOW) 
+				: (0 == (particleToDraw.IndexParticlePhysics % 2)) ? ::cho::SColorBGRA(::cho::RED) 
 				: ::cho::SColorBGRA(::cho::ORANGE)
 				;
 			finalColor																*= 1.0f - (particleToDraw.TimeLived);
@@ -127,10 +127,10 @@ static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weapon
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iRay];
 		applicationInstance.CacheLinePoints.clear();
 		::cho::drawLine(viewOffscreen.metrics(), laserToDraw.Segment, applicationInstance.CacheLinePoints);
-		const ::cho::SParticleInstance<::SGameParticle>								& gameParticle								= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle];
-		const float																	lightRange									= (gameParticle.Type.TypePlayer == PLAYER_TYPE_PLAYER) ? 3.0f : 2.5f;
-		const float																	lightValue									= (gameParticle.Type.TypePlayer == PLAYER_TYPE_PLAYER) ? .15f : 1.0f;
-		const ::cho::SColorBGRA														finalColor									= weaponTypeColorPalette[gameParticle.Type.TypeWeapon];
+		const ::cho::SParticleBinding<::SGameParticle>								& gameParticle								= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticleInstance];
+		const float																	lightRange									= (gameParticle.Binding.TypePlayer == PLAYER_TYPE_PLAYER) ? 3.0f : 2.5f;
+		const float																	lightValue									= (gameParticle.Binding.TypePlayer == PLAYER_TYPE_PLAYER) ? .15f : 1.0f;
+		const ::cho::SColorBGRA														finalColor									= weaponTypeColorPalette[gameParticle.Binding.TypeWeapon];
 		for(uint32_t iLinePoint = 0, pointCount = applicationInstance.CacheLinePoints.size(); iLinePoint < pointCount; ++iLinePoint) {
 			const ::cho::SCoord2<float>													& pointToDraw								= applicationInstance.CacheLinePoints[iLinePoint].Cast<float>();
 			::cho::drawPixelLight(viewOffscreen, pointToDraw, finalColor, lightValue, lightRange);
@@ -145,22 +145,22 @@ static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weapon
 	::cho::drawRectangle(offscreen.View, applicationInstance.ColorBackground, ::cho::SRectangle2D<uint32_t>{{}, offscreen.View.metrics()});
 	for(uint32_t iRay = 0, rayCount = applicationInstance.StuffToDraw.Stars.size(); iRay < rayCount; ++iRay) {
 		::SParticleToDraw															& starToDraw								= applicationInstance.StuffToDraw.Stars[iRay];
-		if(false == applicationInstance.ParticleSystem.Instances[starToDraw.IndexParticle].Type.Lit)
+		if(false == applicationInstance.ParticleSystem.Instances[starToDraw.IndexParticleInstance].Binding.Lit)
 			continue;
 		::cho::SCoord2<int32_t>														& particlePosition							= starToDraw.Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (0 == (starToDraw.Id % 7))	? ::cho::DARKYELLOW	/ 2.0f
-			: (0 == (starToDraw.Id % 6))	? ::cho::GRAY 
-			: (0 == (starToDraw.Id % 5))	? ::cho::WHITE
-			: (0 == (starToDraw.Id % 4))	? ::cho::DARKGRAY 
-			: (0 == (starToDraw.Id % 3))	? ::cho::GRAY 
-			: (0 == (starToDraw.Id % 2))	? ::cho::WHITE
+			= (0 == (starToDraw.IndexParticlePhysics % 7))	? ::cho::DARKYELLOW	/ 2.0f
+			: (0 == (starToDraw.IndexParticlePhysics % 6))	? ::cho::GRAY 
+			: (0 == (starToDraw.IndexParticlePhysics % 5))	? ::cho::WHITE
+			: (0 == (starToDraw.IndexParticlePhysics % 4))	? ::cho::DARKGRAY 
+			: (0 == (starToDraw.IndexParticlePhysics % 3))	? ::cho::GRAY 
+			: (0 == (starToDraw.IndexParticlePhysics % 2))	? ::cho::WHITE
 			: ::cho::DARKGRAY 
 			;
 		float																		maxFactor	= .5f;
 		float																		range		= 3.f;
 		maxFactor																= (rand() % 3 + 1) * 0.10f;
-		range																	= starToDraw.Id % 3 + 1.0f;
+		range																	= starToDraw.IndexParticlePhysics % 3 + 1.0f;
 		::cho::drawPixelLight(viewOffscreen, particlePosition.Cast<float>(), viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x], maxFactor, range);
 	}
 	return 0;
@@ -172,14 +172,14 @@ static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weapon
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iThrust = 0, particleCount = (uint32_t)applicationInstance.StuffToDraw.Thrust.size(); iThrust < particleCount; ++iThrust) {
 		::SParticleToDraw															& thrustToDraw								= applicationInstance.StuffToDraw.Thrust[iThrust];
-		::SApplication::TParticleInstance											& particleInstance							= applicationInstance.ParticleSystem.Instances[thrustToDraw.IndexParticle];
-		if(false == particleInstance.Type.Lit)
+		::SApplication::TParticleInstance											& particleInstance							= applicationInstance.ParticleSystem.Instances[thrustToDraw.IndexParticleInstance];
+		if(false == particleInstance.Binding.Lit)
 			continue;
-		::SShipState																& shipState									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) 
-			? gameInstance.Ships	.States[particleInstance.Type.OwnerIndex] 
-			: gameInstance.Enemies	.States[particleInstance.Type.OwnerIndex]
+		::SShipState																& shipState									= (particleInstance.Binding.TypePlayer == PLAYER_TYPE_PLAYER) 
+			? gameInstance.Ships	.States[particleInstance.Binding.OwnerIndex] 
+			: gameInstance.Enemies	.States[particleInstance.Binding.OwnerIndex]
 			;
-		const int32_t																physicsId									= thrustToDraw.Id;
+		const int32_t																physicsId									= thrustToDraw.IndexParticlePhysics;
 		const ::cho::SCoord2<float>													& particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		if(false == ::cho::in_range(particlePosition, {{}, offscreen.View.metrics().Cast<float>()}))
 			continue;

@@ -144,8 +144,8 @@ static				::cho::error_t										checkLaserCollision
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		typedef	::SApplication::TParticle											TParticle;
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.ParticleIndex];
-		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.ParticleIndex];
+		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.IndexParticlePhysics];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.IndexParticlePhysics];
 		const bool																	nextPosOutOfRange								 
 			= (	((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 			||	((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
@@ -154,9 +154,9 @@ static				::cho::error_t										checkLaserCollision
 			= (	((uint32_t)particleCurrent.Position.x) >= framework.Offscreen.View.width	()
 			||	((uint32_t)particleCurrent.Position.y) >= framework.Offscreen.View.height	()
 			);
-		const bool																	instanceTimeout									= (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST);
+		const bool																	instanceTimeout									= (particleInstance.Binding.TimeLived >= .125 && particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST);
 		if((currentPosOutOfRange && nextPosOutOfRange) || instanceTimeout) { // Remove the particle instance and related information.
-			particleIntegrator.ParticleState[particleInstance.ParticleIndex].Unused	= true;
+			particleIntegrator.ParticleState[particleInstance.IndexParticlePhysics].Unused	= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
@@ -164,19 +164,19 @@ static				::cho::error_t										checkLaserCollision
 
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
 		typedef	::SApplication::TParticle											TParticle;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-		if(particleInstance.Type.Type == PARTICLE_TYPE_PROJECTILE) {
+		if(particleInstance.Binding.Type == PARTICLE_TYPE_PROJECTILE) {
 			const ::SLaserToDraw														laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, ::cho::LIGHTCYAN};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
-		::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>()};
-			 if(particleInstance.Type.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
-		else if(particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
-		else if(particleInstance.Type.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-		particleInstance.Type.TimeLived											+= lastFrameSeconds;
+		::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleCurrent.Position.Cast<int32_t>()};
+			 if(particleInstance.Binding.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+		else if(particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
+		else if(particleInstance.Binding.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
+		particleInstance.Binding.TimeLived											+= lastFrameSeconds;
 		particleCurrent															= particleNext;
 	}
 	return 0;
@@ -185,7 +185,7 @@ static				::cho::error_t										checkLaserCollision
 template<typename _tParticleType>
 static				::cho::error_t										addParticle														
 	(	::SGameParticle												particleType
-	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::array_pod<::cho::SParticleBinding<_tParticleType>>	& particleInstances
 	,	::SApplication::TIntegrator									& particleIntegrator
 	,	const ::cho::SCoord2<float>									& particlePosition
 	,	const ::cho::SCoord2<float>									& particleDirection
@@ -193,8 +193,8 @@ static				::cho::error_t										addParticle
 	,	const ::cho::array_view<::SApplication::TParticle>			& particleDefinitions
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>									& newInstance								= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
-	::SApplication::TParticle													& newParticle								= particleIntegrator.Particle[newInstance.ParticleIndex];
+	::cho::SParticleBinding<_tParticleType>										& newInstance								= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
+	::SApplication::TParticle													& newParticle								= particleIntegrator.Particle[newInstance.IndexParticlePhysics];
 	newParticle.Position													= particlePosition; 
 	::cho::SCoord2<float>														newDirection								= particleDirection;
 	const float																	value										= .5;
@@ -325,8 +325,8 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 			const cho::SCoord2<float>													& posEnemy									= gameInstance.Enemies.Position[iEnemy];
 			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_ENEMY].x;
 			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
-				gameInstance.Enemies.Health[iEnemy].Health								-= (int32_t)gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Type.OwnerIndex].Speed;
-				gameInstance.Enemies.Health[iEnemy].Shield								-= (int32_t)gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Type.OwnerIndex].Speed;
+				gameInstance.Enemies.Health[iEnemy].Health								-= (int32_t)gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Binding.OwnerIndex].Speed;
+				gameInstance.Enemies.Health[iEnemy].Shield								-= (int32_t)gameInstance.Ships.Weapon[particleInstances[laserToDraw.IndexParticle].Binding.OwnerIndex].Speed;
 			}
 			if(0 >= gameInstance.Enemies.Health[iEnemy].Health) {
 				gameInstance.Enemies.Alive[iEnemy] = 0;
@@ -364,7 +364,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 		const cho::SCoord2<float>													& posXHair									= gameInstance.PositionCrosshair[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 			const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-			if(applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Type.OwnerIndex != iShip)
+			if(applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle].Binding.OwnerIndex != iShip)
 				continue;
 			float																		halfSizeBox									= gameInstance.HalfWidthCrosshair;
 			const ::cho::SLine2D<float>													verticalSegments[]							= 

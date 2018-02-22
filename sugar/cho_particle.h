@@ -116,30 +116,30 @@ namespace cho
 	};
 
 	template<typename _tParticleType>
-	struct SParticleInstance {
+	struct SParticleBinding {
 		typedef					_tParticleType									TParticleType;
 
-								TParticleType									Type										= {};
-								int32_t											ParticleIndex								= -1;
+								TParticleType									Binding										= {};
+								int32_t											IndexParticlePhysics						= -1;
 	};
 
 	template<typename _tParticleType, typename _tCoord>
 							::cho::error_t									addParticle														
 		(	const _tParticleType										& particleType
-		,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+		,	::cho::array_pod<::cho::SParticleBinding<_tParticleType>>	& particleInstances
 		,	::cho::SParticle2Integrator<_tCoord>						& particleIntegrator
 		,	const ::cho::SParticle2<_tCoord>							& particleDefinition
 		)														
 	{
-		::cho::SParticleInstance<_tParticleType>									newInstance									= {}; 
-		newInstance.Type														= particleType; 
-		cho_necall(newInstance.ParticleIndex = particleIntegrator.AddParticle(particleDefinition), "Failed to add particle definition instance to integrator."); 
+		::cho::SParticleBinding<_tParticleType>									newInstance									= {}; 
+		newInstance.Binding													= particleType; 
+		cho_necall(newInstance.IndexParticlePhysics = particleIntegrator.AddParticle(particleDefinition), "Failed to add particle definition instance to integrator."); 
 		return particleInstances.push_back(newInstance);
 	}
 
 	template<typename _tParticleType, typename _tCoord>
 	struct SParticleSystem {
-		typedef					::cho::SParticleInstance<_tParticleType>		TParticleInstance;
+		typedef					::cho::SParticleBinding<_tParticleType>		TParticleInstance;
 		typedef					::cho::SParticle2Integrator<_tCoord>			TIntegrator;
 
 								::cho::array_pod<TParticleInstance>				Instances									= {};

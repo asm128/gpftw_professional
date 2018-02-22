@@ -113,15 +113,15 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 template<typename _tParticleType>
 static				::cho::error_t										addParticle														
 	(	::SGameParticle												particleType
-	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::array_pod<::cho::SParticleBinding<_tParticleType>>	& particleInstances
 	,	::SApplication::TParticleSystem::TIntegrator				& particleIntegrator
 	,	const ::cho::SCoord2<float>									& particlePosition
 	,	const ::cho::SCoord2<float>									& particleDirection
 	,	float														speed
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
-	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.ParticleIndex];
+	::cho::SParticleBinding<_tParticleType>									& newInstance													= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
+	::SApplication::TParticleSystem::TIntegrator::TParticle						& newParticle													= particleIntegrator.Particle[newInstance.IndexParticlePhysics];
 	newParticle.Position													= particlePosition; 
 	::cho::SCoord2<float>														newDirection													= particleDirection;
 	const float																	value															= .5;
@@ -172,27 +172,27 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 		);
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-		if(particleInstance.Type.Type == PARTICLE_TYPE_LASER) {
+		if(particleInstance.Binding.Type == PARTICLE_TYPE_LASER) {
 			::SLaserToDraw	laserToDraw	= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
 		if( ((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 		 || ((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-		 || (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST)
+		 || (particleInstance.Binding.TimeLived >= .125 && particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST)
 		 ) { // Remove the particle instance and related information.
 			particleIntegrator.ParticleState[physicsId].Unused						= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
 		else {
-			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Type.Lit};
-				 if(particleInstance.Type.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
-			else if(particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
-			else if(particleInstance.Type.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-			particleInstance.Type.TimeLived											+= lastFrameSeconds;
+			::SParticleToDraw particleToDraw = {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleCurrent.Position.Cast<int32_t>(), particleInstance.Binding.Lit};
+				 if(particleInstance.Binding.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+			else if(particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
+			else if(particleInstance.Binding.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
+			particleInstance.Binding.TimeLived											+= lastFrameSeconds;
 			particleCurrent															= particleNext;
 		}
 	}

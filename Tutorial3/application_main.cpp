@@ -78,18 +78,18 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 template<typename _tParticleType>
 void																	addParticle														
 	(	_tParticleType												particleType
-	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::array_pod<::cho::SParticleBinding<_tParticleType>>	& particleInstances
 	,	::cho::SParticle2Integrator<float>							& particleEngine
 	,	const ::cho::SCoord2<uint32_t>								& targetSize
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleEngine, particleDefinitions[particleType])]; 
-	particleEngine.Particle[newInstance.ParticleIndex].Position					= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
+	::cho::SParticleBinding<_tParticleType>										newInstance														= particleInstances[::cho::addParticle(particleType, particleInstances, particleEngine, particleDefinitions[particleType])]; 
+	particleEngine.Particle[newInstance.IndexParticlePhysics].Position			= {float(rand() % targetSize.x), float(rand() % targetSize.y)};
 	switch(particleType) {
-	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.ParticleIndex].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 2 + targetSize.y / 4)}; break;
-	case ::PARTICLE_TYPE_LAVA:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= 0; break;
+	case ::PARTICLE_TYPE_FIRE:	particleEngine.Particle[newInstance.IndexParticlePhysics].Position		= {float(targetSize.x / 2 + (rand() % 3 - 1.0f) * (targetSize.x / 5)), float(targetSize.y / 2 + targetSize.y / 4)}; break;
+	case ::PARTICLE_TYPE_LAVA:	particleEngine.Particle[newInstance.IndexParticlePhysics].Position.y	= 0; break;
 	case ::PARTICLE_TYPE_RAIN:
-	case ::PARTICLE_TYPE_SNOW:	particleEngine.Particle[newInstance.ParticleIndex].Position.y	= float(targetSize.y - 2); particleEngine.Particle[newInstance.ParticleIndex].Forces.Velocity.y	= -.001f; break;
+	case ::PARTICLE_TYPE_SNOW:	particleEngine.Particle[newInstance.IndexParticlePhysics].Position.y	= float(targetSize.y - 2); particleEngine.Particle[newInstance.IndexParticlePhysics].Forces.Velocity.y	= -.001f; break;
 	}
 	particleInstances.push_back(newInstance);
 }
@@ -118,7 +118,7 @@ void																	addParticle
 	::cho::array_pod<SApplication::TParticleSystem::TParticleInstance>			& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		SApplication::TParticleSystem::TParticleInstance							& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
 		::cho::SParticle2<float>													& particleNext								= particleEngine.ParticleNext[physicsId];
 		if( particleNext.Position.x < 0 || particleNext.Position.x >= offscreen.View.width	()
 		 || particleNext.Position.y < 0 || particleNext.Position.y >= offscreen.View.height	()
@@ -162,13 +162,13 @@ void																	addParticle
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
 	::cho::array_pod<::SApplication::TParticleSystem::TParticleInstance>		& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
-		::cho::SParticleInstance<PARTICLE_TYPE>										& particleInstance							= particleInstances[iParticle];
-		const int32_t																physicsId									= particleInstance.ParticleIndex;
+		::cho::SParticleBinding<PARTICLE_TYPE>										& particleInstance							= particleInstances[iParticle];
+		const int32_t																physicsId									= particleInstance.IndexParticlePhysics;
 		const ::cho::SCoord2<float>													particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
 		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
-			= (PARTICLE_TYPE_SNOW == particleInstance.Type) ? ::cho::SColorBGRA(::cho::CYAN)
-			: (PARTICLE_TYPE_FIRE == particleInstance.Type) ? ::cho::SColorBGRA(::cho::RED )
-			: (PARTICLE_TYPE_RAIN == particleInstance.Type) ? ::cho::SColorBGRA(::cho::BLUE)
+			= (PARTICLE_TYPE_SNOW == particleInstance.Binding) ? ::cho::SColorBGRA(::cho::CYAN)
+			: (PARTICLE_TYPE_FIRE == particleInstance.Binding) ? ::cho::SColorBGRA(::cho::RED )
+			: (PARTICLE_TYPE_RAIN == particleInstance.Binding) ? ::cho::SColorBGRA(::cho::BLUE)
 			: ::cho::SColorBGRA(::cho::ORANGE)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
 	}

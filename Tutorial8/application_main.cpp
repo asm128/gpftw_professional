@@ -104,6 +104,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		gameInstance.Powerups.Alive		[iShip]									= 1;
 		gameInstance.Powerups.Position	[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 * 3 + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		gameInstance.Powerups.Family	[iShip]									= (POWERUP_FAMILY)iShip;
+		++gameInstance.CountPowerups;
 	}
 	//gameInstance.PositionPowerup											= framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
 	
@@ -129,6 +130,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	return 0;
 }
 
+					//::cho::error_t										removeDeadStuff								(::SApplication& applicationInstance);
 					::cho::error_t										updateInput									(::SApplication& applicationInstance);
 					::cho::error_t										updateShots									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
 					::cho::error_t										updateSpawn									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
@@ -152,6 +154,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
+	//error_if(errored(::removeDeadStuff	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateParticles	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateSpawn		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateShips		(applicationInstance)), "Unknown error.");
@@ -161,7 +164,14 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
 	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. Particle count: %u. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, applicationInstance.ParticleSystem.Instances.size(), 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
+	sprintf_s(buffer, "[%u x %u]. Particle count: %u. Enemy count: %u. Projectile count: %u. Powerup count: %u. FPS: %g. Last frame seconds: %g."
+		, mainWindow.Size.x, mainWindow.Size.y
+		, applicationInstance.ParticleSystem.Instances.size()
+		, applicationInstance.Game.CountEnemies
+		, applicationInstance.Game.CountProjectiles
+		, applicationInstance.Game.CountPowerups
+		, 1 / timer.LastTimeSeconds
+		, timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 	return 0;

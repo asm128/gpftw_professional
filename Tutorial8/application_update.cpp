@@ -148,8 +148,8 @@ template <size_t _sizeAlive>
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		typedef	::SApplication::TParticle											TParticle;
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.ParticleIndex];
-		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.ParticleIndex];
+		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.IndexParticlePhysics];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.IndexParticlePhysics];
 		const bool																	nextPosOutOfRange								 
 			= (	((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
 			||	((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
@@ -158,9 +158,9 @@ template <size_t _sizeAlive>
 			= (	((uint32_t)particleCurrent.Position.x) >= framework.Offscreen.View.width	()
 			||	((uint32_t)particleCurrent.Position.y) >= framework.Offscreen.View.height	()
 			);
-		const bool																	instanceTimeout									= (particleInstance.Type.TimeLived >= .125 && particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST);
+		const bool																	instanceTimeout									= (particleInstance.Binding.TimeLived >= .125 && particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST);
 		if((currentPosOutOfRange && nextPosOutOfRange) || instanceTimeout) { // Remove the particle instance and related information.
-			particleIntegrator.ParticleState[particleInstance.ParticleIndex].Unused	= true;
+			particleIntegrator.ParticleState[particleInstance.IndexParticlePhysics].Unused	= true;
 			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
 			--iParticle;
 		}
@@ -168,19 +168,21 @@ template <size_t _sizeAlive>
 
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.ParticleIndex;
+		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
 		typedef	::SApplication::TParticle											TParticle;
 		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
 		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-		if(particleInstance.Type.Type == PARTICLE_TYPE_PROJECTILE) {
+		if(particleInstance.Binding.Type == PARTICLE_TYPE_PROJECTILE) {
 			const ::SLaserToDraw														laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, ::cho::LIGHTCYAN};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
 		}
-		::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Type.TimeLived, particleCurrent.Position.Cast<int32_t>()};
-			 if(particleInstance.Type.Type == PARTICLE_TYPE_STAR		)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
-		else if(particleInstance.Type.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
-		else if(particleInstance.Type.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-		particleInstance.Type.TimeLived											+= lastFrameSeconds;
+		else {
+			::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleCurrent.Position.Cast<int32_t>()};
+				 if(particleInstance.Binding.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
+			else if(particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
+			else if(particleInstance.Binding.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
+		}
+		particleInstance.Binding.TimeLived											+= lastFrameSeconds;
 		particleCurrent															= particleNext;
 	}
 	return 0;
@@ -189,7 +191,7 @@ template <size_t _sizeAlive>
 template<typename _tParticleType>
 static				::cho::error_t										addParticle														
 	(	::SGameParticle												particleType
-	,	::cho::array_pod<::cho::SParticleInstance<_tParticleType>>	& particleInstances
+	,	::cho::array_pod<::cho::SParticleBinding<_tParticleType>>	& particleInstances
 	,	::SApplication::TIntegrator									& particleIntegrator
 	,	const ::cho::SCoord2<float>									& particlePosition
 	,	const ::cho::SCoord2<float>									& particleDirection
@@ -197,8 +199,10 @@ static				::cho::error_t										addParticle
 	,	const ::cho::array_view<::SApplication::TParticle>			& particleDefinitions
 	)														
 {
-	::cho::SParticleInstance<_tParticleType>									& newInstance								= particleInstances[::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type])]; 
-	::SApplication::TParticle													& newParticle								= particleIntegrator.Particle[newInstance.ParticleIndex];
+	int32_t																		indexParticleInstance						= ::cho::addParticle(particleType, particleInstances, particleIntegrator, particleDefinitions[particleType.Type]); 
+	ree_if(errored(indexParticleInstance), "Cannot create particle instance.");
+	::cho::SParticleBinding<_tParticleType>									& newInstance								= particleInstances[indexParticleInstance]; 
+	::SApplication::TParticle													& newParticle								= particleIntegrator.Particle[newInstance.IndexParticlePhysics];
 	newParticle.Position													= particlePosition; 
 	::cho::SCoord2<float>														newDirection								= particleDirection;
 	const float																	value										= .5;
@@ -210,24 +214,23 @@ static				::cho::error_t										addParticle
 		break;
 	}
 	newParticle.Forces.Velocity												= newDirection * speed;	//{ -, (float)((rand() % 31 * 4) - 15 * 4)};
-	return 0;
+	return indexParticleInstance;
 }
 
-static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
+static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t particleIndex, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
 	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
-	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
-		if(0 == projectilesAlive[iProjectile]) {
-			projectilesAlive[iProjectile]											= 1;
-			::SProjectile																& projectile							= gameInstance.Projectiles.Projectiles[iProjectile];
-			projectile.TypeWeapon													= weaponType;
-			projectile.TypePlayer													= playerType;
-			projectile.ShipIndex													= iShip;
-			projectile.TimeLived													= 0;
-			projectile.Speed														= projectileSpeed;
-			return iProjectile;
-		}
-	}
-	return -1;	// Projectile storage is full. Cannot add projectile.
+	uint32_t																	iProjectile									= ::firstUnused(gameInstance.Projectiles.Alive);
+	rew_if(iProjectile == -1, "Not enough space for storing new projectile.");
+	projectilesAlive[iProjectile]											= 1;
+	::SProjectile																& projectile							= gameInstance.Projectiles.Projectiles[iProjectile] = {};
+	projectile.TypeWeapon													= weaponType;
+	projectile.TypePlayer													= playerType;
+	projectile.ShipIndex													= iShip;
+	projectile.TimeLived													= 0;
+	projectile.Speed														= projectileSpeed;
+	projectile.ParticleIndex												= particleIndex;
+	++gameInstance.CountProjectiles;
+	return iProjectile;
 }
 
 template <size_t _sizeAlive>
@@ -267,8 +270,8 @@ static				::cho::error_t										updateSpawnShots
 				const ::cho::SCoord2<float>													weaponParticleOffset						= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[textureIndex].x), -1};
 				const ::cho::SCoord2<float>													shotDirection								= (playerType == PLAYER_TYPE_PLAYER) ? ::cho::SCoord2<float>{1.0f, 0.0f} : 
 					(gameInstance.Ships.Position[rand() % gameInstance.ShipsPlaying] - gameInstance.Enemies.Position[iShip]).Normalize();
-				::addParticle(gameParticle, particleInstances, particleIntegrator, positions[iShip] + weaponParticleOffset, shotDirection, weapon.Speed, particleDefinitions);
-				e_if(errored(::addProjectile(gameInstance, iShip, gameParticle.TypePlayer, gameParticle.TypeWeapon, weapon.Speed)), "Projectile storage is full. Cannot add projectile.");
+				int32_t																		particleIndex								= ::addParticle(gameParticle, particleInstances, particleIntegrator, positions[iShip] + weaponParticleOffset, shotDirection, weapon.Speed, particleDefinitions);
+				e_if(errored(::addProjectile(gameInstance, particleIndex, iShip, gameParticle.TypePlayer, gameParticle.TypeWeapon, weapon.Speed)), "Projectile storage is full. Cannot add projectile.");
 			}
 		}
 	}
@@ -325,11 +328,7 @@ static				::cho::error_t										updateSpawnShots
 	return 0;
 }
 
-					::cho::error_t										updateShots
-	( ::SApplication										& applicationInstance
-	, const ::cho::array_view<::SApplication::TParticle>	& particleDefinitions
-	)
-{ 
+					::cho::error_t										removeDeadStuff								(::SApplication& applicationInstance)					{
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
@@ -337,9 +336,25 @@ static				::cho::error_t										updateSpawnShots
 			continue;
 		::SProjectile																& projectile								= gameInstance.Projectiles.Projectiles[iProjectile];
 		projectile.TimeLived													+= applicationInstance.Framework.FrameInfo.Seconds.LastFrame;
-		if(projectile.TimeLived > 0.01) 
+		if(projectile.TimeLived > 0.01) {
 			projectilesAlive[iProjectile]											= 0;
+			applicationInstance.ParticleSystem.Integrator.ParticleState[applicationInstance.ParticleSystem.Instances[projectile.ParticleIndex].IndexParticlePhysics].Unused = true;
+			applicationInstance.ParticleSystem.Instances.remove_unordered(projectile.ParticleIndex);
+			--gameInstance.CountProjectiles;
+		}
+		else {
+			info_printf("Time not elapsed? %G", projectile.TimeLived);
+		}
 	}
+	return 0;
+}
+
+					::cho::error_t										updateShots
+	( ::SApplication										& applicationInstance
+	, const ::cho::array_view<::SApplication::TParticle>	& particleDefinitions
+	)
+{ 
+	::SGame																		& gameInstance								= applicationInstance.Game;
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	::SAABBCache																aabbCache;
 	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
@@ -355,12 +370,12 @@ static				::cho::error_t										updateSpawnShots
 			
 			}
 		}
-		const ::SApplication::TParticleInstance										& particleInstance							= particleInstances[laserToDraw.IndexParticle];
-		::SWeapon																	& weapon									= (particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER)
-			? gameInstance.Ships	.Weapon[particleInstance.Type.OwnerIndex]
-			: gameInstance.Enemies	.Weapon[particleInstance.Type.OwnerIndex]
+		const ::SApplication::TParticleInstance										& particleInstance							= particleInstances[laserToDraw.IndexParticleInstance];
+		::SWeapon																	& weapon									= (particleInstance.Binding.TypePlayer == PLAYER_TYPE_PLAYER)
+			? gameInstance.Ships	.Weapon[particleInstance.Binding.OwnerIndex]
+			: gameInstance.Enemies	.Weapon[particleInstance.Binding.OwnerIndex]
 			;
-		if(particleInstance.Type.TypePlayer == PLAYER_TYPE_PLAYER) {
+		if(particleInstance.Binding.TypePlayer == PLAYER_TYPE_PLAYER) {
 			for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) { // Check enemy
 				if(0 == gameInstance.Enemies.Alive[iEnemy])
 					continue;
@@ -375,7 +390,8 @@ static				::cho::error_t										updateSpawnShots
 					if(enemyHealth.Shield < 0) enemyHealth.Shield = 0;
 				}
 				if(0 >= enemyHealth.Health) {
-					gameInstance.Enemies.Alive[iEnemy] = 0;
+					gameInstance.Enemies.Alive[iEnemy]										= 0;
+					--gameInstance.CountEnemies;
 					continue;
 				}
 				static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
@@ -431,8 +447,8 @@ static				::cho::error_t										updateSpawnShots
 		const cho::SCoord2<float>													& posXHair									= gameInstance.PositionCrosshair[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 			const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-			const ::SApplication::TParticleInstance										& particleInstance							= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticle];
-			if(particleInstance.Type.OwnerIndex != iShip || particleInstance.Type.TypePlayer != PLAYER_TYPE_PLAYER)
+			const ::SApplication::TParticleInstance										& particleInstance							= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticleInstance];
+			if(particleInstance.Binding.OwnerIndex != iShip || particleInstance.Binding.TypePlayer != PLAYER_TYPE_PLAYER)
 				continue;
 			float																		halfSizeBox									= gameInstance.HalfWidthCrosshair;
 			const ::cho::SLine2D<float>													verticalSegments[]							= 
@@ -440,7 +456,7 @@ static				::cho::error_t										updateSpawnShots
 				, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 				};
 			const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
-			::cho::SCoord2<float>														collisions	[::cho::size(verticalSegments)]= {};
+			::cho::SCoord2<float>														collisions	[::cho::size(verticalSegments)]	= {};
 			for(uint32_t iSeg = 0; iSeg < ::cho::size(verticalSegments); ++iSeg) {
 				::cho::SCoord2<float>														& collision									= collisions		[iSeg];
 				const ::cho::SLine2D<float>													& segSelected								= verticalSegments	[iSeg]; 
@@ -479,26 +495,30 @@ static				::cho::error_t										updateSpawnShots
 			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {2, 250, WEAPON_TYPE(rand()% WEAPON_TYPE_COUNT)};
 			gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
 			gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
+			++gameInstance.CountEnemies;
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
 		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
-		if(indexToSpawnPow != -1 && gameInstance.Enemies.Alive[0] && 0 == (rand() % 5)) {
-			gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
-			gameInstance.Powerups.Position		[indexToSpawnPow]					= gameInstance.Enemies.Position[0];
-			gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
-			::SPowerup																	& powerup									= gameInstance.Powerups.Type[indexToSpawnPow];
-			powerup.TypeBuff														= BUFF_TYPE_INVALID;
-			powerup.TypeHealth														= HEALTH_TYPE_INVALID;
-			powerup.TypeWeapon														= WEAPON_TYPE_INVALID;
-			switch(rand() % 3) {
-			case 0: powerup.TypeBuff													= BUFF_TYPE_FIRE_RATIO	; break;
-			case 1:	powerup.TypeHealth													= HEALTH_TYPE_LIFE		; break;
-			case 2:	powerup.TypeWeapon													= WEAPON_TYPE_SPARK		; break;
+		if(indexToSpawnPow != -1) {
+			if(gameInstance.Enemies.Alive[0] && 0 == (rand() % 5)) {
+				gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
+				gameInstance.Powerups.Position		[indexToSpawnPow]					= gameInstance.Enemies.Position[0];
+				gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
+				::SPowerup																	& powerup									= gameInstance.Powerups.Type[indexToSpawnPow];
+				powerup.TypeBuff														= BUFF_TYPE_INVALID;
+				powerup.TypeHealth														= HEALTH_TYPE_INVALID;
+				powerup.TypeWeapon														= WEAPON_TYPE_INVALID;
+				switch(rand() % 3) {
+				case 0: powerup.TypeBuff													= BUFF_TYPE_FIRE_RATIO	; break;
+				case 1:	powerup.TypeHealth													= HEALTH_TYPE_LIFE		; break;
+				case 2:	powerup.TypeWeapon													= WEAPON_TYPE_SPARK		; break;
+				}
+				++gameInstance.CountPowerups;
 			}
 		}
 		else
-			warning_printf("Not enough space in enemy container to spawn more enemies!");	
+			warning_printf("Not enough space in enemy container to spawn more powerups!");	
 	}
 	for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])
