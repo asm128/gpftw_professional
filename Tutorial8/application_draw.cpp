@@ -247,7 +247,7 @@ static				::cho::error_t										drawPowerup						(::SApplication& applicationI
 			lightPos[6]																= position + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}			;
 			lightPos[7]																= position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}	;
 			texturePowerup															= applicationInstance.StuffToDraw.TexturesPowerup0;
-			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0];
+			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWCORESQUARE];
 		}
 		else { // draw diagonal powerup box
 			lightPos[0]																= position + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1};
@@ -259,7 +259,7 @@ static				::cho::error_t										drawPowerup						(::SApplication& applicationI
 			lightPos[6]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0};
 			lightPos[7]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1};
 			texturePowerup															= applicationInstance.StuffToDraw.TexturesPowerup1;
-			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP1];
+			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWCOREDIAGONAL];
 		}
 		::drawPowerup(applicationInstance, powFamily, texturePowerup, textureCenterPowerup, position.Cast<float>(), lightPos, timer);
 	}

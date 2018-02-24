@@ -85,8 +85,8 @@ static				::cho::error_t										checkLaserCollision
 }
 
 template <size_t _sizeAlive>
-					::cho::error_t										checkLineOfFire								(::SApplication & applicationInstance, ::SAABBCache& aabbCache, uint32_t iShip, float halfSizeBox, const ::cho::SLine2D<float>& projectilePath, const ::cho::array_static<cho::SCoord2<float>, _sizeAlive>& positions, const ::SArrayElementState<_sizeAlive>& alive)	{
-	::SGame																		& gameInstance			 					= applicationInstance.Game;
+					::cho::error_t										updateLineOfFire							(::SApplication & applicationInstance, ::SAABBCache& aabbCache, uint32_t iShip, float halfSizeBox, const ::cho::SLine2D<float>& projectilePath, const ::cho::array_static<cho::SCoord2<float>, _sizeAlive>& positions, const ::SArrayElementState<_sizeAlive>& alive)	{
+	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iEnemy = 0; iEnemy < alive.size(); ++iEnemy) {
 		if(0 == alive[iEnemy])
 			continue;
@@ -121,8 +121,41 @@ template <size_t _sizeAlive>
 		projectilePath.A.y														-= 1;
 		projectilePath.B.y														-= 1;
 		gameInstance.Ships.LineOfFire[iShip]										= false;
-		::checkLineOfFire(applicationInstance, aabbCache, iShip, gameInstance.HalfWidthEnemy	, projectilePath, gameInstance.Enemies	.Position, gameInstance.Enemies	.Alive);
-		::checkLineOfFire(applicationInstance, aabbCache, iShip, gameInstance.HalfWidthPowerup	, projectilePath, gameInstance.Powerups	.Position, gameInstance.Powerups.Alive);
+		::updateLineOfFire(applicationInstance, aabbCache, iShip, gameInstance.HalfWidthEnemy	, projectilePath, gameInstance.Enemies	.Position, gameInstance.Enemies	.Alive);
+		::updateLineOfFire(applicationInstance, aabbCache, iShip, gameInstance.HalfWidthPowerup	, projectilePath, gameInstance.Powerups	.Position, gameInstance.Powerups.Alive);
+	}
+
+	// Pick up powerups
+	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {	// --- Calculate line of fire and set state accordingly. This causes Draw() to draw the crosshair in the right mode.
+		if(0 == gameInstance.Ships.Alive[iShip])
+			continue;
+		for(uint32_t iPow = 0, powCount = gameInstance.Powerups.Alive.size(); iPow < powCount; ++iPow) {	// --- Calculate line of fire and set state accordingly. This causes Draw() to draw the crosshair in the right mode.
+			if(0 == gameInstance.Powerups.Alive[iPow])
+				continue;
+
+			float																		collisionDistance							= (applicationInstance.Game.HalfWidthShip + applicationInstance.Game.HalfWidthPowerup);
+			if((gameInstance.Powerups.Position[iPow] - gameInstance.Ships.Position[iShip]).LengthSquared() > (collisionDistance * collisionDistance))
+				continue;
+			::SPowerup																	& powerup									= gameInstance.Powerups.Type[iPow];
+			//if(powerup.TypeBuff		!= BUFF_TYPE_INVALID)	{ switch (powerup.TypeBuff		) { gameInstance.Ships.Weapon[iShip].Type = powerup.TypeWeapon; break; }  }
+			if(powerup.TypeWeapon	!= WEAPON_TYPE_INVALID)	{ gameInstance.Ships.Weapon[iShip].Type = powerup.TypeWeapon; }
+			if(powerup.TypeHealth	!= HEALTH_TYPE_INVALID)	{ 
+				switch (powerup.TypeHealth	) { 
+				case HEALTH_TYPE_HEALTH		: gameInstance.Ships.Health[iShip].Health += 1000; break; 
+				case HEALTH_TYPE_SHIELD		: gameInstance.Ships.Health[iShip].Shield += 1000; break; 
+				}
+			}
+			gameInstance.Powerups.Alive[iPow]										= 0;
+
+		}
+		::cho::SCoord2<float>														& shipPosition								= gameInstance.Ships.Position[iShip];
+		::SAABBCache																aabbCache;
+		::cho::SLine2D<float>														projectilePath								= {shipPosition, shipPosition + ::cho::SCoord2<float>{10000, }};
+		projectilePath.A.y														-= 1;
+		projectilePath.B.y														-= 1;
+		gameInstance.Ships.LineOfFire[iShip]										= false;
+		::updateLineOfFire(applicationInstance, aabbCache, iShip, gameInstance.HalfWidthEnemy	, projectilePath, gameInstance.Enemies	.Position, gameInstance.Enemies	.Alive);
+		::updateLineOfFire(applicationInstance, aabbCache, iShip, gameInstance.HalfWidthPowerup	, projectilePath, gameInstance.Powerups	.Position, gameInstance.Powerups.Alive);
 	}
 	return 0;
 }
@@ -160,12 +193,9 @@ template <size_t _sizeAlive>
 					::cho::error_t										updateEffectParticles						(float lastFrameSeconds, ::SApplication::TIntegrator & particleIntegrator, ::cho::array_pod<::SApplication::TParticleInstance> & particleInstances, ::cho::array_pod<::SParticleToDraw> & particlesToDraw)											{ 
 	typedef	::SApplication::TParticleInstance									TParticleInstance;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		TParticleInstance															& particleInstance							= particleInstances				[iParticle];
+		TParticleInstance															& particleInstance							= particleInstances[iParticle];
 		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
-		typedef	::SApplication::TParticle											TParticle;
-		//TParticle																	& particleNext								= particleIntegrator.ParticleNext	[physicsId];
-		TParticle																	& particleCurrent							= particleIntegrator.Particle		[physicsId];
-		const ::SParticleToDraw														particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleCurrent.Position.Cast<int32_t>()};
+		const ::SParticleToDraw														particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleIntegrator.Particle[physicsId].Position.Cast<int32_t>()};
 		particlesToDraw.push_back(particleToDraw);
 		particleInstance.Binding.TimeLived										+= lastFrameSeconds;
 	}
@@ -289,8 +319,8 @@ static				::cho::error_t										updateSpawnShots
 			continue;
 		uint32_t																	textureIndex								= (playerType == PLAYER_TYPE_PLAYER) ? GAME_TEXTURE_SHIP0 + iShip : GAME_TEXTURE_ENEMY;
 		weaponDelay[iShip]														+= framework.FrameInfo.Seconds.LastFrame;
-		if(shipState[iShip].Firing) { // Add lasers / bullets.
-			const ::SWeapon																& weapon										= weapons[iShip];
+		const ::SWeapon																& weapon										= weapons[iShip];
+		if(shipState[iShip].Firing && weapon.Type != WEAPON_TYPE_INVALID) { // Add lasers / bullets.
 			if( weaponDelay[iShip] >= weapon.Delay ) {
 				weaponDelay[iShip]														= 0;
 				::SGameParticle																gameParticle;
@@ -347,7 +377,7 @@ static				::cho::error_t										updateSpawnShots
 		::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystemStars.Instances;
 		::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystemStars.Integrator;
 		applicationInstance.EffectsDelay.Star									+= framework.FrameInfo.Seconds.LastFrame;
-		if(applicationInstance.EffectsDelay.Star > .1) {
+		if( applicationInstance.EffectsDelay.Star > .1 ) {
 			applicationInstance.EffectsDelay.Star									= 0;
 			bool																		bFastStarFromThrust							= false;
 			for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
@@ -389,6 +419,25 @@ static				::cho::error_t										updateSpawnShots
 	return 0;
 }
 
+					::cho::error_t										spawnPowOfRandomType						(::SGame & gameInstance, ::cho::SCoord2<float> powPosition)			{
+	int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
+	ree_if(indexToSpawnPow == -1, "Not enough space to spawn more pows!") 
+	gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
+	gameInstance.Powerups.Position		[indexToSpawnPow]					= powPosition;
+	gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
+	::SPowerup																	& powerup									= gameInstance.Powerups.Type[indexToSpawnPow];
+	powerup.TypeBuff														= BUFF_TYPE_INVALID;
+	powerup.TypeHealth														= HEALTH_TYPE_INVALID;
+	powerup.TypeWeapon														= WEAPON_TYPE_INVALID;
+	switch(rand() % 3) {
+	case 0: powerup.TypeBuff													= (BUFF_TYPE	)(rand() % BUFF_TYPE_COUNT	); break;
+	case 1:	powerup.TypeHealth													= (HEALTH_TYPE	)(rand() % HEALTH_TYPE_COUNT); break;
+	case 2:	powerup.TypeWeapon													= (WEAPON_TYPE	)(rand() % WEAPON_TYPE_COUNT); break;
+	}
+	++gameInstance.CountPowerups;
+	return 0;
+}
+
 					::cho::error_t										updateShots
 	( ::SApplication										& applicationInstance
 	, const ::cho::array_view<::SApplication::TParticle>	& particleDefinitions
@@ -405,7 +454,7 @@ static				::cho::error_t										updateSpawnShots
 			if(0 == gameInstance.Powerups.Alive[iPow])
 				continue;
 			const cho::SCoord2<float>													& posPowerup								= gameInstance.Powerups.Position[iPow];
-			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWERUP0].x;
+			float																		halfSizeBox									= (float)applicationInstance.TextureCenters[GAME_TEXTURE_POWCORESQUARE].x;
 			if(1 == ::checkLaserCollision(projectilePath, aabbCache, posPowerup, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 			
 			}
@@ -432,6 +481,8 @@ static				::cho::error_t										updateSpawnShots
 				if(0 >= enemyHealth.Health) {
 					gameInstance.Enemies.Alive[iEnemy]										= 0;
 					--gameInstance.CountEnemies;
+					if(0 == (rand() % 2))
+						::spawnPowOfRandomType(gameInstance, gameInstance.Enemies.Position[iEnemy]);
 					continue;
 				}
 				static constexpr const ::cho::SCoord2<float>								reference									= {1, 0};
@@ -539,26 +590,6 @@ static				::cho::error_t										updateSpawnShots
 		}
 		else
 			warning_printf("Not enough space in enemy container to spawn more enemies!");	
-		int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
-		if(indexToSpawnPow != -1) {
-			if(gameInstance.Enemies.Alive[0] && 0 == (rand() % 5)) {
-				gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
-				gameInstance.Powerups.Position		[indexToSpawnPow]					= gameInstance.Enemies.Position[0];
-				gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
-				::SPowerup																	& powerup									= gameInstance.Powerups.Type[indexToSpawnPow];
-				powerup.TypeBuff														= BUFF_TYPE_INVALID;
-				powerup.TypeHealth														= HEALTH_TYPE_INVALID;
-				powerup.TypeWeapon														= WEAPON_TYPE_INVALID;
-				switch(rand() % 3) {
-				case 0: powerup.TypeBuff													= BUFF_TYPE_FIRE_RATIO	; break;
-				case 1:	powerup.TypeHealth													= HEALTH_TYPE_LIFE		; break;
-				case 2:	powerup.TypeWeapon													= WEAPON_TYPE_SPARK		; break;
-				}
-				++gameInstance.CountPowerups;
-			}
-		}
-		else
-			warning_printf("Not enough space in enemy container to spawn more powerups!");	
 	}
 	for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])

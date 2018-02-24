@@ -38,14 +38,12 @@ struct SParticleToDraw {
 						int32_t																						IndexParticleInstance;
 						float																						TimeLived;
 						::cho::SCoord2<int32_t>																		Position;
-						//bool																						Lit;
 };
 
 struct SLaserToDraw {
 						int32_t																						IndexParticlePhysics;
 						int32_t																						IndexParticleInstance;
 						::cho::SLine2D<float>																		Segment;
-//						::cho::SColorBGRA																			Color;
 };
 
 struct SStuffToDraw {
@@ -62,8 +60,8 @@ struct SStuffToDraw {
 enum GAME_TEXTURE : int8_t
 	{ GAME_TEXTURE_SHIP0			
 	, GAME_TEXTURE_SHIP1		
-	, GAME_TEXTURE_POWERUP0		
-	, GAME_TEXTURE_POWERUP1		
+	, GAME_TEXTURE_POWCORESQUARE		
+	, GAME_TEXTURE_POWCOREDIAGONAL	
 	, GAME_TEXTURE_CROSSHAIR	
 	, GAME_TEXTURE_POWICON		
 	, GAME_TEXTURE_ENEMY		

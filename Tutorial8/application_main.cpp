@@ -76,10 +76,10 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	for(uint32_t iSprite = 0, spriteCount = ::cho::size(bmpFileNames); iSprite < spriteCount; ++iSprite)
 		::setupSprite(applicationInstance.Textures[iSprite], applicationInstance.TextureCenters[iSprite], {bmpFileNames[iSprite], (uint32_t)strlen(bmpFileNames[iSprite])});
 
-	applicationInstance.StuffToDraw.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWERUP0	].Processed.View);
-	applicationInstance.StuffToDraw.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWICON	].Processed.View);
-	applicationInstance.StuffToDraw.TexturesPowerup1.push_back(applicationInstance.Textures[GAME_TEXTURE_POWERUP1	].Processed.View);
-	applicationInstance.StuffToDraw.TexturesPowerup1.push_back(applicationInstance.Textures[GAME_TEXTURE_POWICON	].Processed.View);
+	applicationInstance.StuffToDraw.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWCORESQUARE		].Processed.View);
+	applicationInstance.StuffToDraw.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWICON			].Processed.View);
+	applicationInstance.StuffToDraw.TexturesPowerup1.push_back(applicationInstance.Textures[GAME_TEXTURE_POWCOREDIAGONAL	].Processed.View);
+	applicationInstance.StuffToDraw.TexturesPowerup1.push_back(applicationInstance.Textures[GAME_TEXTURE_POWICON			].Processed.View);
 	return 0;
 }
 
@@ -104,6 +104,10 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		gameInstance.Powerups.Alive		[iShip]									= 1;
 		gameInstance.Powerups.Position	[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 * 3 + ::cho::SCoord2<float>{0, (float)iShip * 64};
 		gameInstance.Powerups.Family	[iShip]									= (POWERUP_FAMILY)iShip;
+		if(gameInstance.Powerups.Family	[iShip] == POWERUP_FAMILY_WEAPON)
+			gameInstance.Powerups.Type		[iShip].TypeWeapon						= (WEAPON_TYPE)(rand() % WEAPON_TYPE_COUNT);
+		else
+			gameInstance.Powerups.Type		[iShip].TypeHealth						= (HEALTH_TYPE)(rand() % 2);
 		++gameInstance.CountPowerups;
 	}
 	//gameInstance.PositionPowerup											= framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
@@ -161,7 +165,6 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	error_if(errored(::updateEnemies	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateShots		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI		(applicationInstance)), "Unknown error.");
-
 
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
