@@ -85,7 +85,6 @@ struct SProjectile {
 						WEAPON_TYPE															TypeWeapon;
 						PLAYER_TYPE															TypePlayer;
 						int32_t																ShipIndex;
-						int32_t																ParticleIndex;
 };
 
 static constexpr	const int32_t														MAX_PLAYERS																= 4;
@@ -174,12 +173,17 @@ struct SGame {
 
 						double																GhostTimer																= 0;
 						uint32_t															PathStep																= 0;
-						::cho::SCoord2<float>												PathEnemy					[5]											= 
+						::cho::SCoord2<float>												PathEnemy					[10]										= 
 							{ { 10.f,  10.f}
 							, {320.f, 180.f}
 							, { 50.f, 200.f}
 							, {480.f,  10.f}
-							, { 0.0f,  0.0f}
+							, {150.f,  20.f}
+							, {180.f, 320.f}
+							, {200.f,  50.f}
+							, { 10.f, 480.f}
+							, { 50.f,  50.f}
+							, { 20.f, 120.f}
 							};
 };
 

@@ -45,7 +45,7 @@ struct SLaserToDraw {
 						int32_t																						IndexParticlePhysics;
 						int32_t																						IndexParticleInstance;
 						::cho::SLine2D<float>																		Segment;
-						::cho::SColorBGRA																			Color;
+//						::cho::SColorBGRA																			Color;
 };
 
 struct SStuffToDraw {
@@ -86,7 +86,10 @@ struct SApplication {
 
 						::SGame																						Game;
 
-						TParticleSystem																				ParticleSystem								= {};
+						TParticleSystem																				ParticleSystemThrust						= {};
+						TParticleSystem																				ParticleSystemProjectiles					= {};
+						TParticleSystem																				ParticleSystemDebris						= {};
+						TParticleSystem																				ParticleSystemStars							= {};
 
 						::cho::SColorBGRA																			ColorBackground								= ::cho::SColorFloat(.15f, .15f, .15f, 1.0f);
 

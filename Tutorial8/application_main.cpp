@@ -130,7 +130,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	return 0;
 }
 
-					//::cho::error_t										removeDeadStuff								(::SApplication& applicationInstance);
+					::cho::error_t										removeDeadStuff								(::SApplication& applicationInstance);
 					::cho::error_t										updateInput									(::SApplication& applicationInstance);
 					::cho::error_t										updateShots									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
 					::cho::error_t										updateSpawn									(::SApplication& applicationInstance, const ::cho::array_view<::SApplication::TParticleSystem::TIntegrator::TParticle> & particleDefinitions);
@@ -154,19 +154,28 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	applicationInstance.ColorBackground.g									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 	applicationInstance.ColorBackground.r									= (uint8_t)(windDirection * (applicationInstance.ColorBackground.b / 3.0));
 
-	//error_if(errored(::removeDeadStuff	(applicationInstance)), "Unknown error.");
+	error_if(errored(::removeDeadStuff	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateParticles	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateSpawn		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateShips		(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateEnemies	(applicationInstance)), "Unknown error.");
 	error_if(errored(::updateShots		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI		(applicationInstance)), "Unknown error.");
+
+
 	::cho::STimer																& timer										= framework.Timer;
 	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
 	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. Particle count: %u. Enemy count: %u. Projectile count: %u. Powerup count: %u. FPS: %g. Last frame seconds: %g."
+	sprintf_s(buffer, "[%u x %u]. Projecitle fx count: %u. Thrust fx count: %u. Stars fx count: %u. Debris fx count: %u. Total fx count: %u. Enemy count: %u. Projectile count: %u. Powerup count: %u. FPS: %g. Last frame seconds: %g."
 		, mainWindow.Size.x, mainWindow.Size.y
-		, applicationInstance.ParticleSystem.Instances.size()
+		, applicationInstance.ParticleSystemProjectiles	.Instances.size()
+		, applicationInstance.ParticleSystemThrust		.Instances.size()
+		, applicationInstance.ParticleSystemStars		.Instances.size()
+		, applicationInstance.ParticleSystemDebris		.Instances.size()
+		, applicationInstance.ParticleSystemProjectiles	.Instances.size()
+		+ applicationInstance.ParticleSystemThrust		.Instances.size()
+		+ applicationInstance.ParticleSystemStars		.Instances.size()
+		+ applicationInstance.ParticleSystemDebris		.Instances.size()
 		, applicationInstance.Game.CountEnemies
 		, applicationInstance.Game.CountProjectiles
 		, applicationInstance.Game.CountPowerups

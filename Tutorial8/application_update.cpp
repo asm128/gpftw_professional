@@ -16,7 +16,6 @@
 	ship1State.Firing														= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD1] != 0;
 	ship1State.Thrust														= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD2] != 0;
 	ship1State.Brakes														= inputSystem.KeyboardCurrent.KeyState[VK_NUMPAD3] != 0;
-
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip)
 		gameInstance.Ships.Direction[iShip]										= {};
 
@@ -128,15 +127,64 @@ template <size_t _sizeAlive>
 	return 0;
 }
 
-					::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
+
+					::cho::error_t										removeDeadParticles							(::SApplication::TIntegrator & particleIntegrator, ::cho::array_pod<::SApplication::TParticleInstance> & particleInstances, const ::cho::SCoord2<uint32_t> & offscreenViewMetrics)											{ 
 	typedef	::SApplication::TParticleInstance									TParticleInstance;
-	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
+		typedef	::SApplication::TParticle											TParticle;
+		TParticleInstance															& particleInstance							= particleInstances[iParticle];
+		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.IndexParticlePhysics];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.IndexParticlePhysics];
+		const bool																	nextPosOutOfRange								 
+			= (	((uint32_t)particleNext.Position.x) >= offscreenViewMetrics.x
+			||	((uint32_t)particleNext.Position.y) >= offscreenViewMetrics.y
+			);
+		const bool																	currentPosOutOfRange								 
+			= (	((uint32_t)particleCurrent.Position.x) >= offscreenViewMetrics.x
+			||	((uint32_t)particleCurrent.Position.y) >= offscreenViewMetrics.y
+			);
+		const bool																	instanceTimeout									
+			=  (particleInstance.Binding.TimeLived >=	  .125 && particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST)
+			|| (particleInstance.Binding.TimeLived >=		1. && particleInstance.Binding.Type == PARTICLE_TYPE_DEBRIS		)
+			|| (particleInstance.Binding.TimeLived >=	99999. && particleInstance.Binding.Type == PARTICLE_TYPE_PROJECTILE	)
+			;
+		if((currentPosOutOfRange && nextPosOutOfRange) || instanceTimeout) { // Remove the particle instance and related information.
+			particleIntegrator.ParticleState[particleInstance.IndexParticlePhysics].Unused	= true;
+			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
+			--iParticle;
+		}
+	}
+	return 0;
+}
+
+					::cho::error_t										updateEffectParticles						(float lastFrameSeconds, ::SApplication::TIntegrator & particleIntegrator, ::cho::array_pod<::SApplication::TParticleInstance> & particleInstances, ::cho::array_pod<::SParticleToDraw> & particlesToDraw)											{ 
+	typedef	::SApplication::TParticleInstance									TParticleInstance;
+	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
+		TParticleInstance															& particleInstance							= particleInstances				[iParticle];
+		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
+		typedef	::SApplication::TParticle											TParticle;
+		//TParticle																	& particleNext								= particleIntegrator.ParticleNext	[physicsId];
+		TParticle																	& particleCurrent							= particleIntegrator.Particle		[physicsId];
+		const ::SParticleToDraw														particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleCurrent.Position.Cast<int32_t>()};
+		particlesToDraw.push_back(particleToDraw);
+		particleInstance.Binding.TimeLived										+= lastFrameSeconds;
+	}
+	return 0;
+}
+
+					::cho::error_t										integrateParticleVelocity					(::SApplication& applicationInstance)											{ 
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
-	ree_if(errored(particleIntegrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
+	ree_if(errored(applicationInstance.ParticleSystemThrust			.Integrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
+	ree_if(errored(applicationInstance.ParticleSystemDebris			.Integrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
+	ree_if(errored(applicationInstance.ParticleSystemProjectiles	.Integrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
+	ree_if(errored(applicationInstance.ParticleSystemStars			.Integrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
+	return 0;
+}
 
-	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
-	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
+					::cho::error_t										updateParticles								(::SApplication& applicationInstance)											{ 
+	cho_necall(::integrateParticleVelocity(applicationInstance), "???");
+	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::clear
 		( applicationInstance.StuffToDraw.ProjectilePaths
 		, applicationInstance.StuffToDraw.CollisionPoints	
@@ -144,47 +192,34 @@ template <size_t _sizeAlive>
 		, applicationInstance.StuffToDraw.Thrust			
 		, applicationInstance.StuffToDraw.Stars				
 		);
-
-	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		typedef	::SApplication::TParticle											TParticle;
-		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		TParticle																	& particleNext								= particleIntegrator.ParticleNext	[particleInstance.IndexParticlePhysics];
-		TParticle																	& particleCurrent							= particleIntegrator.Particle		[particleInstance.IndexParticlePhysics];
-		const bool																	nextPosOutOfRange								 
-			= (	((uint32_t)particleNext.Position.x) >= framework.Offscreen.View.width	()
-			||	((uint32_t)particleNext.Position.y) >= framework.Offscreen.View.height	()
-			);
-		const bool																	currentPosOutOfRange								 
-			= (	((uint32_t)particleCurrent.Position.x) >= framework.Offscreen.View.width	()
-			||	((uint32_t)particleCurrent.Position.y) >= framework.Offscreen.View.height	()
-			);
-		const bool																	instanceTimeout									= (particleInstance.Binding.TimeLived >= .125 && particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST);
-		if((currentPosOutOfRange && nextPosOutOfRange) || instanceTimeout) { // Remove the particle instance and related information.
-			particleIntegrator.ParticleState[particleInstance.IndexParticlePhysics].Unused	= true;
-			ree_if(errored(particleInstances.remove(iParticle)), "Not sure why would this fail.");
-			--iParticle;
-		}
-	}
-
-	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
-		TParticleInstance															& particleInstance							= particleInstances[iParticle];
-		int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
-		typedef	::SApplication::TParticle											TParticle;
-		TParticle																	& particleNext								= particleIntegrator.ParticleNext[physicsId];
-		TParticle																	& particleCurrent							= particleIntegrator.Particle[physicsId];
-		if(particleInstance.Binding.Type == PARTICLE_TYPE_PROJECTILE) {
-			const ::SLaserToDraw														laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}, ::cho::LIGHTCYAN};
+	const ::cho::SCoord2<uint32_t>												& offscreenViewMetrics						= framework.Offscreen.View.metrics();
+	cho_necall(::removeDeadParticles(applicationInstance.ParticleSystemThrust		.Integrator, applicationInstance.ParticleSystemThrust		.Instances, offscreenViewMetrics), "???");
+	cho_necall(::removeDeadParticles(applicationInstance.ParticleSystemDebris		.Integrator, applicationInstance.ParticleSystemDebris		.Instances, offscreenViewMetrics), "???");
+	cho_necall(::removeDeadParticles(applicationInstance.ParticleSystemProjectiles	.Integrator, applicationInstance.ParticleSystemProjectiles	.Instances, offscreenViewMetrics), "???");
+	cho_necall(::removeDeadParticles(applicationInstance.ParticleSystemStars		.Integrator, applicationInstance.ParticleSystemStars		.Instances, offscreenViewMetrics), "???");
+	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
+	::updateEffectParticles(lastFrameSeconds, applicationInstance.ParticleSystemThrust.Integrator, applicationInstance.ParticleSystemThrust.Instances, applicationInstance.StuffToDraw.Thrust);
+	::updateEffectParticles(lastFrameSeconds, applicationInstance.ParticleSystemDebris.Integrator, applicationInstance.ParticleSystemDebris.Instances, applicationInstance.StuffToDraw.Debris);
+	::updateEffectParticles(lastFrameSeconds, applicationInstance.ParticleSystemStars .Integrator, applicationInstance.ParticleSystemStars .Instances, applicationInstance.StuffToDraw.Stars );
+	{ // Projectiles
+		typedef	::SApplication::TParticleInstance									TParticleInstance;
+		::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystemProjectiles.Integrator;
+		::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystemProjectiles.Instances;
+		for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
+			TParticleInstance															& particleInstance							= particleInstances[iParticle];
+			int32_t																		physicsId									= particleInstance.IndexParticlePhysics;
+			typedef	::SApplication::TParticle											TParticle;
+			TParticle																	& particleNext								= particleIntegrator.ParticleNext	[physicsId];
+			TParticle																	& particleCurrent							= particleIntegrator.Particle		[physicsId];
+			const ::SLaserToDraw														laserToDraw									= {physicsId, (int32_t)iParticle, ::cho::SLine2D<float>{particleCurrent.Position, particleNext.Position}};
 			applicationInstance.StuffToDraw.ProjectilePaths.push_back(laserToDraw);
+			particleInstance.Binding.TimeLived										+= lastFrameSeconds;
 		}
-		else {
-			::SParticleToDraw															particleToDraw								= {physicsId, (int32_t)iParticle, particleInstance.Binding.TimeLived, particleCurrent.Position.Cast<int32_t>()};
-				 if(particleInstance.Binding.Type == PARTICLE_TYPE_STAR			)	applicationInstance.StuffToDraw.Stars	.push_back(particleToDraw);
-			else if(particleInstance.Binding.Type == PARTICLE_TYPE_SHIP_THRUST	)	applicationInstance.StuffToDraw.Thrust	.push_back(particleToDraw);
-			else if(particleInstance.Binding.Type == PARTICLE_TYPE_DEBRIS		)	applicationInstance.StuffToDraw.Debris	.push_back(particleToDraw);
-		}
-		particleInstance.Binding.TimeLived											+= lastFrameSeconds;
-		particleCurrent															= particleNext;
 	}
+	memcpy(applicationInstance.ParticleSystemThrust			.Integrator.Particle.begin(), applicationInstance.ParticleSystemThrust		.Integrator.ParticleNext.begin(), sizeof(::SApplication::TParticle) * applicationInstance.ParticleSystemThrust		.Integrator.ParticleState.size());
+	memcpy(applicationInstance.ParticleSystemDebris			.Integrator.Particle.begin(), applicationInstance.ParticleSystemDebris		.Integrator.ParticleNext.begin(), sizeof(::SApplication::TParticle) * applicationInstance.ParticleSystemDebris		.Integrator.ParticleState.size());
+	memcpy(applicationInstance.ParticleSystemProjectiles	.Integrator.Particle.begin(), applicationInstance.ParticleSystemProjectiles	.Integrator.ParticleNext.begin(), sizeof(::SApplication::TParticle) * applicationInstance.ParticleSystemProjectiles	.Integrator.ParticleState.size());
+	memcpy(applicationInstance.ParticleSystemStars			.Integrator.Particle.begin(), applicationInstance.ParticleSystemStars		.Integrator.ParticleNext.begin(), sizeof(::SApplication::TParticle) * applicationInstance.ParticleSystemStars		.Integrator.ParticleState.size());
 	return 0;
 }
 
@@ -217,7 +252,7 @@ static				::cho::error_t										addParticle
 	return indexParticleInstance;
 }
 
-static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t particleIndex, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
+static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
 	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	uint32_t																	iProjectile									= ::firstUnused(gameInstance.Projectiles.Alive);
 	rew_if(iProjectile == -1, "Not enough space for storing new projectile.");
@@ -228,7 +263,6 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	projectile.ShipIndex													= iShip;
 	projectile.TimeLived													= 0;
 	projectile.Speed														= projectileSpeed;
-	projectile.ParticleIndex												= particleIndex;
 	++gameInstance.CountProjectiles;
 	return iProjectile;
 }
@@ -248,8 +282,8 @@ static				::cho::error_t										updateSpawnShots
 {
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::SGame																		& gameInstance								= applicationInstance.Game;
-	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystemProjectiles.Instances;
+	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystemProjectiles.Integrator;
 	for(uint32_t iShip = 0, shipCount = maxShips; iShip < shipCount; ++iShip) {
 		if(0 == alive[iShip])
 			continue;
@@ -270,8 +304,10 @@ static				::cho::error_t										updateSpawnShots
 				const ::cho::SCoord2<float>													weaponParticleOffset						= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[textureIndex].x), -1};
 				const ::cho::SCoord2<float>													shotDirection								= (playerType == PLAYER_TYPE_PLAYER) ? ::cho::SCoord2<float>{1.0f, 0.0f} : 
 					(gameInstance.Ships.Position[rand() % gameInstance.ShipsPlaying] - gameInstance.Enemies.Position[iShip]).Normalize();
+				int32_t																		projectileIndex								= ::addProjectile(gameInstance, iShip, gameParticle.TypePlayer, gameParticle.TypeWeapon, weapon.Speed);
 				int32_t																		particleIndex								= ::addParticle(gameParticle, particleInstances, particleIntegrator, positions[iShip] + weaponParticleOffset, shotDirection, weapon.Speed, particleDefinitions);
-				e_if(errored(::addProjectile(gameInstance, particleIndex, iShip, gameParticle.TypePlayer, gameParticle.TypeWeapon, weapon.Speed)), "Projectile storage is full. Cannot add projectile.");
+				e_if(errored(projectileIndex), "Projectile storage is full. Cannot add projectile.");
+				e_if(errored(particleIndex	), "Particle storage is full. Cannot add projectile particle.");
 			}
 		}
 	}
@@ -286,45 +322,51 @@ static				::cho::error_t										updateSpawnShots
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 	// Add some effect particles
-	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
-	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
 	applicationInstance.EffectsDelay.Thrust									+= framework.FrameInfo.Seconds.LastFrame;
 	::SGame																		& gameInstance								= applicationInstance.Game;
-	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
-		if(0 == gameInstance.Ships.Alive[iShip])
-			continue;
-		if(applicationInstance.EffectsDelay.Thrust > .01) { // Add thrust particles.
-			for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) {
-				::SGameParticle																gameParticle;
-				gameParticle.OwnerIndex													= iShip;
-				gameParticle.TimeLived													= 0;
-				gameParticle.Type														= PARTICLE_TYPE_SHIP_THRUST;
-				gameParticle.TypePlayer													= PLAYER_TYPE_PLAYER;
-				gameParticle.Lit														= 0 == (rand() % 2);
-				::addParticle(gameParticle, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), gameInstance.Ships.Direction[iShip] * -1.0, (float)(rand() % 400) + (gameInstance.Ships.States[iShip].Thrust ? 400 : 0), particleDefinitions);
+	{
+		::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystemThrust.Instances;
+		::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystemThrust.Integrator;
+		for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
+			if(0 == gameInstance.Ships.Alive[iShip])
+				continue;
+			if(applicationInstance.EffectsDelay.Thrust > .01) { // Add thrust particles.
+				for(int32_t i = 0, particleCountToSpawn = 1 + rand() % 4; i < particleCountToSpawn; ++i) {
+					::SGameParticle																gameParticle;
+					gameParticle.OwnerIndex													= iShip;
+					gameParticle.TimeLived													= 0;
+					gameParticle.Type														= PARTICLE_TYPE_SHIP_THRUST;
+					gameParticle.TypePlayer													= PLAYER_TYPE_PLAYER;
+					gameParticle.Lit														= 0 == (rand() % 2);
+					::addParticle(gameParticle, particleInstances, particleIntegrator, gameInstance.Ships.Position[iShip] + applicationInstance.PSOffsetFromShipCenter.Cast<float>(), gameInstance.Ships.Direction[iShip] * -1.0, (float)(rand() % 400) + (gameInstance.Ships.States[iShip].Thrust ? 400 : 0), particleDefinitions);
+				}
 			}
+		}
+	}
+	{
+		::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystemStars.Instances;
+		::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystemStars.Integrator;
+		applicationInstance.EffectsDelay.Star									+= framework.FrameInfo.Seconds.LastFrame;
+		if(applicationInstance.EffectsDelay.Star > .1) {
+			applicationInstance.EffectsDelay.Star									= 0;
+			bool																		bFastStarFromThrust							= false;
+			for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
+				if(0 == gameInstance.Ships.Alive[iShip])
+					continue;
+				if (gameInstance.Ships.States[iShip].Thrust) {
+					bFastStarFromThrust														= true;
+					break;
+				}
+			}
+			::SGameParticle																gameParticle;
+			gameParticle.TimeLived													= 0;
+			gameParticle.Type														= PARTICLE_TYPE_STAR;
+			gameParticle.Lit														= 0 == rand() % 3;
+			::addParticle(gameParticle, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, {-1, 0}, (float)(rand() % (bFastStarFromThrust ? 400 : 75)) + 25, particleDefinitions);
 		}
 	}
 	::updateSpawnShots(applicationInstance, particleDefinitions, gameInstance.ShipsPlaying			, gameInstance.Ships	.Position, gameInstance.Ships	.WeaponDelay, gameInstance.Ships	.Weapon, gameInstance.Ships		.States, gameInstance.Ships		.Alive, PLAYER_TYPE_PLAYER	);
 	::updateSpawnShots(applicationInstance, particleDefinitions, gameInstance.Enemies.Alive.size()	, gameInstance.Enemies	.Position, gameInstance.Enemies	.WeaponDelay, gameInstance.Enemies	.Weapon, gameInstance.Enemies	.States, gameInstance.Enemies	.Alive, PLAYER_TYPE_ENEMY	);
-	applicationInstance.EffectsDelay.Star									+= framework.FrameInfo.Seconds.LastFrame;
-	if(applicationInstance.EffectsDelay.Star > .1) {
-		applicationInstance.EffectsDelay.Star									= 0;
-		bool																		bFastStarFromThrust							= false;
-		for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {
-			if(0 == gameInstance.Ships.Alive[iShip])
-				continue;
-			if (gameInstance.Ships.States[iShip].Thrust) {
-				bFastStarFromThrust														= true;
-				break;
-			}
-		}
-		::SGameParticle																gameParticle;
-		gameParticle.TimeLived													= 0;
-		gameParticle.Type														= PARTICLE_TYPE_STAR;
-		gameParticle.Lit														= 0 == rand() % 3;
-		::addParticle(gameParticle, particleInstances, particleIntegrator, {offscreen.View.metrics().x - 1.0f, (float)(rand() % offscreen.View.metrics().y)}, {-1, 0}, (float)(rand() % (bFastStarFromThrust ? 400 : 75)) + 25, particleDefinitions);
-	}
 	return 0;
 }
 
@@ -336,10 +378,8 @@ static				::cho::error_t										updateSpawnShots
 			continue;
 		::SProjectile																& projectile								= gameInstance.Projectiles.Projectiles[iProjectile];
 		projectile.TimeLived													+= applicationInstance.Framework.FrameInfo.Seconds.LastFrame;
-		if(projectile.TimeLived > 0.01) {
+		if(projectile.TimeLived > 0.1) {
 			projectilesAlive[iProjectile]											= 0;
-			applicationInstance.ParticleSystem.Integrator.ParticleState[applicationInstance.ParticleSystem.Instances[projectile.ParticleIndex].IndexParticlePhysics].Unused = true;
-			applicationInstance.ParticleSystem.Instances.remove_unordered(projectile.ParticleIndex);
 			--gameInstance.CountProjectiles;
 		}
 		else {
@@ -357,7 +397,7 @@ static				::cho::error_t										updateSpawnShots
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	::SAABBCache																aabbCache;
-	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystem.Instances;
+	::cho::array_pod<::SApplication::TParticleInstance>							& particleInstances							= applicationInstance.ParticleSystemProjectiles.Instances;
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
 		const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
@@ -424,7 +464,7 @@ static				::cho::error_t										updateSpawnShots
 			}
 		}
 	}
-	::SApplication::TIntegrator													& particleIntegrator						= applicationInstance.ParticleSystem.Integrator;
+
 	for(uint32_t iCollision = 0, collisionCount = applicationInstance.StuffToDraw.CollisionPoints.size(); iCollision < collisionCount; ++iCollision)
 		for(uint32_t i=0; i < 10; ++i) {
 			::cho::SCoord2<float>	angle	= {(float)-(rand() % 20) - 10, (float)(rand() % 20 - 1 - 10)};
@@ -434,7 +474,7 @@ static				::cho::error_t										updateSpawnShots
 			gameParticle.Type														= PARTICLE_TYPE_DEBRIS;
 			gameParticle.Lit														= 0 == (rand()% 2);
 			gameParticle.TypePlayer													= PLAYER_TYPE_PLAYER;
-			::addParticle(gameParticle, particleInstances, particleIntegrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100, particleDefinitions);
+			::addParticle(gameParticle, applicationInstance.ParticleSystemDebris.Instances, applicationInstance.ParticleSystemDebris.Integrator, applicationInstance.StuffToDraw.CollisionPoints[iCollision], angle, (float)(rand() % 400) + 100, particleDefinitions);
 		}
 	return 0;
 }
@@ -447,7 +487,7 @@ static				::cho::error_t										updateSpawnShots
 		const cho::SCoord2<float>													& posXHair									= gameInstance.PositionCrosshair[iShip];
 		for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
 			const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-			const ::SApplication::TParticleInstance										& particleInstance							= applicationInstance.ParticleSystem.Instances[laserToDraw.IndexParticleInstance];
+			const ::SApplication::TParticleInstance										& particleInstance							= applicationInstance.ParticleSystemProjectiles.Instances[laserToDraw.IndexParticleInstance];
 			if(particleInstance.Binding.OwnerIndex != iShip || particleInstance.Binding.TypePlayer != PLAYER_TYPE_PLAYER)
 				continue;
 			float																		halfSizeBox									= gameInstance.HalfWidthCrosshair;
@@ -490,7 +530,7 @@ static				::cho::error_t										updateSpawnShots
 		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 		if(indexToSpawnEnemy != -1) {
 			gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
-			gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 200.0f, (float)offscreenMetrics.y};//{(float)(rand() % offscreenMetrics.x), (float)(rand() % offscreenMetrics.y)};
+			gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 1.0f, (float)(rand() % offscreenMetrics.y)};
 			gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
 			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {2, 250, WEAPON_TYPE(rand()% WEAPON_TYPE_COUNT)};
 			gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;

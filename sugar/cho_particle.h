@@ -68,6 +68,19 @@ namespace cho
 	}
 
 	template<typename _tElement>
+						::cho::error_t										integrate									(const ::cho::array_view<::cho::SParticle2<_tElement>>& particles, ::cho::array_pod<::cho::SParticle2State>& particleStates, ::cho::array_view<::cho::SParticle2<_tElement>>& particlesNext, double timeElapsed, double timeElapsedHalfSquared)			{
+		for(uint32_t iParticle = 0, particleCount = (uint32_t)particleStates.size(); iParticle < particleCount; ++iParticle)	
+			if(particleStates[iParticle].RequiresProcessing()) {
+				::cho::SParticle2<_tElement>												& particleNext								= particlesNext[iParticle] = particles[iParticle];	// Copy the current particle state to the next
+				::cho::particleIntegratePosition(particleNext.Forces.Velocity, timeElapsed, timeElapsedHalfSquared, particleNext.Position);
+				particleNext.Forces.IntegrateAccumulatedForce(particleNext.InverseMass, particleNext.Damping, timeElapsed);
+				if(particleNext.Forces.VelocityDepleted())
+					particleStates[iParticle].Active										= false;
+			}
+		return 0;
+	}
+
+	template<typename _tElement>
 	struct SParticle2Integrator {
 		typedef				::cho::SParticle2	<_tElement>						TParticle;
 		typedef				::cho::SCoord2		<_tElement>						TCoord;
@@ -76,18 +89,8 @@ namespace cho
 							::cho::array_pod<TParticle>							Particle									= {};
 							::cho::array_pod<TParticle>							ParticleNext								= {};
 		// -----------------------------------------------------------------	---
-		inline				::cho::error_t										Integrate									(double timeElapsed, double timeElapsedHalfSquared)														{ return Integrate(ParticleNext, timeElapsed, timeElapsedHalfSquared); }
-							::cho::error_t										Integrate									(::cho::array_view<TParticle>& particleNext, double timeElapsed, double timeElapsedHalfSquared)			{
-			for(uint32_t iParticle = 0, particleCount = (uint32_t)ParticleState.size(); iParticle < particleCount; ++iParticle)	
-				if(ParticleState[iParticle].RequiresProcessing()) {
-					TParticle																	& particle = particleNext[iParticle]		= Particle[iParticle];	// Copy the current particle state to the next
-					::cho::particleIntegratePosition			(particle.Forces.Velocity, timeElapsed, timeElapsedHalfSquared, particle.Position);
-					particle.Forces.IntegrateAccumulatedForce	(particle.InverseMass, particle.Damping, timeElapsed);
-					if(particle.Forces.VelocityDepleted())
-						ParticleState[iParticle].Active										= false;
-				}
-			return 0;
-		}
+		inline				::cho::error_t										Integrate									(double timeElapsed, double timeElapsedHalfSquared)														{ return Integrate(ParticleNext, timeElapsed, timeElapsedHalfSquared);	}
+							::cho::error_t										Integrate									(::cho::array_view<TParticle>& particleNext, double timeElapsed, double timeElapsedHalfSquared)			{ return ::cho::integrate(Particle, ParticleState, particleNext, timeElapsed, timeElapsedHalfSquared);		}
 		// --------------------------------------------------------------------
 							::cho::error_t										AddParticle									(const TParticle& particleData)																			{
 								const uint32_t											particleCount								= (uint32_t)ParticleState.size();
