@@ -8,7 +8,7 @@
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
 
-enum SHIP_CONTROL_TYPE 
+enum SHIP_CONTROL_TYPE : int8_t
 	{	SHIP_CONTROL_TYPE_AI
 	,	SHIP_CONTROL_TYPE_HUMAN
 	};
@@ -24,10 +24,12 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
+#pragma pack(push, 1)
 struct SGameParticle {
 						PARTICLE_TYPE																				Type										= (PARTICLE_TYPE)-1;
 						PLAYER_TYPE																					TypePlayer									= (PLAYER_TYPE	)-1;
 						WEAPON_TYPE																					TypeWeapon									= (WEAPON_TYPE	)-1;
+						int8_t																						Padding										= 0;
 						uint32_t																					OwnerIndex									= (uint32_t		)-1;
 						float																						TimeLived									= 0;
 						bool																						Lit											= true;
@@ -45,6 +47,7 @@ struct SLaserToDraw {
 						int32_t																						IndexParticleInstance;
 						::cho::SLine2D<float>																		Segment;
 };
+#pragma pack(pop)
 
 struct SStuffToDraw {
 						::cho::array_pod<::SLaserToDraw>															ProjectilePaths								= {};

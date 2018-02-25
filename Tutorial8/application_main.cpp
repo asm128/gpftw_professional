@@ -57,7 +57,18 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 }
 
 static				::cho::error_t										setupSprite									(::cho::STextureProcessable<::cho::SColorBGRA>& textureToProcess, ::cho::SCoord2<int32_t>& textureCenter, const ::cho::view_const_string& filename)	{ 
-	error_if(errored(::cho::bmpFileLoad(filename, textureToProcess.Original)), "Failed to load bitmap from file: %s.", filename);
+	bool																		failedFromFile								= errored(::cho::bmpFileLoad(filename, textureToProcess.Original));
+	char_t																		filenameBMGCompo	[256]					= {};
+	strcpy_s(filenameBMGCompo, filename.begin());
+	filenameBMGCompo[filename.size() - 1]									= 'g';
+	const ::cho::view_const_string												filenameBMG									= filenameBMGCompo;
+	if(failedFromFile) {
+		error_printf("Failed to load bitmap from file: %s.", filename);
+		error_if(errored(::cho::bmgFileLoad(filenameBMG, textureToProcess.Original)), "Failed to load image from disk: %s.", filenameBMG.begin());
+	} 
+	else {
+		error_if(errored(::cho::bmgFileWrite(filenameBMG, textureToProcess.Original.View)), "Failed to store file on disk: %s.", filenameBMG.begin());
+	}
 	textureCenter															= (textureToProcess.Original.View.metrics() / 2).Cast<int32_t>();
 	textureToProcess.Processed.View											= textureToProcess.Original.View;
 	return 0;

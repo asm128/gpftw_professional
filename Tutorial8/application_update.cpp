@@ -421,7 +421,7 @@ static				::cho::error_t										updateSpawnShots
 
 					::cho::error_t										spawnPowOfRandomType						(::SGame & gameInstance, ::cho::SCoord2<float> powPosition)			{
 	int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
-	ree_if(indexToSpawnPow == -1, "Not enough space to spawn more pows!") 
+	ree_if(indexToSpawnPow == -1, "Not enough space to spawn more pows!");
 	gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
 	gameInstance.Powerups.Position		[indexToSpawnPow]					= powPosition;
 	gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
@@ -475,8 +475,8 @@ static				::cho::error_t										updateSpawnShots
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
 					enemyHealth.Health														-= (int32_t)(weapon.Speed * (1.0f - damegePorportion));
 					enemyHealth.Shield														-= (int32_t)(weapon.Speed * damegePorportion);
-					if(enemyHealth.Health < 0) enemyHealth.Health = 0;
-					if(enemyHealth.Shield < 0) enemyHealth.Shield = 0;
+					if(enemyHealth.Health < 0) enemyHealth.Health								= 0;
+					if(enemyHealth.Shield < 0) enemyHealth.Shield								= 0;
 				}
 				if(0 >= enemyHealth.Health) {
 					gameInstance.Enemies.Alive[iEnemy]										= 0;
@@ -505,11 +505,11 @@ static				::cho::error_t										updateSpawnShots
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
 					enemyHealth.Health														-= (int32_t)(weapon.Speed * (1.0f - damegePorportion));
 					enemyHealth.Shield														-= (int32_t)(weapon.Speed * damegePorportion);
-					if(enemyHealth.Health < 0) enemyHealth.Health = 0;
-					if(enemyHealth.Shield < 0) enemyHealth.Shield = 0;
+					if(enemyHealth.Health < 0) enemyHealth.Health								= 0;
+					if(enemyHealth.Shield < 0) enemyHealth.Shield								= 0;
 				}
 				if(0 >= enemyHealth.Health) {
-					gameInstance.Ships.Alive[iShip] = 0;
+					gameInstance.Ships.Alive[iShip]											= 0;
 					continue;
 				}
 			}
