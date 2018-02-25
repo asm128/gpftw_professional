@@ -459,8 +459,8 @@ static				::cho::error_t										updateSpawnShots
 			
 			}
 		}
-		const ::SApplication::TParticleInstance										& particleInstance							= particleInstances[laserToDraw.IndexParticleInstance];
-		::SWeapon																	& weapon									= (particleInstance.Binding.TypePlayer == PLAYER_TYPE_PLAYER)
+		::SApplication::TParticleInstance											& particleInstance							= particleInstances[laserToDraw.IndexParticleInstance];
+		const ::SWeapon																& weapon									= (particleInstance.Binding.TypePlayer == PLAYER_TYPE_PLAYER)
 			? gameInstance.Ships	.Weapon[particleInstance.Binding.OwnerIndex]
 			: gameInstance.Enemies	.Weapon[particleInstance.Binding.OwnerIndex]
 			;
@@ -477,6 +477,7 @@ static				::cho::error_t										updateSpawnShots
 					enemyHealth.Shield														-= (int32_t)(weapon.Speed * damegePorportion);
 					if(enemyHealth.Health < 0) enemyHealth.Health								= 0;
 					if(enemyHealth.Shield < 0) enemyHealth.Shield								= 0;
+					particleInstance.Binding.TimeLived										= 9999999.f;
 				}
 				if(0 >= enemyHealth.Health) {
 					gameInstance.Enemies.Alive[iEnemy]										= 0;
@@ -490,7 +491,9 @@ static				::cho::error_t										updateSpawnShots
 				for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 					vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
 					vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.GhostTimer);
-					::checkLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints);
+					if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
+						particleInstance.Binding.TimeLived										= 9999999.f;
+					}
 				}
 			}
 		} 
