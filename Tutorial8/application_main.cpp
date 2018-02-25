@@ -6,6 +6,7 @@
 #include "cho_bitmap_file.h"
 #include "cho_bitmap_target.h"
 #include "cho_grid_scale.h"
+#include "cho_grid_copy.h"
 #include "cho_bit_array_view.h"
 
 #include "cho_app_impl.h"
@@ -76,7 +77,8 @@ static				::cho::error_t										setupSprite									(::cho::STextureProcessabl
 
 static				::cho::error_t										setupSprites								(::SApplication& applicationInstance)											{ 
 	static constexpr	const char*												bmpFileNames	[]							= 
-		{ "ship_0.bmp"
+		{ "Codepage-437-24.bmp"
+		, "ship_0.bmp"
 		, "ship_1.bmp"
 		, "pow_core_0.bmp"
 		, "pow_core_1.bmp"
@@ -103,6 +105,14 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	::setupParticles();
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	ree_if	(errored(::setupSprites					(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
+	::cho::grid_view<::cho::SColorBGRA>											& fontAtlasView								= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
+	const ::cho::SCoord2<uint32_t>												& fontAtlasMetrics							= fontAtlasView.metrics();
+	for(uint32_t y = 0, yMax = fontAtlasMetrics.y; y < yMax; ++y) 
+	for(uint32_t x = 0, xMax = fontAtlasMetrics.x; x < xMax; ++x) {
+		::cho::SColorBGRA															& curTexel									= fontAtlasView[y][x];
+		if(curTexel.r == 0x00 && curTexel.g == 0x00 && curTexel.b == 0x00)
+			curTexel																= {0xFF, 0x00, 0xFF, 0xFF};
+	}
 
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
@@ -122,7 +132,6 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		++gameInstance.CountPowerups;
 	}
 	//gameInstance.PositionPowerup											= framework.Offscreen.View.metrics().Cast<float>() / 4U * 3U;
-	
 	applicationInstance.PSOffsetFromShipCenter								= {-applicationInstance.TextureCenters[GAME_TEXTURE_SHIP0].x};
 	return 0;
 }
@@ -134,6 +143,33 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 					::cho::error_t										drawShips									(::SApplication& applicationInstance);	
 					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance);	
 					::cho::error_t										drawCollisions								(::SApplication& applicationInstance);	
+
+
+template<size_t _sizeString>
+static				::cho::error_t										textCalcSizeLine							(const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	return (::cho::error_t)(sizeCharCell.x * ::cho::size(text0) - 1);
+}
+
+static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::grid_view<::cho::SColorBGRA>& viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
+		int32_t																	coordTableX										= text0[iChar] % characterCellsX;
+		int32_t																	coordTableY										= text0[iChar] / characterCellsX;
+		const ::cho::SCoord2<int32_t>											coordCharTable									= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
+		const ::cho::SCoord2<int32_t>											dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
+		const ::cho::SRectangle2D<int32_t>										srcRect0										= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
+		error_if(errored(::cho::grid_copy_alpha(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0, {0xFF, 0x00, 0xFF, 0xFF})), "I believe this never fails.");
+		//error_if(errored(::cho::grid_copy(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0)), "I believe this never fails.");
+	}
+	return 0;
+}
+
+template<size_t _sizeString>
+static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view<::cho::SColorBGRA>& targetView, const ::cho::grid_view<::cho::SColorBGRA>& fontAtlas, uint32_t lineOffset, const ::cho::SCoord2<uint32_t>& targetSize, const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)targetSize.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, text0) / 2, };
+	uint32_t																	dstOffsetY									= (int32_t)(targetSize.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
+	return ::textDrawFixedSize(targetView, fontAtlas, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset);
+}
+
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	
 	error_if(errored(::drawBackground		(applicationInstance)), "Why??");		// --- Draw stars
 	error_if(errored(::drawPowerups			(applicationInstance)), "Why??");		// --- Draw powerups
@@ -142,6 +178,18 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	error_if(errored(::drawThrust			(applicationInstance)), "Why??");		// --- Draw propulsion engine
 	error_if(errored(::drawShots			(applicationInstance)), "Why??");		// --- Draw lasers
 	error_if(errored(::drawCollisions		(applicationInstance)), "Why??");		// --- Draw lasers
+
+	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
+	uint32_t																	lineOffset									= 0;
+	static constexpr const char													textLine0	[]								= "W: Up, S: Down, A: Left, D: Right";
+	static constexpr const char													textLine1	[]								= "T: Shoot. Y: Thrust. U: Handbrake.";
+	static constexpr const char													textLine2	[]								= "Press ESC to exit.";
+	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= applicationInstance.Framework.Offscreen.View;
+	::cho::grid_view<::cho::SColorBGRA>											& fontAtlasView								= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
+	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= offscreenView.metrics();
+	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset, offscreenMetrics, sizeCharCell, textLine0);	++lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset, offscreenMetrics, sizeCharCell, textLine1);	++lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2);	--lineOffset;
 	return 0;
 }
 

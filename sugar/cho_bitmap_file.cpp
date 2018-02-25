@@ -7,7 +7,10 @@
 					::cho::error_t																	cho::bmpFileLoad							(const ::cho::view_const_string	& filename	, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)	{ // 
 	FILE																									* source									= 0; 
 	fopen_s(&source, filename.begin(), "rb");
-	ree_if(0 == source, "Failed to open file: %s. File not found?", filename.begin());
+	if(0 == source) {
+		error_printf("Failed to open file: %s. File not found?", filename.begin());
+		return -1;
+	}
 	if errored(::cho::bmpFileLoad(source, out_Colors, out_ImageView)) {
 		error_printf("Failed to load file: '%s'. File corrupt?", filename.begin());
 		fclose(source);
@@ -210,7 +213,10 @@ struct SHeaderInfoBMP {
 					::cho::error_t																	cho::bmgFileLoad							(const ::cho::view_const_string	& filename		, ::cho::array_pod<::cho::SColorBGRA>& out_Colors, ::cho::grid_view<::cho::SColorBGRA>& out_ImageView)	{ 
 	FILE																									* source									= 0; 
 	fopen_s(&source, filename.begin(), "rb");
-	ree_if(0 == source, "Failed to open file: %s. File not found?", filename.begin());
+	if(0 == source) {
+		error_printf("Failed to open file: %s. File not found?", filename.begin());
+		return -1;
+	}
 	if errored(::cho::bmgFileLoad(source, out_Colors, out_ImageView)) {
 		error_printf("Failed to load file: '%s'. File corrupt?", filename.begin());
 		fclose(source);
@@ -223,7 +229,10 @@ struct SHeaderInfoBMP {
 					::cho::error_t																	cho::bmgFileWrite							(const ::cho::view_const_string	& filename		, const ::cho::grid_view<::cho::SColorBGRA>& in_ImageView)												{ 
 	FILE																									* source									= 0; 
 	fopen_s(&source, filename.begin(), "wb");
-	ree_if(0 == source, "Failed to open file: %s. File not found?", filename.begin());
+	if(0 == source) {
+		error_printf("Failed to open file: %s. Forbidden?", filename.begin());
+		return -1;
+	}
 	if errored(::cho::bmgFileWrite(source, in_ImageView)) {
 		error_printf("Failed to store file: '%s'. No space on disk?", filename.begin());
 		fclose(source);

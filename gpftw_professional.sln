@@ -55,11 +55,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial7 (Game)", "Tutoria
 		{0E376995-5FBF-4FEB-AC68-B38A1CF33916} = {0E376995-5FBF-4FEB-AC68-B38A1CF33916}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial8", "Tutorial8\Tutorial8.vcxproj", "{24C49FD6-5B25-4857-B922-13B8613DC5C9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial8 (Gontrill)", "Tutorial8\Tutorial8.vcxproj", "{24C49FD6-5B25-4857-B922-13B8613DC5C9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{92362907-D84D-4409-B8BC-96F1F766BD9C} = {92362907-D84D-4409-B8BC-96F1F766BD9C}
 		{0E376995-5FBF-4FEB-AC68-B38A1CF33916} = {0E376995-5FBF-4FEB-AC68-B38A1CF33916}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial9", "Tutorial9\Tutorial9.vcxproj", "{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -157,6 +159,14 @@ Global
 		{24C49FD6-5B25-4857-B922-13B8613DC5C9}.Release|x64.Build.0 = Release|x64
 		{24C49FD6-5B25-4857-B922-13B8613DC5C9}.Release|x86.ActiveCfg = Release|Win32
 		{24C49FD6-5B25-4857-B922-13B8613DC5C9}.Release|x86.Build.0 = Release|Win32
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Debug|x64.ActiveCfg = Debug|x64
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Debug|x64.Build.0 = Debug|x64
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Debug|x86.ActiveCfg = Debug|Win32
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Debug|x86.Build.0 = Debug|Win32
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Release|x64.ActiveCfg = Release|x64
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Release|x64.Build.0 = Release|x64
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Release|x86.ActiveCfg = Release|Win32
+		{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
