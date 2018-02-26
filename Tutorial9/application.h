@@ -7,6 +7,7 @@ struct SApplication {
 						::cho::SFramework								Framework									;
 
 						::cho::STexture<::cho::SColorBGRA>				TextureFont									= {};
+						::cho::STextureMonochrome<uint32_t>				TextureFontMonochrome						= {};
 
 																		SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

@@ -1,5 +1,6 @@
 #include "cho_array.h"
 #include "cho_grid_view.h"
+#include "cho_bit_array_view.h"
 
 #ifndef CHO_TEXTURE_H_902387498237
 #define CHO_TEXTURE_H_902387498237
@@ -26,13 +27,13 @@ namespace cho
 			return *this; 
 		}
 
-							::cho::array_view<_tTexel>&							operator=									(const ::cho::grid_view<_tTexel>& other)			{ 
-			Texels																	= other;
+							::cho::STexture<_tTexel>&							operator=									(const ::cho::grid_view<_tTexel>& other)			{ 
+			Texels																	= {other.begin(), other.size()};
 			View																	= {Texels.begin(), other.metrics()};
 			return *this; 
 		}
 
-							::cho::array_view<_tTexel>&							operator=									(const ::cho::STexture<_tTexel>& other)				{ 
+							::cho::STexture<_tTexel>&							operator=									(const ::cho::STexture<_tTexel>& other)				{ 
 			Texels																	= other.Texels;
 			View																	= {Texels.begin(), other.View.metrics()};
 			return *this; 
@@ -45,6 +46,49 @@ namespace cho
 							::cho::error_t										resize										(uint32_t newSizeX, uint32_t newSizeY)				{ cho_necall(Texels.resize(newSizeX * newSizeY), "cannot resize?"); View = {Texels.begin(), newSizeX, newSizeY}; return 0; }
 		inline				::cho::error_t										resize										(::cho::SCoord2<uint32_t> newSize)					{ return resize(newSize.x, newSize.y); }
 	}; // struct
+
+	template<typename _tTexel>
+	struct STextureMonochrome {
+		typedef				_tTexel												TTexel;
+
+							::cho::array_pod		<_tTexel>					Texels										;
+							::cho::bit_array_view	<_tTexel>					View										;
+							uint32_t											Pitch										= 0;
+
+		constexpr																STextureMonochrome							()													= default;
+																				STextureMonochrome							(const ::cho::bit_array_view<_tTexel>& other)		{ 
+			Texels																	= other;
+			View																	= {Texels.begin(), Texels.size()};
+			Pitch																	= other.Pitch;
+			return *this; 
+		}
+
+																				STextureMonochrome							(const ::cho::STextureMonochrome<_tTexel>& other)	{ 
+			Texels																	= other.Texels;
+			View																	= {Texels.begin(), Texels.size()};
+			Pitch																	= other.Pitch;
+			return *this; 
+		}
+
+							::cho::STextureMonochrome<_tTexel>&					operator=									(const ::cho::bit_array_view<_tTexel>& other)		{ 
+			Texels																	= other;
+			View																	= {Texels.begin(), Texels.size()};
+			Pitch																	= other.Pitch;
+			return *this; 
+		}
+
+							::cho::STextureMonochrome<_tTexel>&					operator=									(const ::cho::STextureMonochrome<_tTexel>& other)	{ 
+			Texels																	= other.Texels;
+			View																	= {Texels.begin(), Texels.size()};
+			Pitch																	= other.Pitch;
+			return *this; 
+		}
+
+							::cho::error_t										resize										(uint32_t newSizeX, uint32_t newSizeY)				{ cho_necall(Texels.resize(newSizeX * newSizeY), "cannot resize?"); View = {Texels.begin(), newSizeX * newSizeY}; Pitch = newSizeX; return 0; }
+		inline				::cho::error_t										resize										(const ::cho::SCoord2<uint32_t> & newSize)			{ return resize(newSize.x, newSize.y); }
+	}; // struct
+
+
 
 	template<typename _tTexel>
 	struct STextureProcessable {
