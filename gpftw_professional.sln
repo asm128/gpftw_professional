@@ -62,6 +62,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial8 (Gontrill)", "Tut
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial9", "Tutorial9\Tutorial9.vcxproj", "{282710CA-7379-4FFD-9EB4-2763BDE7BAF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{92362907-D84D-4409-B8BC-96F1F766BD9C} = {92362907-D84D-4409-B8BC-96F1F766BD9C}
+		{0E376995-5FBF-4FEB-AC68-B38A1CF33916} = {0E376995-5FBF-4FEB-AC68-B38A1CF33916}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

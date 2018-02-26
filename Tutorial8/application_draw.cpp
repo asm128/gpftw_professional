@@ -10,7 +10,8 @@ static				::cho::error_t										drawShipHealthBar							(::SApplication& appli
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
 	::cho::SLine2D<int32_t>														healthBar									= {};
 	healthBar.A 															= {(int32_t)(centerEnemy.x  + .5f - halfMetrics.x), (int32_t)(centerEnemy.y + yOffset)};
-	healthBar.B																= {(int32_t)(centerEnemy.x  + .5f + halfMetrics.x), (int32_t)(centerEnemy.y + yOffset)};
+	healthBar.B																= healthBar.A; //{(int32_t)(centerEnemy.x  + .5f + halfMetrics.x), (int32_t)(centerEnemy.y + yOffset)};
+	healthBar.B.x															+= halfMetrics.x * 2;
 	double																		enemyHealthProportion						= health / 5000.0;
 	healthBar.B.x															= ::cho::interpolate_linear(healthBar.A.x, healthBar.B.x, enemyHealthProportion);
 	applicationInstance.CacheLinePoints.clear();

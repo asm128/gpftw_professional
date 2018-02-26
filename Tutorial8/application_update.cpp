@@ -104,12 +104,15 @@ template <size_t _sizeAlive>
 		if(0 == gameInstance.Ships.Alive[iShip])
 			continue;
 		::cho::SCoord2<float>														& shipPosition								= gameInstance.Ships.Position[iShip];
+		const ::SShipState															& shipState									= gameInstance.Ships.States[iShip];
 		shipPosition															+= gameInstance.Ships.Direction[iShip] * (float)(framework.FrameInfo.Seconds.LastFrame * 100) * 
-			(gameInstance.Ships.States[iShip].Brakes ? .25f : (gameInstance.Ships.States[iShip].Thrust ? 2 : 1));
+			(shipState.Brakes ? .25f : (shipState.Thrust ? 2 : 1));
 		shipPosition.x															= ::cho::clamp(shipPosition.x, .1f, (float)offscreenMetrics.x - 1);
 		shipPosition.y															= ::cho::clamp(shipPosition.y, .1f, (float)offscreenMetrics.y - 1);
-		gameInstance.PositionCrosshair[iShip]									= shipPosition + ::cho::SCoord2<float>{96,};
-		gameInstance.PositionCrosshair[iShip].x									= ::cho::min(gameInstance.PositionCrosshair[iShip].x, (float)offscreenMetrics.x);
+
+		::cho::SCoord2<float>														& crosshairPosition							= gameInstance.PositionCrosshair[iShip];
+		crosshairPosition														= shipPosition + ::cho::SCoord2<float>{96,};
+		crosshairPosition.x														= ::cho::min(crosshairPosition.x, (float)offscreenMetrics.x);
 	}
 
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip) {	// --- Calculate line of fire and set state accordingly. This causes Draw() to draw the crosshair in the right mode.
@@ -137,10 +140,21 @@ template <size_t _sizeAlive>
 			if((gameInstance.Powerups.Position[iPow] - gameInstance.Ships.Position[iShip]).LengthSquared() > (collisionDistance * collisionDistance))
 				continue;
 			::SPowerup																	& powerup									= gameInstance.Powerups.Type[iPow];
-			//if(powerup.TypeBuff		!= BUFF_TYPE_INVALID)	{ switch (powerup.TypeBuff		) { gameInstance.Ships.Weapon[iShip].Type = powerup.TypeWeapon; break; }  }
+			if(powerup.TypeBuff		!= BUFF_TYPE_INVALID)	{ 
+				switch (powerup.TypeBuff) { 
+				case BUFF_TYPE_FIRE_RATIO:
+					gameInstance.Ships.Health[iShip].Health									+= 2000; 
+					gameInstance.Ships.Health[iShip].Shield									+= 2000; 
+					break; 
+				case BUFF_TYPE_FORCE_FIELD:
+					gameInstance.Ships.Health[iShip].Health									+= 2000; 
+					gameInstance.Ships.Health[iShip].Shield									+= 2000; 
+					break; 
+				}  
+			}
 			if(powerup.TypeWeapon	!= WEAPON_TYPE_INVALID)	{ gameInstance.Ships.Weapon[iShip].Type = powerup.TypeWeapon; }
 			if(powerup.TypeHealth	!= HEALTH_TYPE_INVALID)	{ 
-				switch (powerup.TypeHealth	) { 
+				switch (powerup.TypeHealth) { 
 				case HEALTH_TYPE_HEALTH		: gameInstance.Ships.Health[iShip].Health += 1000; break; 
 				case HEALTH_TYPE_SHIELD		: gameInstance.Ships.Health[iShip].Shield += 1000; break; 
 				}
@@ -620,8 +634,8 @@ static				::cho::error_t										updateSpawnShots
 			else {
 				directionEnemy.Normalize();
 				::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
-				gameInstance.Enemies.Position[iEnemy]									+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-				gameInstance.Enemies.Position[iEnemy]									= 
+				enemyPosition															+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
+				enemyPosition															= 
 					{ ::cho::clamp(enemyPosition.x, .1f, (float)offscreen.View.metrics().x - 1)
 					, ::cho::clamp(enemyPosition.y, .1f, (float)offscreen.View.metrics().y - 1)
 					};
