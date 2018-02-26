@@ -78,6 +78,30 @@ namespace cho
 	}
 
 	template<typename _tCell, typename _tCoord>
+						::cho::error_t							grid_raster_alpha_bit			(::cho::grid_view<_tCell>& dst, const ::cho::bit_array_view<uint32_t>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<uint32_t> & srcMetrics, const ::cho::SRectangle2D<_tCoord>& srcRect, ::cho::array_pod<::cho::SCoord2<uint32_t>> & dstCoords)		{
+		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::cho::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
+		const int32_t													ySrcLimit					= ::cho::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
+		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, srcMetrics, srcRect, xDstOffset, xSrcOffset);
+		uint32_t														elementsCopied				= 0;
+		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
+			const int32_t													yDst						= y + (int32_t)dstOffset.y;
+			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
+			if(yDst < 0 || ySrc < 0)
+				continue;
+			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+				break;
+			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
+				const uint32_t xSrc = xSrcOffset + x;
+				if(true == src[ySrc * srcMetrics.x + xSrc])
+					dstCoords.push_back({xDstOffset + x, (uint32_t)yDst});
+			}
+			elementsCopied												+= xCopyCells;
+		}
+		return elementsCopied;
+	}
+
+	template<typename _tCell, typename _tCoord>
 						::cho::error_t							grid_copy_alpha				(::cho::grid_view<_tCell>& dst, const ::cho::grid_view<_tCell>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SRectangle2D<_tCoord>& srcRect, const _tCell& comparand)		{
 		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
 		const uint32_t													xSrcOffset					= (uint32_t)::cho::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)src.width());			// 
