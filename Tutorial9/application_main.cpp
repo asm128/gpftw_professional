@@ -112,7 +112,7 @@ static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::ch
 		dstCoords.clear();
 		error_if(errored(::cho::grid_raster_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, srcRect0, dstCoords)), "I believe this never fails.");
 		for(uint32_t iCoord = 0; iCoord < dstCoords.size(); ++iCoord) {
-			::cho::drawPixelLight(bmpTarget, dstCoords[iCoord].Cast<float>(), color, 0.15f, 2.f);
+			::cho::drawPixelLight(bmpTarget, dstCoords[iCoord], color, 0.05f, 1.0);
 		}
 	}
 	return 0;
@@ -135,10 +135,10 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	static constexpr const char													textLine1	[]								= "T: Shoot. Y: Thrust. U: Handbrake.";
 	static constexpr const char													textLine2	[]								= "Press ESC to exit.";
 	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= applicationInstance.Framework.Offscreen.View;
-	::cho::grid_view<::cho::SColorBGRA>											& fontAtlasView								= applicationInstance.TextureFont.View;
+	const ::cho::grid_view<::cho::SColorBGRA>									& fontAtlasView								= applicationInstance.TextureFont.View;
 	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= offscreenView.metrics();
-	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine0, ::cho::SColorBGRA{0, 0xFFU, 0xFFU, 0xFFU});	++lineOffset;
-	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine1, ::cho::SColorBGRA{0xFFU, 0xFFU, 0, 0xFFU});	++lineOffset;
-	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2, ::cho::SColorBGRA{0, 0xFFU, 0, 0xFFU});	--lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine0, ::cho::SColorBGRA{0, framework.FrameInfo.FrameNumber % 0xFF, 0xFFU, 0xFFU});	++lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine1, ::cho::SColorBGRA{framework.FrameInfo.FrameNumber % 0xFFU, 0xFFU, 0, 0xFFU});	++lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2, ::cho::SColorBGRA{0, framework.FrameInfo.FrameNumber % 0xFFU, 0, 0xFFU});	--lineOffset;
 	return 0;																																																
 }

@@ -9,8 +9,8 @@
 namespace cho
 {
 	template<typename _tCoord, typename _tCell>
-					::cho::error_t											drawPixelBrightness								(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, const _tCell& colorLight, _tCoord factor, _tCoord range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-		::cho::SCoord2<_tCoord>														maxRange										= {range, range};
+					::cho::error_t											drawPixelBrightness								(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, const _tCell& colorLight, float factor, double range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+		::cho::SCoord2<double>														maxRange										= {range, range};
 		_tCoord																		colorUnit										= _tCoord(1.0 / maxRange.Length());
 		for(int32_t y = -(int32_t)range - 1, blendCount = 1 + (int32_t)range + 1; y < blendCount; ++y)	// the + 1 - 1 is because we actually process more surrounding pixels in order to compensate for the flooring of the coordinates 
 		for(int32_t x = -(int32_t)range - 1; x < blendCount; ++x) {										// as it causes a visual effect of the light being cut to a rectangle and having sharp borders.
@@ -31,7 +31,7 @@ namespace cho
 	}
 
 	template<typename _tCoord, typename _tCell>
-					::cho::error_t											drawPixelLight									(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, const _tCell& colorLight, _tCoord maxFactor, _tCoord range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+					::cho::error_t											drawPixelLight									(::cho::grid_view<::cho::SColorBGRA> & viewOffscreen, const ::cho::SCoord2<_tCoord> & sourcePosition, const _tCell& colorLight, float maxFactor, double range)								{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 		if( ((uint32_t)sourcePosition.x) < viewOffscreen.width	()
 		 && ((uint32_t)sourcePosition.y) < viewOffscreen.height	()
 		 )
