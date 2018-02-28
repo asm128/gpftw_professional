@@ -4,6 +4,7 @@
 #include "cho_coord.h"
 #include "cho_bit_array_view.h"
 #include "cho_array_static.h"
+#include "weapon.h"
 
 #ifndef GAME_H_982374982374
 #define GAME_H_982374982374
@@ -15,18 +16,6 @@ enum PLAYER_TYPE : int8_t
 	, PLAYER_TYPE_ENEMY
 	, PLAYER_TYPE_COUNT
 	, PLAYER_TYPE_INVALID				= -1
-	};
-
-enum WEAPON_TYPE : int8_t
-	{ WEAPON_TYPE_LASER					= 0
-	, WEAPON_TYPE_PLASMA
-	, WEAPON_TYPE_SPARK
-	, WEAPON_TYPE_BULLET
-	, WEAPON_TYPE_ARROW
-	, WEAPON_TYPE_POISON
-	, WEAPON_TYPE_ROCK
-	, WEAPON_TYPE_COUNT
-	, WEAPON_TYPE_INVALID				= -1
 	};
 
 enum HEALTH_TYPE : int8_t

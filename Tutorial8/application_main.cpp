@@ -16,21 +16,21 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 static ::SApplication::TParticleSystem::TIntegrator::TParticle			particleDefinitions	[::PARTICLE_TYPE_COUNT]	= {};
 
 static				void												setupParticles								()																				{
-	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].Position				= 
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Position				= 
-	particleDefinitions	[::PARTICLE_TYPE_STAR		].Position				= {};
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE		].Position				= 
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST	].Position				= 
+	particleDefinitions	[::PARTICLE_TYPE_STAR			].Position				= {};
 
-	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].SetMass				(1);
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].SetMass				(1);
-	particleDefinitions	[::PARTICLE_TYPE_STAR		].SetMass				(1);
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE		].SetMass				(1);
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST	].SetMass				(1);
+	particleDefinitions	[::PARTICLE_TYPE_STAR			].SetMass				(1);
 
-	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].Damping				= 1.0f;
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Damping				= 0.80f;
-	particleDefinitions	[::PARTICLE_TYPE_STAR		].Damping				= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE		].Damping				= 1.0f;
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST	].Damping				= 0.80f;
+	particleDefinitions	[::PARTICLE_TYPE_STAR			].Damping				= 1.0f;
 
-	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE	].Forces.Velocity		= {};
-	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST].Forces.Velocity		= {};
-	particleDefinitions	[::PARTICLE_TYPE_STAR		].Forces.Velocity		= {};
+	particleDefinitions	[::PARTICLE_TYPE_PROJECTILE		].Forces.Velocity		= {};
+	particleDefinitions	[::PARTICLE_TYPE_SHIP_THRUST	].Forces.Velocity		= {};
+	particleDefinitions	[::PARTICLE_TYPE_STAR			].Forces.Velocity		= {};
 }
 
 					::SApplication										* g_ApplicationInstance						= 0;
@@ -89,6 +89,18 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	for(uint32_t iSprite = 0, spriteCount = ::cho::size(bmpFileNames); iSprite < spriteCount; ++iSprite)
 		::setupSprite(applicationInstance.Textures[iSprite], applicationInstance.TextureCenters[iSprite], {bmpFileNames[iSprite], (uint32_t)strlen(bmpFileNames[iSprite])});
 
+	const ::cho::grid_view<::cho::SColorBGRA>									& fontAtlas									= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
+	const ::cho::SCoord2<uint32_t>												& textureFontMetrics						= fontAtlas.metrics();
+	applicationInstance.TextureFontMonochrome.resize(textureFontMetrics);
+	for(uint32_t y = 0, yMax = textureFontMetrics.y; y < yMax; ++y)
+	for(uint32_t x = 0, xMax = textureFontMetrics.x; x < xMax; ++x) {
+		const ::cho::SColorBGRA														& pixelToTest								= fontAtlas[y][x];
+		applicationInstance.TextureFontMonochrome.View[y * textureFontMetrics.x + x]	
+		=	0 != pixelToTest.r
+		||	0 != pixelToTest.g
+		||	0 != pixelToTest.b
+		;
+	}
 	applicationInstance.StuffToDraw.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWCORESQUARE		].Processed.View);
 	applicationInstance.StuffToDraw.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWICON			].Processed.View);
 	applicationInstance.StuffToDraw.TexturesPowerup1.push_back(applicationInstance.Textures[GAME_TEXTURE_POWCOREDIAGONAL	].Processed.View);
@@ -170,6 +182,34 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	return ::textDrawFixedSize(targetView, fontAtlas, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset);
 }
 
+///---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::bit_array_view<uint32_t>& viewTextureFont, const ::cho::SCoord2<uint32_t> & viewMetrics, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset, const ::cho::SColorBGRA& color)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	::cho::array_pod<::cho::SCoord2<uint32_t>>								dstCoords;
+	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
+		int32_t																	coordTableX										= text0[iChar] % characterCellsX;
+		int32_t																	coordTableY										= text0[iChar] / characterCellsX;
+		const ::cho::SCoord2<int32_t>											coordCharTable									= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
+		const ::cho::SCoord2<int32_t>											dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
+		const ::cho::SRectangle2D<int32_t>										srcRect0										= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewMetrics.y - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
+		//error_if(errored(::cho::grid_copy_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, ::cho::SColorBGRA{0, 0xFF, 0xFF, 0xFF}, srcRect0)), "I believe this never fails.");
+		dstCoords.clear();
+		error_if(errored(::cho::grid_raster_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, srcRect0, dstCoords)), "I believe this never fails.");
+		for(uint32_t iCoord = 0; iCoord < dstCoords.size(); ++iCoord) {
+			::cho::drawPixelLight(bmpTarget, dstCoords[iCoord], color, 0.05f, 0.75);
+		}
+	}
+	return 0;
+}
+
+template<size_t _sizeString>
+static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view<::cho::SColorBGRA>& targetView, const ::cho::bit_array_view<uint32_t>& fontAtlas, const ::cho::SCoord2<uint32_t> & viewMetrics, uint32_t lineOffset, const ::cho::SCoord2<uint32_t>& targetSize, const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString], const ::cho::SColorBGRA& color)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
+	const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)targetSize.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, text0) / 2, };
+	uint32_t																	dstOffsetY									= (int32_t)(targetSize.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
+	return ::textDrawFixedSize(targetView, fontAtlas, viewMetrics, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset, color);
+}
+
+
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	
 	error_if(errored(::drawBackground		(applicationInstance)), "Why??");		// --- Draw stars
 	error_if(errored(::drawPowerups			(applicationInstance)), "Why??");		// --- Draw powerups
@@ -187,8 +227,8 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= applicationInstance.Framework.Offscreen.View;
 	::cho::grid_view<::cho::SColorBGRA>											& fontAtlasView								= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
 	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= offscreenView.metrics();
-	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset, offscreenMetrics, sizeCharCell, textLine0);	++lineOffset;
-	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset, offscreenMetrics, sizeCharCell, textLine1);	++lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine0, ::cho::SColorBGRA{0, applicationInstance.Framework.FrameInfo.FrameNumber % 0xFF, 0xFFU, 0xFFU});	++lineOffset;
+	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine1, ::cho::SColorBGRA{applicationInstance.Framework.FrameInfo.FrameNumber % 0xFFU, 0xFFU, 0, 0xFFU});	++lineOffset;
 	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2);	--lineOffset;
 	return 0;
 }

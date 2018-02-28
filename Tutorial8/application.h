@@ -24,6 +24,7 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
 
+
 #pragma pack(push, 1)
 struct SGameParticle {
 						PARTICLE_TYPE																				Type										= (PARTICLE_TYPE)-1;
@@ -98,6 +99,7 @@ struct SApplication {
 						::cho::array_static<::cho::STextureProcessable<::cho::SColorBGRA>	, GAME_TEXTURE_COUNT>	Textures									= {};
 						::cho::array_static<::cho::SCoord2<int32_t>							, GAME_TEXTURE_COUNT>	TextureCenters								= {};
 						::cho::SCoord2<int32_t>																		PSOffsetFromShipCenter						= {};
+						::cho::STextureMonochrome<uint32_t>															TextureFontMonochrome						= {};
 
 						::SStuffToDraw																				StuffToDraw									= {};
 						::cho::array_pod<::cho::SCoord2<int32_t>>													CacheLinePoints								= {};

@@ -77,6 +77,58 @@ namespace cho
 		return elementsCopied;
 	}
 
+	template<typename _tCoord>
+						::cho::error_t							check_bit_raster_contour				(const ::cho::bit_array_view<uint32_t>& src, const ::cho::SCoord2<uint32_t> & srcMetrics, const ::cho::SRectangle2D<_tCoord>& srcRect, const ::cho::SCoord2<_tCoord> & cellToCheck)		{
+		::cho::SCoord2<_tCoord>											cellToCheckLeft							= {cellToCheck.x - 1, cellToCheck.y};
+		::cho::SCoord2<_tCoord>											cellToCheckRight						= {cellToCheck.x + 1, cellToCheck.y};
+		::cho::SCoord2<_tCoord>											cellToCheckTop							= {cellToCheck.x, cellToCheck.y + 1};
+		::cho::SCoord2<_tCoord>											cellToCheckBottom						= {cellToCheck.x, cellToCheck.y - 1};
+		::cho::SCoord2<_tCoord>											rectLimit								= srcRect.Offset + srcRect.Size;
+		bool															result									
+			=  ((uint32_t)cellToCheckLeft	.x) >= srcMetrics.x || ((uint32_t)cellToCheckLeft	.y) >= srcMetrics.y
+			|| ((uint32_t)cellToCheckRight	.x) >= srcMetrics.x || ((uint32_t)cellToCheckRight	.y) >= srcMetrics.y
+			|| ((uint32_t)cellToCheckTop	.x) >= srcMetrics.x || ((uint32_t)cellToCheckTop	.y) >= srcMetrics.y
+			|| ((uint32_t)cellToCheckBottom	.x) >= srcMetrics.x || ((uint32_t)cellToCheckBottom	.y) >= srcMetrics.y
+			|| (false == ::cho::in_range(cellToCheckLeft	.y, srcRect.Offset.y, rectLimit.y))
+			|| (false == ::cho::in_range(cellToCheckRight	.y, srcRect.Offset.y, rectLimit.y))
+			|| (false == ::cho::in_range(cellToCheckTop		.y, srcRect.Offset.y, rectLimit.y))
+			|| (false == ::cho::in_range(cellToCheckBottom	.y, srcRect.Offset.y, rectLimit.y))
+			;
+			 if(false == result) {
+				 result 
+					=  (false == src[cellToCheckLeft	.y * srcMetrics.x + cellToCheckLeft		.x])
+					|| (false == src[cellToCheckRight	.y * srcMetrics.x + cellToCheckRight	.x])
+					|| (false == src[cellToCheckTop		.y * srcMetrics.x + cellToCheckTop		.x])
+					|| (false == src[cellToCheckBottom	.y * srcMetrics.x + cellToCheckBottom	.x])
+					;
+			 }
+		return result ? 1 : 0;
+	}
+
+	template<typename _tCell, typename _tCoord>
+						::cho::error_t							grid_raster_alpha_bit_contour	(::cho::grid_view<_tCell>& dst, const ::cho::bit_array_view<uint32_t>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<uint32_t> & srcMetrics, const ::cho::SRectangle2D<_tCoord>& srcRect, ::cho::array_pod<::cho::SCoord2<uint32_t>> & dstCoords)		{
+		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
+		const uint32_t													xSrcOffset					= (uint32_t)::cho::clamp((int32_t)srcRect.Offset.x		, 0, (int32_t)srcMetrics.x);			// 
+		const int32_t													ySrcLimit					= ::cho::min((int32_t)(srcRect.Offset.y + srcRect.Size.y),  (int32_t)srcMetrics.y);
+		const uint32_t													xCopyCells					= ::cho::grid_copy_row_calc(dst, srcMetrics, srcRect, xDstOffset, xSrcOffset);
+		uint32_t														elementsCopied				= 0;
+		for(int32_t y = 0, yMax = (int32_t)srcRect.Size.y; y < yMax; ++y) {
+			const int32_t													yDst						= y + (int32_t)dstOffset.y;
+			const int32_t													ySrc						= y + (int32_t)srcRect.Offset.y;
+			if(yDst < 0 || ySrc < 0)
+				continue;
+			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
+				break;
+			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
+				const uint32_t													xSrc						= xSrcOffset + x;
+				if((true == src[ySrc * srcMetrics.x + xSrc]) && check_bit_raster_contour(src, srcMetrics, srcRect, {(_tCoord)xSrc, (_tCoord)ySrc}))
+					dstCoords.push_back({xDstOffset + x, (uint32_t)yDst});
+			}
+			elementsCopied												+= xCopyCells;
+		}
+		return elementsCopied;
+	}
+
 	template<typename _tCell, typename _tCoord>
 						::cho::error_t							grid_raster_alpha_bit			(::cho::grid_view<_tCell>& dst, const ::cho::bit_array_view<uint32_t>& src, const ::cho::SCoord2<_tCoord>& dstOffset, const ::cho::SCoord2<uint32_t> & srcMetrics, const ::cho::SRectangle2D<_tCoord>& srcRect, ::cho::array_pod<::cho::SCoord2<uint32_t>> & dstCoords)		{
 		const uint32_t													xDstOffset					= (uint32_t)::cho::clamp((int32_t)dstOffset.x			, 0, (int32_t)dst.width());			// 
@@ -92,7 +144,7 @@ namespace cho
 			if(yDst >= (int32_t)dst.height() || ySrc >= ySrcLimit) 
 				break;
 			for(uint32_t x = 0, xMax = xCopyCells; x < xMax; ++x) {
-				const uint32_t xSrc = xSrcOffset + x;
+				const uint32_t													xSrc						= xSrcOffset + x;
 				if(true == src[ySrc * srcMetrics.x + xSrc])
 					dstCoords.push_back({xDstOffset + x, (uint32_t)yDst});
 			}
