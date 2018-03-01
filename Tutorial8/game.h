@@ -5,6 +5,7 @@
 #include "cho_bit_array_view.h"
 #include "cho_array_static.h"
 #include "weapon.h"
+#include "ship.h"
 
 #ifndef GAME_H_982374982374
 #define GAME_H_982374982374
@@ -45,6 +46,16 @@ enum POWERUP_FAMILY : int8_t
 	, POWERUP_FAMILY_INVALID			= -1
 	};
 
+enum GAME_ELEMENT : int8_t
+	{ GAME_ELEMENT_PLAYER				= 0
+	, GAME_ELEMENT_ENEMY
+	, GAME_ELEMENT_POWERUP
+	, GAME_ELEMENT_SHOT
+	, GAME_ELEMENT_PROP
+	, GAME_ELEMENT_COUNT
+	, GAME_ELEMENT_INVALID				= -1
+	};
+
 struct SPowerup {
 						BUFF_TYPE																TypeBuff																= BUFF_TYPE_INVALID;
 						HEALTH_TYPE																TypeHealth																= HEALTH_TYPE_INVALID;
@@ -54,13 +65,8 @@ struct SPowerup {
 struct SWeapon {
 						float																	Delay;
 						float																	Speed;
+						int32_t																	IndexProperties;
 						WEAPON_TYPE																Type;
-};
-
-struct SShipState {
-						bool																	Thrust																	: 1;
-						bool																	Firing																	: 1;
-						bool																	Brakes																	: 1;
 };
 
 struct SHealthPoints {

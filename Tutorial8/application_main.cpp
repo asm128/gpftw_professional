@@ -130,7 +130,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	for(uint32_t iShip = 0, shipCount = applicationInstance.Game.ShipsPlaying; iShip < shipCount; ++iShip) {
 		gameInstance.Ships.Alive		[iShip]									= 1;
 		gameInstance.Ships.Position		[iShip]									= framework.Offscreen.View.metrics().Cast<float>() / 4 + ::cho::SCoord2<float>{0, (float)iShip * 64};
-		gameInstance.Ships.Weapon		[iShip]									= {.10f, 2000, iShip ? WEAPON_TYPE_PLASMA : WEAPON_TYPE_LASER};
+		gameInstance.Ships.Weapon		[iShip]									= {.10f, 2000, (int32_t)iShip, iShip ? WEAPON_TYPE_PLASMA : WEAPON_TYPE_LASER};
 		gameInstance.Ships.Health		[iShip].Health							= 5000;
 		gameInstance.Ships.Health		[iShip].Shield							= 5000;
 		gameInstance.PositionCrosshair	[iShip]									= gameInstance.Ships.Position[iShip] + ::cho::SCoord2<float>{64, };
@@ -265,25 +265,25 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	error_if(errored(::updateShots		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI		(applicationInstance)), "Unknown error.");
 
-	::cho::STimer																& timer										= framework.Timer;
-	::cho::SDisplay																& mainWindow								= framework.MainDisplay;
-	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. Projecitle fx count: %u. Thrust fx count: %u. Stars fx count: %u. Debris fx count: %u. Total fx count: %u. Enemy count: %u. Projectile count: %u. Powerup count: %u. FPS: %g. Last frame seconds: %g."
-		, mainWindow.Size.x, mainWindow.Size.y
-		, applicationInstance.ParticleSystemProjectiles	.Instances.size()
-		, applicationInstance.ParticleSystemThrust		.Instances.size()
-		, applicationInstance.ParticleSystemStars		.Instances.size()
-		, applicationInstance.ParticleSystemDebris		.Instances.size()
-		, applicationInstance.ParticleSystemProjectiles	.Instances.size()
-		+ applicationInstance.ParticleSystemThrust		.Instances.size()
-		+ applicationInstance.ParticleSystemStars		.Instances.size()
-		+ applicationInstance.ParticleSystemDebris		.Instances.size()
-		, applicationInstance.Game.CountEnemies
-		, applicationInstance.Game.CountProjectiles
-		, applicationInstance.Game.CountPowerups
-		, 1 / timer.LastTimeSeconds
-		, timer.LastTimeSeconds);
-	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
-	SetWindowText(windowHandle, buffer);
+	//::cho::STimer																& timer										= framework.Timer;
+	//::cho::SDisplay																& mainWindow								= framework.MainDisplay;
+	//char																		buffer		[256]							= {};
+	//sprintf_s(buffer, "[%u x %u]. Projecitle fx count: %u. Thrust fx count: %u. Stars fx count: %u. Debris fx count: %u. Total fx count: %u. Enemy count: %u. Projectile count: %u. Powerup count: %u. FPS: %g. Last frame seconds: %g."
+	//	, mainWindow.Size.x, mainWindow.Size.y
+	//	, applicationInstance.ParticleSystemProjectiles	.Instances.size()
+	//	, applicationInstance.ParticleSystemThrust		.Instances.size()
+	//	, applicationInstance.ParticleSystemStars		.Instances.size()
+	//	, applicationInstance.ParticleSystemDebris		.Instances.size()
+	//	, applicationInstance.ParticleSystemProjectiles	.Instances.size()
+	//	+ applicationInstance.ParticleSystemThrust		.Instances.size()
+	//	+ applicationInstance.ParticleSystemStars		.Instances.size()
+	//	+ applicationInstance.ParticleSystemDebris		.Instances.size()
+	//	, applicationInstance.Game.CountEnemies
+	//	, applicationInstance.Game.CountProjectiles
+	//	, applicationInstance.Game.CountPowerups
+	//	, 1 / timer.LastTimeSeconds
+	//	, timer.LastTimeSeconds);
+	//::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
+	//SetWindowText(windowHandle, buffer);
 	return 0;
 }

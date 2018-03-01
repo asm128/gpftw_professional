@@ -61,13 +61,13 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	ree_if	(errored(frameworkResult), "Unknown error.");
 	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
-	::cho::STimer																& timer										= applicationInstance.Framework.Timer;
-	::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
-
-	char																		buffer		[256]							= {};
-	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
-	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
-	SetWindowText(windowHandle, buffer);
+	//-----------------------------
+	//::cho::STimer																& timer										= applicationInstance.Framework.Timer;
+	//::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
+	//char																		buffer		[256]							= {};
+	//sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
+	//::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
+	//SetWindowText(windowHandle, buffer);
 	return 0;
 }
 

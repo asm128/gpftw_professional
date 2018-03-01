@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="ship.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="weapon.h" />
   </ItemGroup>

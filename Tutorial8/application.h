@@ -30,6 +30,7 @@ struct SGameParticle {
 						PARTICLE_TYPE																				Type										= (PARTICLE_TYPE)-1;
 						PLAYER_TYPE																					TypePlayer									= (PLAYER_TYPE	)-1;
 						WEAPON_TYPE																					TypeWeapon									= (WEAPON_TYPE	)-1;
+						int8_t																						IndexWeapon									= -1;
 						int8_t																						Padding										= 0;
 						uint32_t																					OwnerIndex									= (uint32_t		)-1;
 						float																						TimeLived									= 0;
