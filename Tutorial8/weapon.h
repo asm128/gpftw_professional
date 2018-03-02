@@ -147,15 +147,15 @@ static constexpr	const SWeaponProperties					weaponProperties []					=
 	,	{"Fire Gun"			, WEAPON_TYPE_POISON	, SHOT_TYPE_SINGLE, 100.f, 7.0f,  750}
 	,	{"Fire Gun"			, WEAPON_TYPE_ARROW		, SHOT_TYPE_SINGLE, 100.f, 8.0f,  750}
 	,	{"Fire Gun"			, WEAPON_TYPE_BULLET	, SHOT_TYPE_SINGLE, 100.f, 9.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_LASER		, SHOT_TYPE_SINGLE, 100.f, 1.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_PLASMA	, SHOT_TYPE_SINGLE, 100.f, 2.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_BUBBLE	, SHOT_TYPE_SINGLE, 100.f, 3.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_SPARK		, SHOT_TYPE_SINGLE, 100.f, 4.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_POISON	, SHOT_TYPE_SINGLE, 100.f, 5.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_ARROW		, SHOT_TYPE_SINGLE, 100.f, 6.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_BULLET	, SHOT_TYPE_SINGLE, 100.f, 7.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_LASER		, SHOT_TYPE_SINGLE, 100.f, 8.0f,  750}
-	,	{"Fire Gun"			, WEAPON_TYPE_PLASMA	, SHOT_TYPE_SINGLE, 100.f, 9.0f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_LASER		, SHOT_TYPE_SINGLE, 100.f, .10f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_PLASMA	, SHOT_TYPE_SINGLE, 100.f, .20f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_BUBBLE	, SHOT_TYPE_SINGLE, 100.f, .30f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_SPARK		, SHOT_TYPE_SINGLE, 100.f, .40f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_POISON	, SHOT_TYPE_SINGLE, 100.f, .50f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_ARROW		, SHOT_TYPE_SINGLE, 100.f, .60f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_BULLET	, SHOT_TYPE_SINGLE, 100.f, .70f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_LASER		, SHOT_TYPE_SINGLE, 100.f, .80f,  750}
+	,	{"Fire Gun"			, WEAPON_TYPE_PLASMA	, SHOT_TYPE_SINGLE, 100.f, .90f,  750}
 	,	{"Fire Gun"			, WEAPON_TYPE_BUBBLE	, SHOT_TYPE_SINGLE, 100.f, 1.0f,  750}
 	,	{"Fire Gun"			, WEAPON_TYPE_SPARK		, SHOT_TYPE_SINGLE, 100.f, 2.0f,  750}
 	,	{"Fire Gun"			, WEAPON_TYPE_POISON	, SHOT_TYPE_SINGLE, 100.f, 3.0f,  750}

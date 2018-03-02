@@ -29,8 +29,8 @@
 	if(inputSystem.KeyboardCurrent.KeyState[VK_DOWN		]) ship1Direction.y	-= 1;
 	if(inputSystem.KeyboardCurrent.KeyState[VK_RIGHT	]) ship1Direction.x	+= 1;
 	if(inputSystem.KeyboardCurrent.KeyState[VK_LEFT		]) ship1Direction.x	-= 1;
-	for(uint32_t iWeaponSelect = 0, weaponCount = ::cho::min(::cho::size(::weaponProperties), 10U); iWeaponSelect < weaponCount; ++iWeaponSelect) {
-		if(inputSystem.KeyboardCurrent.KeyState['1' + iWeaponSelect]) {
+	for(uint32_t iWeaponSelect = 0, weaponCount = ::cho::min(::cho::size(::weaponProperties), 11U); iWeaponSelect < weaponCount; ++iWeaponSelect) {
+		if(inputSystem.KeyboardCurrent.KeyState['0' + iWeaponSelect]) {
 			gameInstance.Ships.Weapon[0].IndexProperties							= iWeaponSelect;
 			break;
 		}
