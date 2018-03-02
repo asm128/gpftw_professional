@@ -113,13 +113,16 @@ static				::cho::error_t										drawShipHealthBar							(::SApplication& appli
 }
 
 static				const ::cho::array_static<::cho::SColorBGRA, WEAPON_TYPE_COUNT>	weaponTypeColorPalette			= 
-	{ ::cho::SColorBGRA{::cho::RED		  	}
-	, ::cho::SColorBGRA{::cho::LIGHTCYAN  	}
-	, ::cho::SColorBGRA{::cho::LIGHTGREEN 	}
-	, ::cho::SColorBGRA{::cho::LIGHTGRAY	}
-	, ::cho::SColorBGRA{::cho::LIGHTYELLOW	}
-	, ::cho::SColorBGRA{::cho::DARKGRAY		}
-	, ::cho::SColorBGRA{::cho::WHITE		}
+	{ ::cho::SColorBGRA{::cho::WHITE		} // WEAPON_TYPE_ARROW
+	, ::cho::SColorBGRA{::cho::LIGHTGRAY	} // WEAPON_TYPE_BULLET
+	, ::cho::SColorBGRA{::cho::RED			} // WEAPON_TYPE_LASER				
+	, ::cho::SColorBGRA{::cho::LIGHTCYAN	} // WEAPON_TYPE_PLASMA
+	, ::cho::SColorBGRA{::cho::LIGHTCYAN	} // WEAPON_TYPE_BUBBLE
+	, ::cho::SColorBGRA{::cho::LIGHTYELLOW	} // WEAPON_TYPE_SPARK
+	, ::cho::SColorBGRA{::cho::LIGHTGREEN 	} // WEAPON_TYPE_POISON
+	, ::cho::SColorBGRA{::cho::RED			} // WEAPON_TYPE_FIRE
+	, ::cho::SColorBGRA{::cho::GRAY			} // WEAPON_TYPE_ROCK
+	, ::cho::SColorBGRA{::cho::WHITE		} // WEAPON_TYPE_GRAVITY
 	};
 
 					::cho::error_t										drawShots									(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.

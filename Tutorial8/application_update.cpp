@@ -29,10 +29,9 @@
 	if(inputSystem.KeyboardCurrent.KeyState[VK_DOWN		]) ship1Direction.y	-= 1;
 	if(inputSystem.KeyboardCurrent.KeyState[VK_RIGHT	]) ship1Direction.x	+= 1;
 	if(inputSystem.KeyboardCurrent.KeyState[VK_LEFT		]) ship1Direction.x	-= 1;
-	for(uint32_t iWeaponSelect = 0, weaponCount = ::cho::min(::cho::size(::weaponProperties), 9U); iWeaponSelect < weaponCount; ++iWeaponSelect) {
+	for(uint32_t iWeaponSelect = 0, weaponCount = ::cho::min(::cho::size(::weaponProperties), 10U); iWeaponSelect < weaponCount; ++iWeaponSelect) {
 		if(inputSystem.KeyboardCurrent.KeyState['1' + iWeaponSelect]) {
 			gameInstance.Ships.Weapon[0].IndexProperties							= iWeaponSelect;
-			gameInstance.Ships.Weapon[0].Type										= (WEAPON_TYPE)iWeaponSelect;
 			break;
 		}
 	}
@@ -153,7 +152,9 @@ template <size_t _sizeAlive>
 					break; 
 				}  
 			}
-			if(powerup.TypeWeapon	!= WEAPON_TYPE_INVALID)	{ gameInstance.Ships.Weapon[iShip].Type = powerup.TypeWeapon; }
+			if(powerup.TypeWeapon	!= WEAPON_TYPE_INVALID)	{ 
+				gameInstance.Ships.Weapon[iShip].IndexProperties	= powerup.TypeWeapon; 
+			}
 			if(powerup.TypeHealth	!= HEALTH_TYPE_INVALID)	{ 
 				switch (powerup.TypeHealth) { 
 				case HEALTH_TYPE_HEALTH		: gameInstance.Ships.Health[iShip].Health += 1000; break; 
@@ -335,8 +336,8 @@ static				::cho::error_t										updateSpawnShots
 		uint32_t																	textureIndex								= (playerType == PLAYER_TYPE_PLAYER) ? GAME_TEXTURE_SHIP0 + iShip : GAME_TEXTURE_ENEMY;
 		weaponDelay[iShip]														+= framework.FrameInfo.Seconds.LastFrame;
 		const ::SWeapon																& weapon										= weapons[iShip];
-		if(shipState[iShip].Firing && weapon.Type != WEAPON_TYPE_INVALID) { // Add lasers / bullets.
-			if( weaponDelay[iShip] >= weapon.Delay ) {
+		if(shipState[iShip].Firing && (weapon.IndexProperties != -1)) { // Add lasers / bullets.
+			if( weaponDelay[iShip] >= weaponProperties[weapon.IndexProperties].Delay ) {
 				const ::SWeaponProperties													& weaponProp								= ::weaponProperties[weapons[iShip].IndexProperties];
 				weaponDelay[iShip]														= 0;
 				::SGameParticle																gameParticle;
@@ -345,8 +346,8 @@ static				::cho::error_t										updateSpawnShots
 				gameParticle.Type														= PARTICLE_TYPE_PROJECTILE;
 				gameParticle.Lit														= true;
 				gameParticle.TypePlayer													= playerType;
-				gameParticle.TypeWeapon													= ::weaponProperties[weapons[iShip].IndexProperties].TypeWeapon;
 				gameParticle.IndexWeapon												= (int8_t)weapons[iShip].IndexProperties;
+				gameParticle.TypeWeapon													= ::weaponProperties[gameParticle.IndexWeapon].TypeWeapon;
 				const ::cho::SCoord2<float>													textureShipMetrics							= applicationInstance.Textures[textureIndex].Processed.View.metrics().Cast<float>();
 				const ::cho::SCoord2<float>													weaponParticleOffset						= {textureShipMetrics.x - (textureShipMetrics.x - applicationInstance.TextureCenters[textureIndex].x), -1};
 				const ::cho::SCoord2<float>													shotDirection								= (playerType == PLAYER_TYPE_PLAYER) ? ::cho::SCoord2<float>{1.0f, 0.0f} : 
@@ -523,8 +524,8 @@ static				::cho::error_t										updateSpawnShots
 				::SHealthPoints																& enemyHealth								= gameInstance.Ships.Health[iShip];
 				if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 					float																		damegePorportion							= ::cho::max(.5f, (rand() % 5001) / 5000.0f);
-					enemyHealth.Health														-= (int32_t)(weapon.Speed * (1.0f - damegePorportion));
-					enemyHealth.Shield														-= (int32_t)(weapon.Speed * damegePorportion);
+					enemyHealth.Health														-= (int32_t)(weaponProperties[weapon.IndexProperties].Speed * (1.0f - damegePorportion));
+					enemyHealth.Shield														-= (int32_t)(weaponProperties[weapon.IndexProperties].Speed * damegePorportion);
 					if(enemyHealth.Health < 0) enemyHealth.Health								= 0;
 					if(enemyHealth.Shield < 0) enemyHealth.Shield								= 0;
 				}
@@ -596,14 +597,14 @@ static				::cho::error_t										updateSpawnShots
 	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
 	static float																timerSpawn									= 0;
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
-	if(timerSpawn > 2.5) {
+	if(timerSpawn > 5.5) {
 		timerSpawn																= 0;
 		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 		if(indexToSpawnEnemy != -1) {
 			gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
 			gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 1.0f, (float)(rand() % offscreenMetrics.y)};
 			gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
-			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {2, 250, (int32_t)(MAX_PLAYER_WEAPONS + (rand() % (::cho::size(::weaponProperties) - MAX_PLAYER_WEAPONS))), WEAPON_TYPE(rand()% WEAPON_TYPE_COUNT)};
+			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {(int32_t)(MAX_PLAYER_WEAPONS + (rand() % (::cho::size(::weaponProperties) - MAX_PLAYER_WEAPONS)))};
 			gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
 			gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
 			++gameInstance.CountEnemies;

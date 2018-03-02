@@ -63,10 +63,7 @@ struct SPowerup {
 };
 
 struct SWeapon {
-						float																	Delay;
-						float																	Speed;
 						int32_t																	IndexProperties;
-						WEAPON_TYPE																Type;
 };
 
 struct SHealthPoints {
