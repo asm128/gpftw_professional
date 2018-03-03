@@ -19,11 +19,11 @@ enum WEAPON_TYPE : int8_t
 	};
 
 enum SHOT_TYPE 
-	{	SHOT_TYPE_SINGLE
-	,	SHOT_TYPE_SPLASH
-	,	SHOT_TYPE_OMNI
-	,	SHOT_TYPE_HOMING
-	,	SHOT_TYPE_COUNT
+	{ SHOT_TYPE_SINGLE
+	, SHOT_TYPE_SPLASH
+	, SHOT_TYPE_OMNI
+	, SHOT_TYPE_HOMING
+	, SHOT_TYPE_COUNT
 	};
 
 struct SWeaponProperties {
@@ -36,7 +36,7 @@ struct SWeaponProperties {
 };
 
 static constexpr	const int								MAX_PLAYER_WEAPONS					= 100;
-static constexpr	const SWeaponProperties					weaponProperties []					=   
+static constexpr	const SWeaponProperties					weaponProperties	[]				=   
 	{	{"Bow"				, WEAPON_TYPE_ARROW		, SHOT_TYPE_SINGLE,  800.f, 0.4f / 2, 1500}
 	,	{"Gun"				, WEAPON_TYPE_BULLET	, SHOT_TYPE_SINGLE,  900.f, 0.2f / 2, 1000}
 	,	{"Laser Gun"		, WEAPON_TYPE_LASER		, SHOT_TYPE_SINGLE, 1000.f, 0.2f / 2, 1000}
