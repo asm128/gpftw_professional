@@ -430,9 +430,9 @@ static				::cho::error_t										updateSpawnShots
 			projectilesAlive[iProjectile]											= 0;
 			--gameInstance.CountProjectiles;
 		}
-		else {
-			info_printf("Time not elapsed? %G", projectile.TimeLived);
-		}
+		//else {
+		//	info_printf("Time not elapsed? %G", projectile.TimeLived);
+		//}
 	}
 	return 0;
 }

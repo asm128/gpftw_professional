@@ -27,7 +27,6 @@ struct SShipState {
 						bool									Brakes										: 1;
 };
 
-static constexpr	const int								MAX_PLAYER_SHIPS							= 50;
 static constexpr	const SShipProperties					shipProperties		[]						= 
 	{ {"Assault"			, SHIP_CLASS_ASSAULT		, 10,    80,   100}
 	, {"Interceptor"		, SHIP_CLASS_INTERCEPTOR	, 10,   100,    80}

@@ -57,9 +57,9 @@ enum GAME_ELEMENT : int8_t
 	};
 
 struct SPowerup {
-						BUFF_TYPE																TypeBuff																= BUFF_TYPE_INVALID;
-						HEALTH_TYPE																TypeHealth																= HEALTH_TYPE_INVALID;
-						WEAPON_TYPE																TypeWeapon																= WEAPON_TYPE_INVALID;
+						BUFF_TYPE																TypeBuff															= BUFF_TYPE_INVALID;
+						HEALTH_TYPE																TypeHealth															= HEALTH_TYPE_INVALID;
+						WEAPON_TYPE																TypeWeapon															= WEAPON_TYPE_INVALID;
 };
 
 struct SWeapon {
@@ -79,93 +79,93 @@ struct SProjectile {
 						int32_t																	ShipIndex;
 };
 
-static constexpr	const int32_t															MAX_PLAYERS																= 4;
-static constexpr	const int32_t															MAX_POWERUP																= 64;
-static constexpr	const int32_t															MAX_ENEMIES																= 128;
-static constexpr	const int32_t															MAX_PROJECTILES															= 512;
+static constexpr	const int32_t															MAX_PLAYERS															= 4;
+static constexpr	const int32_t															MAX_POWERUP															= 64;
+static constexpr	const int32_t															MAX_ENEMIES															= 128;
+static constexpr	const int32_t															MAX_PROJECTILES														= 512;
 
 template<size_t _sizeArray>
 struct SArrayElementState : public ::cho::bit_array_view<uint64_t> { 
 public:
 	typedef				uint64_t																TStorage;
-						TStorage																Data				[(_sizeArray / (8 * sizeof(TStorage))) + 1]			= {};	
+						TStorage																Data				[(_sizeArray / (8 * sizeof(TStorage))) + 1]		= {};	
 
-																								SArrayElementState														()						: bit_array_view(Data, _sizeArray) {}
+																								SArrayElementState													()						: bit_array_view(Data, _sizeArray) {}
 };
 #pragma pack(pop)
 
 template<size_t _sizeArray>
-					::cho::error_t															firstUnused																(const ::SArrayElementState<_sizeArray>& container)			{
+					::cho::error_t															firstUnused															(const ::SArrayElementState<_sizeArray>& container)			{
 	for(uint32_t iObject = 0; iObject < _sizeArray; ++iObject)
 		if(0 == container[iObject])
 			return iObject;
 	return -1;						
 }
 
-static constexpr	const uint32_t															MAGIC_NUMBER															= 1397704771;
+static constexpr	const uint32_t															MAGIC_NUMBER														= 1397704771;
 
 template<uint32_t _sizeArray>	
 struct SPropertiesPowerup		{ 
-						::SArrayElementState						< _sizeArray>				Alive																	= {};
-						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Position																= {};
-						::cho::array_static<POWERUP_FAMILY			, _sizeArray>				Family																	= {};
-						::cho::array_static<::SPowerup				, _sizeArray>				Type																	= {};
+						::SArrayElementState						< _sizeArray>				Alive																= {};
+						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Position															= {};
+						::cho::array_static<POWERUP_FAMILY			, _sizeArray>				Family																= {};
+						::cho::array_static<::SPowerup				, _sizeArray>				Type																= {};
 };
 
 template<uint32_t _sizeArray>	
 struct SPropertiesProjectile	{ 
-						::SArrayElementState						< _sizeArray>				Alive																	= {};
-						::cho::array_static<::SProjectile			, MAX_PROJECTILES>			Projectiles																= {};
-						::cho::array_static<::SHealthPoints			, _sizeArray>				Health																	= {};
+						::SArrayElementState						< _sizeArray>				Alive																= {};
+						::cho::array_static<::SProjectile			, _sizeArray>				Projectiles															= {};
+						::cho::array_static<::SHealthPoints			, _sizeArray>				Health																= {};
 };
 
 template<uint32_t _sizeArray>	
 struct SPropertiesEnemy			{ 
-						::SArrayElementState						< _sizeArray>				Alive																	= {};
-						::cho::array_static<::SShipState			, _sizeArray>				States																	= {};
-						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Position																= {};
-						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Direction																= {};
-						::cho::array_static<::SHealthPoints			, _sizeArray>				Health																	= {};
-						::cho::array_static<double					, _sizeArray>				TimeLived																= {};
-						::cho::array_static<double					, _sizeArray>				SkillTimer																= {};
-						::cho::array_static<int8_t					, _sizeArray>				Target																	= {};
-						::cho::array_static<::SWeapon				, _sizeArray>				Weapon																	= {};
-						::cho::array_static<double					, _sizeArray>				WeaponDelay																= {};
-						::cho::array_static<uint32_t				, _sizeArray>				PathStep																= {};
-						::cho::array_static<float					, _sizeArray>				TimerPath																= {};
+						::SArrayElementState						< _sizeArray>				Alive																= {};
+						::cho::array_static<::SShipState			, _sizeArray>				States																= {};
+						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Position															= {};
+						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Direction															= {};
+						::cho::array_static<::SHealthPoints			, _sizeArray>				Health																= {};
+						::cho::array_static<double					, _sizeArray>				TimeLived															= {};
+						::cho::array_static<double					, _sizeArray>				SkillTimer															= {};
+						::cho::array_static<int8_t					, _sizeArray>				Target																= {};
+						::cho::array_static<::SWeapon				, _sizeArray>				Weapon																= {};
+						::cho::array_static<double					, _sizeArray>				WeaponDelay															= {};
+						::cho::array_static<uint32_t				, _sizeArray>				PathStep															= {};
+						::cho::array_static<float					, _sizeArray>				TimerPath															= {};
 };
 
 template<uint32_t _sizeArray>	
 struct SPropertiesShip			{ 		
-						::SArrayElementState						< _sizeArray>				Alive																	= {};			
-						::cho::array_static<::SShipState			, _sizeArray>				States																	= {};
-						::cho::array_static<::SHealthPoints			, _sizeArray>				Health																	= {};
-						::cho::array_static<::SWeapon				, _sizeArray>				Weapon																	= {};
-						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Position																= {};
-						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Direction																= {};
-						::cho::array_static<bool					, _sizeArray>				LineOfFire																= {};
-						::cho::array_static<double					, _sizeArray>				WeaponDelay																= {};
+						::SArrayElementState						< _sizeArray>				Alive																= {};			
+						::cho::array_static<::SShipState			, _sizeArray>				States																= {};
+						::cho::array_static<::SHealthPoints			, _sizeArray>				Health																= {};
+						::cho::array_static<::SWeapon				, _sizeArray>				Weapon																= {};
+						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Position															= {};
+						::cho::array_static<::cho::SCoord2<float>	, _sizeArray>				Direction															= {};
+						::cho::array_static<bool					, _sizeArray>				LineOfFire															= {};
+						::cho::array_static<double					, _sizeArray>				WeaponDelay															= {};
 };
 
 struct SGame {
-						uint32_t																ShipsPlaying															= 2;
-						::SPropertiesShip		<MAX_PLAYERS>									Ships																	= {};
-						::SPropertiesEnemy		<MAX_ENEMIES>									Enemies																	= {};
-						::SPropertiesProjectile	<MAX_PROJECTILES>								Projectiles																= {};
-						::SPropertiesPowerup	<MAX_POWERUP>									Powerups																= {};
-						::cho::array_static<::cho::SCoord2<float>, MAX_PLAYERS>					PositionCrosshair														= {};
-						uint32_t																CountEnemies															= 0;
-						uint32_t																CountProjectiles														= 0;
-						uint32_t																CountPowerups															= 0;
+						uint32_t																ShipsPlaying														= 2;
+						::SPropertiesShip		<MAX_PLAYERS>									Ships																= {};
+						::SPropertiesEnemy		<MAX_ENEMIES>									Enemies																= {};
+						::SPropertiesProjectile	<MAX_PROJECTILES>								Projectiles															= {};
+						::SPropertiesPowerup	<MAX_POWERUP>									Powerups															= {};
+						::cho::array_static<::cho::SCoord2<float>, MAX_PLAYERS>					PositionCrosshair													= {};
+						uint32_t																CountEnemies														= 0;
+						uint32_t																CountProjectiles													= 0;
+						uint32_t																CountPowerups														= 0;
 
-						float																	HalfWidthShip															= 5;
-						float																	HalfWidthCrosshair														= 5;
-						float																	HalfWidthEnemy															= 5;
-						float																	HalfWidthPowerup														= 5;
+						float																	HalfWidthShip														= 5;
+						float																	HalfWidthCrosshair													= 5;
+						float																	HalfWidthEnemy														= 5;
+						float																	HalfWidthPowerup													= 5;
 
-						double																	GhostTimer																= 0;
-						uint32_t																PathStep																= 0;
-						::cho::SCoord2<float>													PathEnemy					[10]										= 
+						double																	GhostTimer															= 0;
+						uint32_t																PathStep															= 0;
+						::cho::SCoord2<float>													PathEnemy					[10]									= 
 							{ { 10.f,  10.f}
 							, {320.f, 180.f}
 							, { 50.f, 200.f}
