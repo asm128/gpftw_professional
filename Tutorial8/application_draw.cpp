@@ -226,6 +226,30 @@ static				::cho::error_t										drawPowerup						(::SApplication& applicationI
 	::cho::drawPixelLight(viewOffscreen, selectedLightPos2.Cast<float>(), selectedColor, .3f, 3.0f);
 	return 0;
 }
+
+static constexpr	int32_t												PWERUP_HALF_WIDTH							= 6;
+static constexpr	const ::cho::SCoord2<int32_t>						squarePowerupLightPositions		[8]			= 
+	{ ::cho::SCoord2<int32_t>{-PWERUP_HALF_WIDTH    , -PWERUP_HALF_WIDTH - 1}	
+	, ::cho::SCoord2<int32_t>{-PWERUP_HALF_WIDTH - 1, -PWERUP_HALF_WIDTH}		
+	, ::cho::SCoord2<int32_t>{-PWERUP_HALF_WIDTH - 1,  PWERUP_HALF_WIDTH - 1}	
+	, ::cho::SCoord2<int32_t>{-PWERUP_HALF_WIDTH    ,  PWERUP_HALF_WIDTH}		
+	, ::cho::SCoord2<int32_t>{ PWERUP_HALF_WIDTH - 1,  PWERUP_HALF_WIDTH}		
+	, ::cho::SCoord2<int32_t>{ PWERUP_HALF_WIDTH    ,  PWERUP_HALF_WIDTH - 1}	
+	, ::cho::SCoord2<int32_t>{ PWERUP_HALF_WIDTH    , -PWERUP_HALF_WIDTH}		
+	, ::cho::SCoord2<int32_t>{ PWERUP_HALF_WIDTH - 1, -PWERUP_HALF_WIDTH - 1}	
+	};
+
+static constexpr	const ::cho::SCoord2<int32_t>						diagonalPowerupLightPositions	[8]			= 
+	{ ::cho::SCoord2<int32_t>{-1, -PWERUP_HALF_WIDTH - 1}
+	, ::cho::SCoord2<int32_t>{ 0, -PWERUP_HALF_WIDTH - 1}
+	, ::cho::SCoord2<int32_t>{PWERUP_HALF_WIDTH, -1}		
+	, ::cho::SCoord2<int32_t>{PWERUP_HALF_WIDTH,  0}		
+	, ::cho::SCoord2<int32_t>{ 0, PWERUP_HALF_WIDTH}		
+	, ::cho::SCoord2<int32_t>{-1, PWERUP_HALF_WIDTH}		
+	, ::cho::SCoord2<int32_t>{-PWERUP_HALF_WIDTH - 1,  0}
+	, ::cho::SCoord2<int32_t>{-PWERUP_HALF_WIDTH - 1, -1}
+	};
+
 					::cho::error_t										drawPowerups								(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	static double																timer										= 0;
@@ -237,35 +261,22 @@ static				::cho::error_t										drawPowerup						(::SApplication& applicationI
 			continue;
 		POWERUP_FAMILY																powFamily									= gameInstance.Powerups.Family[iPow];
 		::cho::SCoord2<int32_t>														position									= gameInstance.Powerups.Position[iPow].Cast<int32_t>();
-		int32_t																		halfWidth									= 6;
 		::cho::SCoord2<int32_t>														lightPos [8]								;
 		::cho::array_view<::cho::grid_view<::cho::SColorBGRA>>						texturePowerup								;
 		::cho::SCoord2<int32_t>														textureCenterPowerup						;
 		if(powFamily == POWERUP_FAMILY_HEALTH || powFamily == POWERUP_FAMILY_BUFF) { // draw square powerup box
-			lightPos[0]																= position + ::cho::SCoord2<int32_t>{-halfWidth	, -halfWidth - 1}		;
-			lightPos[1]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -halfWidth}		;
-			lightPos[2]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  halfWidth - 1}	;
-			lightPos[3]																= position + ::cho::SCoord2<int32_t>{-halfWidth	,  halfWidth}			;
-			lightPos[4]																= position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  halfWidth}		;
-			lightPos[5]																= position + ::cho::SCoord2<int32_t>{ halfWidth	,  halfWidth - 1}		;
-			lightPos[6]																= position + ::cho::SCoord2<int32_t>{ halfWidth	,  -halfWidth}			;
-			lightPos[7]																= position + ::cho::SCoord2<int32_t>{ halfWidth - 1,  -halfWidth - 1}	;
+			for(uint32_t i = 0; i < ::cho::size(lightPos); ++i)
+				lightPos[i]																= position + squarePowerupLightPositions[i];
 			texturePowerup															= applicationInstance.StuffToDraw.TexturesPowerup0;
 			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWCORESQUARE];
 		}
 		else { // draw diagonal powerup box
-			lightPos[0]																= position + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1};
-			lightPos[1]																= position + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1};
-			lightPos[2]																= position + ::cho::SCoord2<int32_t>{halfWidth, -1}		;
-			lightPos[3]																= position + ::cho::SCoord2<int32_t>{halfWidth,  0}		;
-			lightPos[4]																= position + ::cho::SCoord2<int32_t>{ 0, halfWidth}		;
-			lightPos[5]																= position + ::cho::SCoord2<int32_t>{-1, halfWidth}		;
-			lightPos[6]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1,  0};
-			lightPos[7]																= position + ::cho::SCoord2<int32_t>{-halfWidth - 1, -1};
+			for(uint32_t i = 0; i < ::cho::size(lightPos); ++i)
+				lightPos[i]																= position + diagonalPowerupLightPositions[i];
 			texturePowerup															= applicationInstance.StuffToDraw.TexturesPowerup1;
 			textureCenterPowerup													= applicationInstance.TextureCenters[GAME_TEXTURE_POWCOREDIAGONAL];
 		}
-		::drawPowerup(applicationInstance, powFamily, texturePowerup, textureCenterPowerup, position.Cast<float>(), lightPos, timer);
+		cho_necall(::drawPowerup(applicationInstance, powFamily, texturePowerup, textureCenterPowerup, position.Cast<float>(), lightPos, timer), "Why would this ever happen?");
 	}
 	return 0;
 }

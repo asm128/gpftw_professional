@@ -422,17 +422,14 @@ static				::cho::error_t										updateSpawnShots
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
-		if(0 == projectilesAlive[iProjectile]) 
-			continue;
-		::SProjectile																& projectile								= gameInstance.Projectiles.Projectiles[iProjectile];
-		projectile.TimeLived													+= applicationInstance.Framework.FrameInfo.Seconds.LastFrame;
-		if(projectile.TimeLived > 0.1) {
-			projectilesAlive[iProjectile]											= 0;
-			--gameInstance.CountProjectiles;
+		if(projectilesAlive[iProjectile]) {
+			::SProjectile																& projectile								= gameInstance.Projectiles.Projectiles[iProjectile];
+			projectile.TimeLived													+= applicationInstance.Framework.FrameInfo.Seconds.LastFrame;
+			if(projectile.TimeLived > 0.1) {
+				projectilesAlive[iProjectile]											= 0;
+				--gameInstance.CountProjectiles;
+			}
 		}
-		//else {
-		//	info_printf("Time not elapsed? %G", projectile.TimeLived);
-		//}
 	}
 	return 0;
 }
@@ -440,9 +437,9 @@ static				::cho::error_t										updateSpawnShots
 					::cho::error_t										spawnPowOfRandomType						(::SGame & gameInstance, ::cho::SCoord2<float> powPosition)			{
 	int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
 	ree_if(indexToSpawnPow == -1, "Not enough space to spawn more pows!");
-	gameInstance.Powerups.Alive			[indexToSpawnPow]					= 1;
-	gameInstance.Powerups.Position		[indexToSpawnPow]					= powPosition;
-	gameInstance.Powerups.Family		[indexToSpawnPow]					= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
+	gameInstance.Powerups.Alive		[indexToSpawnPow]						= 1;
+	gameInstance.Powerups.Position	[indexToSpawnPow]						= powPosition;
+	gameInstance.Powerups.Family	[indexToSpawnPow]						= (POWERUP_FAMILY)(rand() % POWERUP_FAMILY_COUNT);
 	::SPowerup																	& powerup									= gameInstance.Powerups.Type[indexToSpawnPow];
 	powerup.TypeBuff														= BUFF_TYPE_INVALID;
 	powerup.TypeHealth														= HEALTH_TYPE_INVALID;
@@ -572,7 +569,7 @@ static				::cho::error_t										updateSpawnShots
 			for(uint32_t iSeg = 0; iSeg < ::cho::size(verticalSegments); ++iSeg) {
 				::cho::SCoord2<float>														& collision									= collisions		[iSeg];
 				const ::cho::SLine2D<float>													& segSelected								= verticalSegments	[iSeg]; 
-				if(::cho::line_line_intersect(projectilePath, segSelected, collision)) {
+				if(1 == ::cho::line_line_intersect(projectilePath, segSelected, collision)) {
 					bool																		bFound										= false;
 					for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 						if(collision == collisions[iS2]) {
@@ -590,6 +587,19 @@ static				::cho::error_t										updateSpawnShots
 	return 0;
 }
 
+					::cho::error_t										spawnEnemy										(::SGame & gameInstance, const ::cho::SCoord2<uint32_t> & offscreenMetrics)			{
+	int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
+	ree_if(indexToSpawnEnemy == -1, "Not enough space in enemy container to spawn more enemies!");	
+	gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
+	gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 1.0f, (float)(rand() % offscreenMetrics.y)};
+	gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
+	gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {(int32_t)(MAX_PLAYER_WEAPONS + (rand() % (::cho::size(::weaponProperties) - MAX_PLAYER_WEAPONS)))};
+	gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
+	gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
+	++gameInstance.CountEnemies;
+	return 0;
+}
+
 					::cho::error_t										updateEnemies								(::SApplication & applicationInstance)			{
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= framework.Offscreen.View.metrics();
@@ -599,18 +609,7 @@ static				::cho::error_t										updateSpawnShots
 	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
 	if(timerSpawn > 5.5) {
 		timerSpawn																= 0;
-		int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
-		if(indexToSpawnEnemy != -1) {
-			gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
-			gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 1.0f, (float)(rand() % offscreenMetrics.y)};
-			gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
-			gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {(int32_t)(MAX_PLAYER_WEAPONS + (rand() % (::cho::size(::weaponProperties) - MAX_PLAYER_WEAPONS)))};
-			gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
-			gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
-			++gameInstance.CountEnemies;
-		}
-		else
-			warning_printf("Not enough space in enemy container to spawn more enemies!");	
+		cho_necall(::spawnEnemy(gameInstance, offscreenMetrics), "Something prevented to add more enemies. Probably a static limit on the container.");
 	}
 	for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])
@@ -623,7 +622,7 @@ static				::cho::error_t										updateSpawnShots
 			timerPath																= 0;
 			++enemyPathStep;
 			if( enemyPathStep >= ::cho::size(gameInstance.PathEnemy) )
-				enemyPathStep										= 0;
+				enemyPathStep															= 0;
 		}
 		{
 			::cho::SCoord2<float>														& enemyPosition								= gameInstance.Enemies.Position[iEnemy];
