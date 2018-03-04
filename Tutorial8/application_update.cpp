@@ -505,7 +505,7 @@ static				::cho::error_t										updateSpawnShots
 				::cho::SCoord2<float>														vector;
 				for(uint32_t iGhost = 0; iGhost < 5; ++iGhost) {
 					vector																	= reference * (64 * sin(applicationInstance.Framework.FrameInfo.Seconds.Total));
-					vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.GhostTimer);
+					vector.Rotate(::cho::math_2pi / 5 * iGhost + gameInstance.Enemies.TimeLived[iEnemy]);
 					if(1 == ::checkLaserCollision(projectilePath, aabbCache, posEnemy + vector, halfSizeBox, applicationInstance.StuffToDraw.CollisionPoints)) {
 						particleInstance.Binding.TimeLived										= 9999999.f;
 					}
