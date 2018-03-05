@@ -120,8 +120,8 @@ namespace cho
 							::cho::SCoord2<int32_t>								MousePosition							= {};
 	};
 
-						::cho::error_t										createControl							(::cho::SGUI& guiSystem, const ::cho::SControlProperties& controlProperties);
-						::cho::error_t										updateGUI								(::cho::SGUI& GUISystem, const ::cho::SInput& inputSystem);
+						::cho::error_t										guiControlCreate						(::cho::SGUI& guiSystem, const ::cho::SControlProperties& controlProperties);
+						::cho::error_t										guiUpdate								(::cho::SGUI& GUISystem, const ::cho::SInput& inputSystem);
 } // namespace
 
 #endif // CHO_GUI_H_2903874982374

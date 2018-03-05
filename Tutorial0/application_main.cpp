@@ -47,7 +47,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 }
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& systemInput								= applicationInstance.Framework.Input;
 	if(systemInput.KeyUp	('W')) ::Beep(440, 100);
 	if(systemInput.KeyUp	('A')) ::Beep(520, 100);
 	if(systemInput.KeyUp	('S')) ::Beep(600, 100);

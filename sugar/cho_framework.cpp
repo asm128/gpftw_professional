@@ -8,8 +8,8 @@
 #endif
 
 					::cho::error_t										cho::updateFramework						(::cho::SFramework& framework)													{
-	framework.SystemInput.KeyboardPrevious											= framework.SystemInput.KeyboardCurrent;
-	framework.SystemInput.MousePrevious												= framework.SystemInput.MouseCurrent;
+	framework.Input.KeyboardPrevious											= framework.Input.KeyboardCurrent;
+	framework.Input.MousePrevious												= framework.Input.MouseCurrent;
 	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
 	::cho::STimer																& timer										= framework.Timer;
 	timer		.Frame();

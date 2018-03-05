@@ -15,7 +15,7 @@ static				LRESULT WINAPI														mainWndProc									(HWND hWnd, UINT uMsg,
 
 	::cho::SFramework																			& framework									= applicationInstance.Framework;
 	::cho::SDisplay																				& mainDisplay								= framework.MainDisplay;
-	::cho::SInput																				& input										= framework.SystemInput;
+	::cho::SInput																				& input										= framework.Input;
 	::cho::SDisplayPlatformDetail																& displayDetail								= framework.MainDisplay.PlatformDetail;
 	switch(uMsg) {
 	default: break;		

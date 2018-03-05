@@ -97,7 +97,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& systemInput								= applicationInstance.Framework.Input;
 	if(systemInput.KeyboardCurrent.KeyState[VK_UP		])	++applicationInstance.Rectangle.Offset.y;
 	if(systemInput.KeyboardCurrent.KeyState[VK_DOWN		])	--applicationInstance.Rectangle.Offset.y;
 	if(systemInput.KeyboardCurrent.KeyState[VK_LEFT		])	--applicationInstance.Rectangle.Offset.x;

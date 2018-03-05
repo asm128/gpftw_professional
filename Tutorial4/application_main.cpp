@@ -124,7 +124,7 @@ static				::cho::error_t										addParticle
 
 
 static				::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& inputSystem								= applicationInstance.Framework.Input;
 	applicationInstance.Firing												= inputSystem.KeyboardCurrent.KeyState[VK_SPACE] != 0;
 	applicationInstance.TurboShip											= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT] != 0;
 

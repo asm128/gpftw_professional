@@ -95,7 +95,7 @@ void																	addParticle
 }
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& systemInput								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& systemInput								= applicationInstance.Framework.Input;
 	::SApplication::TParticleSystem												& particleSystem							= applicationInstance.ParticleSystem;
 	::cho::SFramework::TOffscreen												& offscreen									= applicationInstance.Framework.Offscreen;
 	if(systemInput.KeyboardCurrent.KeyState['1']) for(uint32_t i = 0; i < 3; ++i) ::addParticle(PARTICLE_TYPE_SNOW, particleSystem.Instances, particleSystem.Integrator, { offscreen.View.width(), offscreen.View.height() });

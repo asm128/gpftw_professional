@@ -4,8 +4,7 @@
 #include "cho_coord.h"
 #include "cho_bit_array_view.h"
 #include "cho_array_static.h"
-#include "weapon.h"
-#include "ship.h"
+#include "enemy.h"
 
 #ifndef GAME_H_982374982374
 #define GAME_H_982374982374
@@ -64,11 +63,6 @@ struct SPowerup {
 
 struct SWeapon {
 						int32_t																	IndexProperties;
-};
-
-struct SHealthPoints {
-						int32_t																	Health;
-						int32_t																	Shield;
 };
 
 struct SProjectile {

@@ -1,4 +1,5 @@
 #include "cho_array_view.h"
+#include "gontrill_base.h"
 
 #ifndef SHIP_H_2098379238
 #define SHIP_H_2098379238
@@ -17,14 +18,19 @@ struct SShipProperties {
 						::cho::view_const_string				Name;		
 						SHIP_CLASS								Class;
 						float									Speed;
-						int32_t									Health;
-						int32_t									Shield;
+						SHealthPoints							BaseHealth;
 };
 
 struct SShipState {
 						bool									Thrust										: 1;
 						bool									Firing										: 1;
 						bool									Brakes										: 1;
+};
+
+struct SShip {
+						int32_t									PropertiesShip								;
+						int32_t									PropertiesWeapon							;
+						SHealthPoints							HealthCurrent								= {};
 };
 
 static constexpr	const SShipProperties					shipProperties		[]						= 

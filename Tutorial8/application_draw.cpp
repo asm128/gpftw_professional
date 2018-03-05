@@ -302,7 +302,7 @@ static				::cho::error_t										drawCrosshairDiagonal						(::SApplication& ap
 static				::cho::error_t										drawCrosshairAligned						(::SApplication& applicationInstance, double beaconTimer, const ::cho::SCoord2<int32_t>	& centerCrosshair)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= framework.Offscreen.View;
-	int32_t																		halfWidth									= 10 - ((int32_t)beaconTimer % 11);
+	const int32_t																halfWidth									= 10 - ((int32_t)beaconTimer % 11);
 	const ::cho::SCoord2<int32_t>												lightCrosshair []							= 
 		{ centerCrosshair + ::cho::SCoord2<int32_t>{-1, -halfWidth - 1}
 		, centerCrosshair + ::cho::SCoord2<int32_t>{ 0, -halfWidth - 1}

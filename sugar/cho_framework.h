@@ -15,7 +15,7 @@ namespace cho
 
 							::cho::SRuntimeValues								RuntimeValues								= {};
 							::cho::SDisplay										MainDisplay									= {};
-							::cho::SInput										SystemInput									= {};
+							::cho::SInput										Input										= {};
 							::cho::STimer										Timer										= {};
 							::cho::SFrameInfo									FrameInfo									= {};
 							TOffscreen											Offscreen									= {};

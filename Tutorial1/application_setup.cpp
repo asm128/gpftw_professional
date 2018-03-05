@@ -11,7 +11,7 @@ extern				::SApplication														* g_ApplicationInstance						;
 	static	const int																			adjustedMinRect								= ::AdjustWindowRectEx(&minClientRect, WS_OVERLAPPEDWINDOW, FALSE, 0);
 
 	::cho::SDisplay																				& mainDisplay								= applicationInstance.Framework.MainDisplay;
-	::cho::SInput																				& input										= applicationInstance.Framework.SystemInput;
+	::cho::SInput																				& input										= applicationInstance.Framework.Input;
 	::cho::SDisplayPlatformDetail																& displayDetail								= mainDisplay.PlatformDetail;
 	switch(uMsg) {
 	default: break;		

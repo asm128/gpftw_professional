@@ -1,6 +1,6 @@
 #include "cho_gui.h"
 
-::cho::error_t									cho::createControl			(::cho::SGUI& guiSystem, const ::cho::SControlProperties& definition)						{
+::cho::error_t									cho::guiControlCreate			(::cho::SGUI& guiSystem, const ::cho::SControlProperties& definition)						{
 	::cho::SRectangle2D<int32_t>						areaRealigned				= {};
 	::cho::realignRectangle(guiSystem.TargetSize, definition.Area, areaRealigned, definition.AlignArea);
 
@@ -56,7 +56,7 @@ static						::cho::error_t		updateGUIControlHovered			(::cho::SControlState& con
 	return 0;
 }
 
-::cho::error_t									cho::updateGUI					(::cho::SGUI& GUISystem, const ::cho::SInput& inputSystem)										{ 
+::cho::error_t									cho::guiUpdate					(::cho::SGUI& GUISystem, const ::cho::SInput& inputSystem)										{ 
 	::cho::SCoord2<int32_t>								mousePos						= GUISystem.MousePosition = inputSystem.MouseCurrent.Position;
 	::cho::SControlPropertyTable						& controlsIdle					= GUISystem.Properties[::cho::CONTROL_STATE_Idle];
 	::cho::array_pod<::cho::SControlState>				& controlsState					= GUISystem.Controls;

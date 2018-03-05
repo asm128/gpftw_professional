@@ -5,7 +5,7 @@
 #include "cho_collision.h"
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& inputSystem								= applicationInstance.Framework.Input;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	gameInstance.Ships.States[0].Firing										= inputSystem.KeyboardCurrent.KeyState['T'] != 0;
 	gameInstance.Ships.States[0].Thrust										= inputSystem.KeyboardCurrent.KeyState['Y'] != 0;

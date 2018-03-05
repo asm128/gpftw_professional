@@ -5,7 +5,7 @@
 #include "cho_collision.h"
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& inputSystem								= applicationInstance.Framework.Input;
 	::SGame																		& gameInstance								= applicationInstance.Game;
 	::SShipState																& ship0State								= gameInstance.Ships.States[0];
 	ship0State.Firing														= inputSystem.KeyboardCurrent.KeyState['T'] != 0;
@@ -206,7 +206,7 @@ template <size_t _sizeAlive>
 	return 0;
 }
 
-					::cho::error_t										updateEffectParticles						(float lastFrameSeconds, ::SApplication::TIntegrator & particleIntegrator, ::cho::array_pod<::SApplication::TParticleInstance> & particleInstances, ::cho::array_pod<::SParticleToDraw> & particlesToDraw)											{ 
+static				::cho::error_t										updateEffectParticles						(float lastFrameSeconds, ::SApplication::TIntegrator & particleIntegrator, ::cho::array_pod<::SApplication::TParticleInstance> & particleInstances, ::cho::array_pod<::SParticleToDraw> & particlesToDraw)											{ 
 	typedef	::SApplication::TParticleInstance									TParticleInstance;
 	for(uint32_t iParticle = 0; iParticle < particleInstances.size(); ++iParticle) {
 		TParticleInstance															& particleInstance							= particleInstances[iParticle];
@@ -218,7 +218,7 @@ template <size_t _sizeAlive>
 	return 0;
 }
 
-					::cho::error_t										integrateParticleVelocity					(::SApplication& applicationInstance)											{ 
+static				::cho::error_t										integrateParticleVelocity					(::SApplication& applicationInstance)											{ 
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
 	ree_if(errored(applicationInstance.ParticleSystemThrust			.Integrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
@@ -353,9 +353,9 @@ static				::cho::error_t										updateSpawnShots
 				const ::cho::SCoord2<float>													shotDirection								= (playerType == PLAYER_TYPE_PLAYER) ? ::cho::SCoord2<float>{1.0f, 0.0f} : 
 					(gameInstance.Ships.Position[rand() % gameInstance.ShipsPlaying] - gameInstance.Enemies.Position[iShip]).Normalize();
 				int32_t																		projectileIndex								= ::addProjectile(gameInstance, iShip, gameParticle.TypePlayer, gameParticle.TypeWeapon, weaponProp.Speed);
+				ce_if(errored(projectileIndex), "Projectile storage is full. Cannot add projectile.");
 				int32_t																		particleIndex								= ::addParticle(gameParticle, particleInstances, particleIntegrator, positions[iShip] + weaponParticleOffset, shotDirection, weaponProp.Speed, particleDefinitions);
-				e_if(errored(projectileIndex), "Projectile storage is full. Cannot add projectile.");
-				e_if(errored(particleIndex	), "Particle storage is full. Cannot add projectile particle.");
+				e_if(errored(particleIndex), "Particle storage is full. Cannot add projectile particle.");
 			}
 		}
 	}
@@ -434,7 +434,7 @@ static				::cho::error_t										updateSpawnShots
 	return 0;
 }
 
-					::cho::error_t										spawnPowOfRandomType						(::SGame & gameInstance, ::cho::SCoord2<float> powPosition)			{
+static				::cho::error_t										spawnPowOfRandomType						(::SGame & gameInstance, ::cho::SCoord2<float> powPosition)			{
 	int32_t																		indexToSpawnPow								= firstUnused(gameInstance.Powerups.Alive);
 	ree_if(indexToSpawnPow == -1, "Not enough space to spawn more pows!");
 	gameInstance.Powerups.Alive		[indexToSpawnPow]						= 1;
@@ -587,7 +587,7 @@ static				::cho::error_t										updateSpawnShots
 	return 0;
 }
 
-					::cho::error_t										spawnEnemy										(::SGame & gameInstance, const ::cho::SCoord2<uint32_t> & offscreenMetrics)			{
+static			::cho::error_t										spawnEnemy										(::SGame & gameInstance, const ::cho::SCoord2<uint32_t> & offscreenMetrics)			{
 	int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 	ree_if(indexToSpawnEnemy == -1, "Not enough space in enemy container to spawn more enemies!");	
 	gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
@@ -636,12 +636,7 @@ static				::cho::error_t										updateSpawnShots
 			}
 			else {
 				directionEnemy.Normalize();
-				::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
 				enemyPosition															+= directionEnemy * (float)(framework.FrameInfo.Seconds.LastFrame * 100);// * (applicationInstance.ShipState.Brakes ? .25f : (applicationInstance.ShipState.Thrust ? 2 : 1));
-				enemyPosition															= 
-					{ ::cho::clamp(enemyPosition.x, .1f, (float)offscreen.View.metrics().x - 1)
-					, ::cho::clamp(enemyPosition.y, .1f, (float)offscreen.View.metrics().y - 1)
-					};
 			}
 		}
 	}	return 0;

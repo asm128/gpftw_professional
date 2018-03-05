@@ -2,7 +2,7 @@
 #include "cho_collision.h"
 
 					::cho::error_t										updateInput									(::SApplication& applicationInstance)											{ 
-	::cho::SInput																& inputSystem								= applicationInstance.Framework.SystemInput;
+	::cho::SInput																& inputSystem								= applicationInstance.Framework.Input;
 	applicationInstance.ShipState.Firing									= inputSystem.KeyboardCurrent.KeyState[VK_SPACE		] != 0;
 	applicationInstance.ShipState.Thrust									= inputSystem.KeyboardCurrent.KeyState[VK_SHIFT		] != 0;
 	applicationInstance.ShipState.Brakes									= inputSystem.KeyboardCurrent.KeyState[VK_CONTROL	] != 0;

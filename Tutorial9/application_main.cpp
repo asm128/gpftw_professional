@@ -58,16 +58,22 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
 	::cho::error_t																frameworkResult								= ::cho::updateFramework(applicationInstance.Framework);
-	ree_if	(errored(frameworkResult), "Unknown error.");
-	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
-	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
+	ree_if(errored(frameworkResult), "Unknown error.");
+	rvi_if(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
+	ree_if(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and this could cause an invalid memory access later on.");
 	//-----------------------------
-	//::cho::STimer																& timer										= applicationInstance.Framework.Timer;
-	//::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
-	//char																		buffer		[256]							= {};
-	//sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
-	//::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
-	//SetWindowText(windowHandle, buffer);
+	::cho::STimer																& timer										= applicationInstance.Framework.Timer;
+	::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
+	::cho::SGUI																	& gui										= applicationInstance.GUI;
+	guiUpdate(gui, applicationInstance.Framework.Input);
+	//::cho::SControlProperties													newControl									= {};
+	//newControl.AlignArea;
+	//::cho::guiControlCreate(gui, );
+
+	char																		buffer		[256]							= {};
+	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
+	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
+	SetWindowText(windowHandle, buffer);
 	return 0;
 }
 
@@ -108,12 +114,13 @@ static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::ch
 		const ::cho::SCoord2<int32_t>											coordCharTable									= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
 		const ::cho::SCoord2<int32_t>											dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
 		const ::cho::SRectangle2D<int32_t>										srcRect0										= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewMetrics.y - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
-		//error_if(errored(::cho::grid_copy_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, ::cho::SColorBGRA{0, 0xFF, 0xFF, 0xFF}, srcRect0)), "I believe this never fails.");
-		dstCoords.clear();
-		error_if(errored(::cho::grid_raster_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, srcRect0, dstCoords)), "I believe this never fails.");
-		for(uint32_t iCoord = 0; iCoord < dstCoords.size(); ++iCoord) {
-			::cho::drawPixelLight(bmpTarget, dstCoords[iCoord], color, 0.05f, 1.0);
-		}
+		error_if(errored(::cho::grid_copy_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, ::cho::SColorBGRA{0, 0xFF, 0xFF, 0xFF}, srcRect0)), "I believe this never fails.");
+		//dstCoords.clear();
+		//error_if(errored(::cho::grid_raster_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, srcRect0, dstCoords)), "I believe this never fails.");
+		//for(uint32_t iCoord = 0; iCoord < dstCoords.size(); ++iCoord) {
+		//	::cho::drawPixelLight(bmpTarget, dstCoords[iCoord], color, 0.05f, 1.0);
+		//}
+		color;
 	}
 	return 0;
 }
