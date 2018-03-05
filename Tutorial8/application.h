@@ -4,6 +4,7 @@
 #include "cho_particle.h"
 #include "cho_framework.h"
 #include "game.h"
+#include "level.h"
 
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
@@ -86,9 +87,10 @@ struct SApplication {
 	typedef				TParticleSystem::TIntegrator																TIntegrator;
 	typedef				TIntegrator::TParticle																		TParticle;
 
-						::cho::SFramework																			Framework									;
+	::cho::SFramework																			Framework									= {};
 
-						::SGame																						Game;
+						::SGame																						Game										= {};
+						::SLevel																					Level										= {};
 
 						TParticleSystem																				ParticleSystemThrust						= {};
 						TParticleSystem																				ParticleSystemProjectiles					= {};

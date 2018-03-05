@@ -21,19 +21,7 @@ struct SShipProperties {
 						SHealthPoints							BaseHealth;
 };
 
-struct SShipState {
-						bool									Thrust										: 1;
-						bool									Firing										: 1;
-						bool									Brakes										: 1;
-};
-
-struct SShip {
-						int32_t									PropertiesShip								;
-						int32_t									PropertiesWeapon							;
-						SHealthPoints							HealthCurrent								= {};
-};
-
-static constexpr	const SShipProperties					shipProperties		[]						= 
+static constexpr	const SShipProperties					shipProperties		[]			= 
 	{ {"Assault"			, SHIP_CLASS_ASSAULT		, 10,    80,   100}
 	, {"Interceptor"		, SHIP_CLASS_INTERCEPTOR	, 10,   100,    80}
 	, {"Alien Saucer"		, SHIP_CLASS_SAUCER			, 10,   100,   100}
@@ -42,5 +30,17 @@ static constexpr	const SShipProperties					shipProperties		[]						=
 	, {"Factory Pod"		, SHIP_CLASS_SPAWNER		, 10,    50,   100}
 	, {"Wormhole Endpoint"	, SHIP_CLASS_SPAWNER		, 10, 10000,     0}
 	};
+
+struct SShipState {
+						bool									Thrust							: 1;
+						bool									Firing							: 1;
+						bool									Brakes							: 1;
+};
+
+struct SShip {
+						int32_t									PropertiesShip					;
+						int32_t									PropertiesWeapon				;
+						SHealthPoints							HealthCurrent					;
+};
 
 #endif // SHIP_H_2098379238
