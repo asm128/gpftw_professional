@@ -204,6 +204,7 @@
     <ClInclude Include="cho_input.h" />
     <ClInclude Include="cho_layered_view.h" />
     <ClInclude Include="cho_math.h" />
+    <ClInclude Include="cho_matrix.h" />
     <ClInclude Include="cho_particle.h" />
     <ClInclude Include="cho_ptr.h" />
     <ClInclude Include="cho_runtime.h" />

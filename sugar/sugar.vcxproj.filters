@@ -132,6 +132,9 @@
     <ClInclude Include="cho_array_static.h">
       <Filter>container</Filter>
     </ClInclude>
+    <ClInclude Include="cho_matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cho_ascii_target.cpp">

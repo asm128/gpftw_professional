@@ -9,6 +9,7 @@
 #include "cho_bit_array_view.h"
 
 #include "cho_app_impl.h"
+#include "cho_matrix.h"
 
 static constexpr	const uint32_t										ASCII_SCREEN_WIDTH							= 132	;
 static constexpr	const uint32_t										ASCII_SCREEN_HEIGHT							= 50	;
@@ -64,41 +65,12 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	//-----------------------------
 	::cho::STimer																& timer										= applicationInstance.Framework.Timer;
 	::cho::SDisplay																& mainWindow								= applicationInstance.Framework.MainDisplay;
-	::cho::SGUI																	& gui										= applicationInstance.GUI;
-	guiUpdate(gui, applicationInstance.Framework.Input);
-	//::cho::SControlProperties													newControl									= {};
-	//newControl.AlignArea;
-	//::cho::guiControlCreate(gui, );
-
 	char																		buffer		[256]							= {};
 	sprintf_s(buffer, "[%u x %u]. FPS: %g. Last frame seconds: %g.", mainWindow.Size.x, mainWindow.Size.y, 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
 	::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
 	SetWindowText(windowHandle, buffer);
 	return 0;
 }
-
-//static				::cho::error_t										textCalcSizeLine							(const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-//	return (::cho::error_t)(text0.size() ? sizeCharCell.x * strlen(text0.begin()) : 0);
-//}
-
-//static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::grid_view<::cho::SColorBGRA>& viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-//	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
-//		int32_t																	coordTableX										= text0[iChar] % characterCellsX;
-//		int32_t																	coordTableY										= text0[iChar] / characterCellsX;
-//		const ::cho::SCoord2<int32_t>											coordCharTable									= {coordTableX * sizeCharCell.x, coordTableY * sizeCharCell.y};
-//		const ::cho::SCoord2<int32_t>											dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
-//		const ::cho::SRectangle2D<int32_t>										srcRect0										= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewTextureFont.height() - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
-//		error_if(errored(::cho::grid_copy_alpha(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, srcRect0, {0xFF, 0x00, 0xFF, 0xFF})), "I believe this never fails.");
-//	}
-//	return 0;
-//}
-
-//template<size_t _sizeString>
-//static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view<::cho::SColorBGRA>& targetView, const ::cho::grid_view<::cho::SColorBGRA>& fontAtlas, uint32_t lineOffset, const ::cho::SCoord2<uint32_t>& targetSize, const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-//	const ::cho::SCoord2<int32_t>												dstTextOffset								= {(int32_t)targetSize.x / 2 - (int32_t)textCalcSizeLine(sizeCharCell, text0) / 2, };
-//	uint32_t																	dstOffsetY									= (int32_t)(targetSize.y - lineOffset * sizeCharCell.y - sizeCharCell.y);
-//	return ::textDrawFixedSize(targetView, fontAtlas, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset);
-//}
 
 template<size_t _sizeString>
 static				::cho::error_t										textCalcSizeLine							(const ::cho::SCoord2<int32_t>& sizeCharCell, const char (&text0)[_sizeString] )	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
@@ -114,11 +86,6 @@ static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::ch
 		const ::cho::SCoord2<int32_t>											dstOffset1										= {sizeCharCell.x * iChar, dstOffsetY};
 		const ::cho::SRectangle2D<int32_t>										srcRect0										= ::cho::SRectangle2D<int32_t>{{coordCharTable.x, (int32_t)viewMetrics.y - sizeCharCell.y - coordCharTable.y}, sizeCharCell};
 		error_if(errored(::cho::grid_copy_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, ::cho::SColorBGRA{0, 0xFF, 0xFF, 0xFF}, srcRect0)), "I believe this never fails.");
-		//dstCoords.clear();
-		//error_if(errored(::cho::grid_raster_alpha_bit(bmpTarget, viewTextureFont, dstTextOffset + dstOffset1, viewMetrics, srcRect0, dstCoords)), "I believe this never fails.");
-		//for(uint32_t iCoord = 0; iCoord < dstCoords.size(); ++iCoord) {
-		//	::cho::drawPixelLight(bmpTarget, dstCoords[iCoord], color, 0.05f, 1.0);
-		//}
 		color;
 	}
 	return 0;
@@ -131,10 +98,75 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	return ::textDrawFixedSize(targetView, fontAtlas, viewMetrics, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset, color);
 }
 
+// Vertex coordinates for cube faces
+static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						= 
+	{ {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}	// Right	- first			?? I have no idea if this is correct lol
+	, {{0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}	// Right	- second		?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f}}	// Bottom	- first			?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}}	// Bottom	- second		?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}	// Back		- first			?? I have no idea if this is correct lol
+	, {{0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}	// Back		- second		?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Left		- first
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Left		- second
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Top		- first
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Top		- second
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Front	- first
+	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Front	- second
+	};
+
+// and now I should get some code for transfofming this into 2d
+
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
+	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= offscreen.View.metrics();
 	::memset(offscreen.Texels.begin(), 0, sizeof(::cho::SFramework::TOffscreen::TTexel) * offscreen.Texels.size());	// Clear target.
+	//------------------------------------------------
+	::cho::array_pod<::cho::STriangle3D<float>>									triangle3dList								= {};
+	triangle3dList.resize(12);
+	static constexpr const ::cho::SCoord3<float>								cubeCenter									= {0.5f, 0.5f, 0.5f};
+	::cho::SMatrix4<float>														transformMatrix								= {};
+	::cho::SMatrix4<float>														tiltMatrix									= {};
+	transformMatrix.Identity();
+	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
+	const ::cho::SCoord3<float>													tilt										= {10, };	// ? cam't remember what is this. Radians? Eulers?
+	const ::cho::SCoord3<float>													rotation									= {0, (float)frameInfo.FrameNumber / 100, 0};
+	tiltMatrix.Rotation(tilt);
+	transformMatrix.Rotation(rotation); // I'm rusty with math so let's experiment in order to remember.
+	transformMatrix.Scale({200, 200, 200}, false);
+		// Now I should add a camera matrix and a projection matrix in order to properly transform this to camera space and then to screen space.
+	transformMatrix																= tiltMatrix * transformMatrix;
+
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
+		::cho::STriangle3D<float>													& transformedTriangle						= triangle3dList[iTriangle];
+		transformedTriangle														= geometryCube[iTriangle];
+		transformedTriangle.A													-= cubeCenter;
+		transformedTriangle.B													-= cubeCenter;
+		transformedTriangle.C													-= cubeCenter;
+		transformedTriangle.A													= transformMatrix.Transform(transformedTriangle.A);
+		transformedTriangle.B													= transformMatrix.Transform(transformedTriangle.B);
+		transformedTriangle.C													= transformMatrix.Transform(transformedTriangle.C);
+	}
+	::cho::array_pod<::cho::STriangle2D<int32_t>>								triangle2dList								= {};
+	triangle2dList.resize(12);
+	const ::cho::SCoord2<int32_t>												screenCenter								= {(int32_t)offscreenMetrics.x / 2, (int32_t)offscreenMetrics.y / 2};
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
+		::cho::STriangle3D<float>													& transformedTriangle3D						= triangle3dList[iTriangle];
+		::cho::STriangle2D<int32_t>													& transformedTriangle2D						= triangle2dList[iTriangle];
+		transformedTriangle2D.A													= {(int32_t)transformedTriangle3D.A.x, (int32_t)transformedTriangle3D.A.y};
+		transformedTriangle2D.B													= {(int32_t)transformedTriangle3D.B.x, (int32_t)transformedTriangle3D.B.y};
+		transformedTriangle2D.C													= {(int32_t)transformedTriangle3D.C.x, (int32_t)transformedTriangle3D.C.y};
+		transformedTriangle2D.A													+= screenCenter;
+		transformedTriangle2D.B													+= screenCenter;
+		transformedTriangle2D.C													+= screenCenter;
+	}
+
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
+		::cho::STriangle2D<int32_t>													& transformedTriangle2D						= triangle2dList[iTriangle];
+		error_if(errored(::cho::drawTriangle(offscreen.View, (::cho::SColorBGRA)::cho::YELLOW, transformedTriangle2D)), "Not sure if these functions could ever fail");
+	}
+
+	//------------------------------------------------
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
 	uint32_t																	lineOffset									= 0;
 	static constexpr const char													textLine0	[]								= "W: Up, S: Down, A: Left, D: Right";
@@ -142,7 +174,6 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	static constexpr const char													textLine2	[]								= "Press ESC to exit.";
 	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= applicationInstance.Framework.Offscreen.View;
 	const ::cho::grid_view<::cho::SColorBGRA>									& fontAtlasView								= applicationInstance.TextureFont.View;
-	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= offscreenView.metrics();
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine0, ::cho::SColorBGRA{0, framework.FrameInfo.FrameNumber % 0xFF, 0xFFU, 0xFFU});	++lineOffset;
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset, offscreenMetrics, sizeCharCell, textLine1, ::cho::SColorBGRA{framework.FrameInfo.FrameNumber % 0xFFU, 0xFFU, 0, 0xFFU});	++lineOffset;
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2, ::cho::SColorBGRA{0, framework.FrameInfo.FrameNumber % 0xFFU, 0, 0xFFU});	--lineOffset;
