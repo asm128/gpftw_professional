@@ -1,4 +1,5 @@
 #include "application.h"
+#include <Windowsx.h>
 
 static constexpr	const uint32_t														BMP_SCREEN_WIDTH							= 1280;
 static constexpr	const uint32_t														BMP_SCREEN_HEIGHT							= uint32_t(::BMP_SCREEN_WIDTH * (9.0 / 16.0));
@@ -18,6 +19,14 @@ extern				::SApplication														* g_ApplicationInstance						;
 	case WM_CLOSE			: ::DestroyWindow(hWnd); return 0;
 	case WM_KEYDOWN			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; input.KeyboardCurrent.KeyState[wParam]  =  1; return 0;
 	case WM_KEYUP			: if(wParam > ::cho::size(input.KeyboardPrevious.KeyState)) break; input.KeyboardPrevious.KeyState[wParam] = input.KeyboardCurrent.KeyState[wParam]; input.KeyboardCurrent.KeyState[wParam] &= ~1; return 0;
+	case WM_MOUSEMOVE		: {
+		int32_t																						xPos										= GET_X_LPARAM(lParam); 
+		int32_t																						yPos										= GET_Y_LPARAM(lParam); 
+		input.MouseCurrent.Position.x															= ::cho::clamp(xPos, 0, (int32_t)mainDisplay.Size.x);
+		input.MouseCurrent.Position.y															= ::cho::clamp(yPos, 0, (int32_t)mainDisplay.Size.y);
+		input.MouseCurrent.Deltas																= input.MouseCurrent.Position - input.MousePrevious.Position;
+		return 0;
+	}
 	case WM_GETMINMAXINFO	:	// Catch this message so to prevent the window from becoming too small.
 		((::MINMAXINFO*)lParam)->ptMinTrackSize													= {minClientRect.right - minClientRect.left, minClientRect.bottom - minClientRect.top}; 
 		return 0;

@@ -10,6 +10,7 @@
 					::cho::error_t										cho::updateFramework						(::cho::SFramework& framework)													{
 	framework.Input.KeyboardPrevious											= framework.Input.KeyboardCurrent;
 	framework.Input.MousePrevious												= framework.Input.MouseCurrent;
+	framework.Input.MouseCurrent.Deltas											= {};
 	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
 	::cho::STimer																& timer										= framework.Timer;
 	timer		.Frame();

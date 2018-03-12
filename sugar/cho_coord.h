@@ -301,10 +301,26 @@ namespace cho
 	template<typename _tElement>	struct SSphere2D		{ double Radius; ::cho::SCoord2<_tElement>	Center			; CHO_DEFAULT_OPERATOR_NE(SSphere2D		<_tElement>, Center	== other.Center	&& Radius	== other.Radius					); };
 
 	template<typename _tElement>	struct SLine3D			{ ::cho::SCoord3<_tElement>					A, B			; CHO_DEFAULT_OPERATOR_NE(SLine3D		<_tElement>, A		== other.A		&& B		== other.B						); };
-	template<typename _tElement>	struct STriangle3D		{ ::cho::SCoord3<_tElement>					A, B, C			; CHO_DEFAULT_OPERATOR_NE(STriangle3D	<_tElement>, A		== other.A		&& B		== other.B		&& C == other.C	); };
 	template<typename _tElement>	struct SRectangle3D		{ ::cho::SCoord3<_tElement>					Offset, Size	; CHO_DEFAULT_OPERATOR_NE(SRectangle3D	<_tElement>, Offset	== other.Offset	&& Size		== other.Size					); };
 	template<typename _tElement>	struct SCircle3D		{ double Radius; ::cho::SCoord3<_tElement>	Center			; CHO_DEFAULT_OPERATOR_NE(SCircle3D		<_tElement>, Center	== other.Center	&& Radius	== other.Radius					); };
 	template<typename _tElement>	struct SSphere3D		{ double Radius; ::cho::SCoord3<_tElement>	Center			; CHO_DEFAULT_OPERATOR_NE(SSphere3D		<_tElement>, Center	== other.Center	&& Radius	== other.Radius					); };
+	template<typename _tElement>	struct STriangle3D		{ ::cho::SCoord3<_tElement>					A, B, C			; CHO_DEFAULT_OPERATOR_NE(STriangle3D	<_tElement>, A		== other.A		&& B		== other.B		&& C == other.C	); };
+
+	template<typename _tElement>
+							STriangle2D<_tElement>&						translate								(::cho::STriangle2D<_tElement>& triangle, const ::cho::SCoord2<_tElement>& translation)									{
+		triangle.A															+= translation;
+		triangle.B															+= translation;
+		triangle.C															+= translation;
+		return triangle;
+	}
+
+	template<typename _tElement>
+							STriangle3D<_tElement>&						translate								(::cho::STriangle3D<_tElement>& triangle, const ::cho::SCoord3<_tElement>& translation)									{
+		triangle.A															+= translation;
+		triangle.B															+= translation;
+		triangle.C															+= translation;
+		return triangle;
+	}
 #pragma pack(pop)
 
 	// ---- Line

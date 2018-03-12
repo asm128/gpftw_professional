@@ -133,7 +133,7 @@
       <Filter>container</Filter>
     </ClInclude>
     <ClInclude Include="cho_matrix.h">
-      <Filter>Header Files</Filter>
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -444,6 +444,13 @@ namespace cho
 
 	};	// struct
 
+	template<typename _tElement>
+							STriangle3D<_tElement>&						transform								(::cho::STriangle3D<_tElement>& triangle, const ::cho::SMatrix4<_tElement>& transform)									{
+		triangle.A															= transform.Transform(triangle.A);
+		triangle.B															= transform.Transform(triangle.B);
+		triangle.C															= transform.Transform(triangle.C);
+		return triangle;
+	}
 
 }
 

@@ -19,7 +19,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 					::SApplication										* g_ApplicationInstance						= 0;
 
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
-	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size; // / 2;
+	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size; 
 	::cho::updateSizeDependentTarget	(applicationInstance.Framework.Offscreen				, newSize);
 	return 0;
 }
@@ -171,7 +171,9 @@ static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						
 	const ::cho::SCoord3<float>													cameraTarget								= {0, 0, 0};
 	::cho::SCoord3<float>														cameraPos									= {10, 5, 0};
 	::cho::SCoord3<float>														lightPos									= {10, 5, 0};
-	cameraPos	.RotateY(frameInfo.FrameNumber / 100.0f);
+	static float																cameraRotation								= 0;
+	cameraRotation															+= (float)framework.Input.MouseCurrent.Deltas.x / 5.0f;
+	cameraPos	.RotateY(cameraRotation);//frameInfo.FrameNumber / 100.0f);
 	lightPos	.RotateY(frameInfo.FrameNumber / 50.0f * -2);
 	lightPos	.RotateX(frameInfo.FrameNumber / 50.0f * -2);
 	viewMatrix.LookAt(cameraPos, cameraTarget, cameraUp);
@@ -185,11 +187,7 @@ static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
 		::cho::STriangle3D<float>													& transformedTriangle						= triangle3dList[iTriangle];
 		transformedTriangle														= applicationInstance.CubePositions[iTriangle];
-		transformedTriangle.A													= projection.Transform(transformedTriangle.A);
-		transformedTriangle.B													= projection.Transform(transformedTriangle.B);
-		transformedTriangle.C													= projection.Transform(transformedTriangle.C);
-		double																		lightFactor									= geometryCubeNormals[iTriangle].Dot(lightPos);
-		triangle3dColorList[iTriangle]											= ::cho::BLUE * lightFactor;
+		transform(transformedTriangle, projection);
 	}
 	::cho::array_pod<::cho::STriangle2D<int32_t>>								triangle2dList								= {};
 	triangle2dList.resize(12);
@@ -200,15 +198,15 @@ static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						
 		transformedTriangle2D.A													= {(int32_t)transformedTriangle3D.A.x, (int32_t)transformedTriangle3D.A.y};
 		transformedTriangle2D.B													= {(int32_t)transformedTriangle3D.B.x, (int32_t)transformedTriangle3D.B.y};
 		transformedTriangle2D.C													= {(int32_t)transformedTriangle3D.C.x, (int32_t)transformedTriangle3D.C.y};
-		transformedTriangle2D.A													+= screenCenter;
-		transformedTriangle2D.B													+= screenCenter;
-		transformedTriangle2D.C													+= screenCenter;
+		translate(transformedTriangle2D, screenCenter);
 	}
 
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
-		::cho::STriangle2D<int32_t>													& transformedTriangle2D						= triangle2dList[iTriangle];
-		error_if(errored(::cho::drawTriangle(offscreen.View, triangle3dColorList[iTriangle], transformedTriangle2D)), "Not sure if these functions could ever fail");
+		double																		lightFactor									= geometryCubeNormals[iTriangle].Dot(lightPos);
+		triangle3dColorList[iTriangle]											= ::cho::BLUE * lightFactor;
 	}
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle)
+		error_if(errored(::cho::drawTriangle(offscreen.View, triangle3dColorList[iTriangle], triangle2dList[iTriangle])), "Not sure if these functions could ever fail");
 
 	//------------------------------------------------
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
