@@ -10,6 +10,7 @@ struct SApplication {
 						::cho::STexture<::cho::SColorBGRA>				TextureFont									= {};
 						::cho::STextureMonochrome<uint32_t>				TextureFontMonochrome						= {};
 						::cho::SGUI										GUI											= {};
+						::cho::STriangle3D	<float>						CubePositions[12]							= {};
 
 																		SApplication								(::cho::SRuntimeValues& runtimeValues)			noexcept	: Framework(runtimeValues) {}
 };

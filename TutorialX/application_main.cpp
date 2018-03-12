@@ -36,6 +36,28 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
+					
+// Vertex coordinates for cube faces
+static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						= 
+	{ {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Right	- first			?? I have no idea if this is correct lol
+	, {{1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}	// Right	- second		?? I have no idea if this is correct lol
+
+	, {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}	// Back		- first			?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}}	// Back		- second		?? I have no idea if this is correct lol
+
+	, {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}	// Bottom	- first			?? I have no idea if this is correct lol
+	, {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f}}	// Bottom	- second		?? I have no idea if this is correct lol
+
+	, {{1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 1.0f}}	// Left		- first
+	, {{1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}}	// Left		- second
+
+	, {{1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}}	// Front	- first
+	, {{1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}	// Front	- second
+
+	, {{1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}}	// Top		- first
+	, {{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}}	// Top		- second
+	};
+
 					::cho::error_t										mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance);
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
@@ -52,6 +74,15 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 		||	0 != applicationInstance.TextureFont.View[y][x].g
 		||	0 != applicationInstance.TextureFont.View[y][x].b
 		;
+
+	static constexpr const ::cho::SCoord3<float>								cubeCenter									= {0.5f, 0.5f, 0.5f};
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
+		::cho::STriangle3D<float>													& transformedTriangle						= applicationInstance.CubePositions[iTriangle];
+		transformedTriangle														= geometryCube[iTriangle];
+		transformedTriangle.A													-= cubeCenter;
+		transformedTriangle.B													-= cubeCenter;
+		transformedTriangle.C													-= cubeCenter;
+	}
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	return 0;
 }
@@ -98,23 +129,25 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	return ::textDrawFixedSize(targetView, fontAtlas, viewMetrics, 32, dstOffsetY, sizeCharCell, {text0, ::cho::size(text0) -1}, dstTextOffset, color);
 }
 
-// Vertex coordinates for cube faces
-static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						= 
-	{ {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}	// Right	- first			?? I have no idea if this is correct lol
-	, {{0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}	// Right	- second		?? I have no idea if this is correct lol
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f}}	// Bottom	- first			?? I have no idea if this is correct lol
-	, {{0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}}	// Bottom	- second		?? I have no idea if this is correct lol
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}	// Back		- first			?? I have no idea if this is correct lol
-	, {{0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}	// Back		- second		?? I have no idea if this is correct lol
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Left		- first
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Left		- second
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Top		- first
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Top		- second
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Front	- first
-	, {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Front	- second
-	};
+static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						= 
+	{ {0.0f, 0.0f, -1.0f}	// Right	- first			?? I have no idea if this is correct lol
+	, {0.0f, 0.0f, -1.0f}	// Right	- second		?? I have no idea if this is correct lol
 
-// and now I should get some code for transfofming this into 2d
+	, {-1.0f, 0.0f, 0.0f}	// Back		- first			?? I have no idea if this is correct lol
+	, {-1.0f, 0.0f, 0.0f}	// Back		- second		?? I have no idea if this is correct lol
+
+	, {0.0f, -1.0f, 0.0f}	// Bottom	- first			?? I have no idea if this is correct lol
+	, {0.0f, -1.0f, 0.0f}	// Bottom	- second		?? I have no idea if this is correct lol
+
+	, {0.0f, 0.0f, 1.0f}	// Left		- first
+	, {0.0f, 0.0f, 1.0f}	// Left		- second
+
+	, {1.0f, 0.0f, 0.0f}	// Front	- first
+	, {1.0f, 0.0f, 0.0f}	// Front	- second
+
+	, {0.0f, 1.0f, 0.0f}	// Top		- first
+	, {0.0f, 1.0f, 0.0f}	// Top		- second
+	};
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
@@ -123,34 +156,45 @@ static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						=
 	::memset(offscreen.Texels.begin(), 0, sizeof(::cho::SFramework::TOffscreen::TTexel) * offscreen.Texels.size());	// Clear target.
 	//------------------------------------------------
 	::cho::array_pod<::cho::STriangle3D<float>>									triangle3dList								= {};
+	::cho::array_pod<::cho::SColorBGRA>											triangle3dColorList							= {};
 	triangle3dList.resize(12);
-	static constexpr const ::cho::SCoord3<float>								cubeCenter									= {0.5f, 0.5f, 0.5f};
-	::cho::SMatrix4<float>														transformMatrix								= {};
-	::cho::SMatrix4<float>														tiltMatrix									= {};
-	transformMatrix.Identity();
+	triangle3dColorList.resize(12);
+	::cho::SMatrix4<float>														projection									= {};
+	::cho::SMatrix4<float>														viewMatrix									= {};
+	projection.Identity();
 	::cho::SFrameInfo															& frameInfo									= framework.FrameInfo;
 	const ::cho::SCoord3<float>													tilt										= {10, };	// ? cam't remember what is this. Radians? Eulers?
 	const ::cho::SCoord3<float>													rotation									= {0, (float)frameInfo.FrameNumber / 100, 0};
-	tiltMatrix.Rotation(tilt);
-	transformMatrix.Rotation(rotation); // I'm rusty with math so let's experiment in order to remember.
-	transformMatrix.Scale({200, 200, 200}, false);
-		// Now I should add a camera matrix and a projection matrix in order to properly transform this to camera space and then to screen space.
-	transformMatrix																= tiltMatrix * transformMatrix;
 
+	// I'm a sissso I don't delete the old code
+	const ::cho::SCoord3<float>													cameraUp									= {0, 1, 0};	// ? cam't remember what is this. Radians? Eulers?
+	const ::cho::SCoord3<float>													cameraTarget								= {0, 0, 0};
+	::cho::SCoord3<float>														cameraPos									= {10, 5, 0};
+	::cho::SCoord3<float>														lightPos									= {10, 5, 0};
+	cameraPos	.RotateY(frameInfo.FrameNumber / 100.0f);
+	lightPos	.RotateY(frameInfo.FrameNumber / 50.0f * -2);
+	lightPos	.RotateX(frameInfo.FrameNumber / 50.0f * -2);
+	viewMatrix.LookAt(cameraPos, cameraTarget, cameraUp);
+	projection.FieldOfView(.25 * ::cho::math_pi, offscreenMetrics.x / offscreenMetrics.y, 0.01, 1000.0 );
+	projection.Scale(200, 200, 200, false);
+	// I have no idea what I'm doing.
+	projection																	= viewMatrix * projection;
+
+	cameraPos	.Normalize();
+	lightPos	.Normalize();
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
 		::cho::STriangle3D<float>													& transformedTriangle						= triangle3dList[iTriangle];
-		transformedTriangle														= geometryCube[iTriangle];
-		transformedTriangle.A													-= cubeCenter;
-		transformedTriangle.B													-= cubeCenter;
-		transformedTriangle.C													-= cubeCenter;
-		transformedTriangle.A													= transformMatrix.Transform(transformedTriangle.A);
-		transformedTriangle.B													= transformMatrix.Transform(transformedTriangle.B);
-		transformedTriangle.C													= transformMatrix.Transform(transformedTriangle.C);
+		transformedTriangle														= applicationInstance.CubePositions[iTriangle];
+		transformedTriangle.A													= projection.Transform(transformedTriangle.A);
+		transformedTriangle.B													= projection.Transform(transformedTriangle.B);
+		transformedTriangle.C													= projection.Transform(transformedTriangle.C);
+		double																		lightFactor									= geometryCubeNormals[iTriangle].Dot(lightPos);
+		triangle3dColorList[iTriangle]											= ::cho::BLUE * lightFactor;
 	}
 	::cho::array_pod<::cho::STriangle2D<int32_t>>								triangle2dList								= {};
 	triangle2dList.resize(12);
 	const ::cho::SCoord2<int32_t>												screenCenter								= {(int32_t)offscreenMetrics.x / 2, (int32_t)offscreenMetrics.y / 2};
-	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) { // Maybe the scale
 		::cho::STriangle3D<float>													& transformedTriangle3D						= triangle3dList[iTriangle];
 		::cho::STriangle2D<int32_t>													& transformedTriangle2D						= triangle2dList[iTriangle];
 		transformedTriangle2D.A													= {(int32_t)transformedTriangle3D.A.x, (int32_t)transformedTriangle3D.A.y};
@@ -163,7 +207,7 @@ static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						=
 
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
 		::cho::STriangle2D<int32_t>													& transformedTriangle2D						= triangle2dList[iTriangle];
-		error_if(errored(::cho::drawTriangle(offscreen.View, (::cho::SColorBGRA)::cho::YELLOW, transformedTriangle2D)), "Not sure if these functions could ever fail");
+		error_if(errored(::cho::drawTriangle(offscreen.View, triangle3dColorList[iTriangle], transformedTriangle2D)), "Not sure if these functions could ever fail");
 	}
 
 	//------------------------------------------------
@@ -179,3 +223,4 @@ static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						=
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2, ::cho::SColorBGRA{0, framework.FrameInfo.FrameNumber % 0xFFU, 0, 0xFFU});	--lineOffset;
 	return 0;																																																
 }
+	
