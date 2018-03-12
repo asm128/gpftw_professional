@@ -20,7 +20,7 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
 	const ::cho::SCoord2<uint32_t>												newSize										= applicationInstance.Framework.MainDisplay.Size; 
-	::cho::updateSizeDependentTarget	(applicationInstance.Framework.Offscreen				, newSize);
+	::cho::updateSizeDependentTarget(applicationInstance.Framework.Offscreen, newSize);
 	return 0;
 }
 
@@ -36,26 +36,25 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	return 0;
 }
 
-					
 // Vertex coordinates for cube faces
 static constexpr const ::cho::STriangle3D<float>						geometryCube	[12]						= 
-	{ {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Right	- first			?? I have no idea if this is correct lol
-	, {{1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}	// Right	- second		?? I have no idea if this is correct lol
+	{ {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}	// Right	- first			?? I have no idea if this is correct lol
+	, {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}}	// Right	- second		?? I have no idea if this is correct lol
 
-	, {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}	// Back		- first			?? I have no idea if this is correct lol
-	, {{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}}	// Back		- second		?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}	// Back		- first			?? I have no idea if this is correct lol
+	, {{0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}}	// Back		- second		?? I have no idea if this is correct lol
 
-	, {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}	// Bottom	- first			?? I have no idea if this is correct lol
-	, {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f}}	// Bottom	- second		?? I have no idea if this is correct lol
+	, {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}}	// Bottom	- first			?? I have no idea if this is correct lol
+	, {{1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}	// Bottom	- second		?? I have no idea if this is correct lol
 
-	, {{1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 1.0f}}	// Left		- first
-	, {{1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}}	// Left		- second
+	, {{1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}}	// Left		- first
+	, {{1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}}	// Left		- second
 
-	, {{1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}}	// Front	- first
-	, {{1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}	// Front	- second
+	, {{1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}	// Front	- first
+	, {{1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f}}	// Front	- second
 
-	, {{1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}}	// Top		- first
-	, {{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}}	// Top		- second
+	, {{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}}	// Top		- first
+	, {{1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 1.0f}}	// Top		- second
 	};
 
 					::cho::error_t										mainWindowCreate							(::cho::SDisplay& mainWindow, HINSTANCE hInstance);
@@ -149,6 +148,10 @@ static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						
 	, {0.0f, 1.0f, 0.0f}	// Top		- second
 	};
 
+struct SCamera {
+						::cho::SCoord3<float>								Position, Target;
+};
+
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::SFramework::TOffscreen												& offscreen									= framework.Offscreen;
@@ -166,28 +169,34 @@ static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						
 	const ::cho::SCoord3<float>													tilt										= {10, };	// ? cam't remember what is this. Radians? Eulers?
 	const ::cho::SCoord3<float>													rotation									= {0, (float)frameInfo.FrameNumber / 100, 0};
 
-	// I'm a sissso I don't delete the old code
-	const ::cho::SCoord3<float>													cameraUp									= {0, 1, 0};	// ? cam't remember what is this. Radians? Eulers?
-	const ::cho::SCoord3<float>													cameraTarget								= {0, 0, 0};
-	::cho::SCoord3<float>														cameraPos									= {10, 5, 0};
+	float																		fFar										= 1000.0f
+		,																		fNear										= 0.01f
+		;
+
+	static constexpr const ::cho::SCoord3<float>								cameraUp									= {0, 1, 0};	// ? cam't remember what is this. Radians? Eulers?
+	::SCamera																	camera										= {{10, 5, 0}, {}};
 	::cho::SCoord3<float>														lightPos									= {10, 5, 0};
 	static float																cameraRotation								= 0;
 	cameraRotation															+= (float)framework.Input.MouseCurrent.Deltas.x / 5.0f;
-	cameraPos	.RotateY(cameraRotation);//frameInfo.FrameNumber / 100.0f);
-	lightPos	.RotateY(frameInfo.FrameNumber / 50.0f * -2);
-	lightPos	.RotateX(frameInfo.FrameNumber / 50.0f * -2);
-	viewMatrix.LookAt(cameraPos, cameraTarget, cameraUp);
-	projection.FieldOfView(.25 * ::cho::math_pi, offscreenMetrics.x / offscreenMetrics.y, 0.01, 1000.0 );
-	projection.Scale(200, 200, 200, false);
-	// I have no idea what I'm doing.
-	projection																	= viewMatrix * projection;
+	//camera.Position	.RotateY(cameraRotation);
+	camera.Position	.RotateY(frameInfo.Microseconds.Total / 1000000.0f);
+	lightPos		.RotateY(frameInfo.Microseconds.Total /  500000.0f * -2);
+	viewMatrix.LookAt(camera.Position, camera.Target, cameraUp);
+	projection.FieldOfView(.25 * ::cho::math_pi, offscreenMetrics.x / (double)offscreenMetrics.y, fNear, fFar );
+	projection																= viewMatrix * projection;
+	lightPos.Normalize();
 
-	cameraPos	.Normalize();
-	lightPos	.Normalize();
+	::cho::SMatrix4<float>														viewport									= {};
+	viewport._11															= 2.0f / offscreenMetrics.x;
+	viewport._22															= 2.0f / offscreenMetrics.y;
+	viewport._33															= 1.0f / (fFar - fNear);
+	viewport._43															= - fNear * ( 1.0f / (fFar - fNear) );
+	viewport._44															= 1.0f;
+	projection																= projection * viewport.GetInverse();
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
 		::cho::STriangle3D<float>													& transformedTriangle						= triangle3dList[iTriangle];
 		transformedTriangle														= applicationInstance.CubePositions[iTriangle];
-		transform(transformedTriangle, projection);
+		::cho::transform(transformedTriangle, projection);
 	}
 	::cho::array_pod<::cho::STriangle2D<int32_t>>								triangle2dList								= {};
 	triangle2dList.resize(12);
@@ -198,15 +207,30 @@ static constexpr const ::cho::SCoord3<float>						geometryCubeNormals	[12]						
 		transformedTriangle2D.A													= {(int32_t)transformedTriangle3D.A.x, (int32_t)transformedTriangle3D.A.y};
 		transformedTriangle2D.B													= {(int32_t)transformedTriangle3D.B.x, (int32_t)transformedTriangle3D.B.y};
 		transformedTriangle2D.C													= {(int32_t)transformedTriangle3D.C.x, (int32_t)transformedTriangle3D.C.y};
-		translate(transformedTriangle2D, screenCenter);
+		::cho::translate(transformedTriangle2D, screenCenter);
 	}
 
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
 		double																		lightFactor									= geometryCubeNormals[iTriangle].Dot(lightPos);
 		triangle3dColorList[iTriangle]											= ::cho::BLUE * lightFactor;
 	}
-	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle)
+	::cho::array_pod<::cho::SCoord2<int32_t>>										trianglePixelCoords;
+	::cho::SCoord3<float> cameraFront = (camera.Target - camera.Position).Normalize();
+	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
+		double																		lightFactor									= geometryCubeNormals[iTriangle].Dot(cameraFront);
+		if(lightFactor > 0)
+			continue;
 		error_if(errored(::cho::drawTriangle(offscreen.View, triangle3dColorList[iTriangle], triangle2dList[iTriangle])), "Not sure if these functions could ever fail");
+		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::BLACK, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].A, triangle2dList[iTriangle].B});
+		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::BLACK, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].B, triangle2dList[iTriangle].C});
+		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::BLACK, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].C, triangle2dList[iTriangle].A});
+		//error_if(errored(::cho::drawTriangle(offscreenMetrics, triangle2dList[iTriangle], trianglePixelCoords)), "Not sure if these functions could ever fail");
+		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].A, triangle2dList[iTriangle].B}, trianglePixelCoords);
+		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].B, triangle2dList[iTriangle].C}, trianglePixelCoords);
+		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].C, triangle2dList[iTriangle].A}, trianglePixelCoords);
+	}
+	for(uint32_t iCoord = 0; iCoord < trianglePixelCoords.size(); ++iCoord)
+		::cho::drawPixelLight(offscreen.View, trianglePixelCoords[iCoord], (::cho::SColorBGRA)::cho::GREEN, 0.05f, 2.5);
 
 	//------------------------------------------------
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};

@@ -16,8 +16,8 @@ namespace cho
 		for(int32_t x = -(int32_t)range - 1; x < blendCount; ++x) {										// as it causes a visual effect of the light being cut to a rectangle and having sharp borders.
 			if(x || y) {
 				::cho::SCoord2<_tCoord>													blendPos										= sourcePosition + ::cho::SCoord2<_tCoord>{(_tCoord)x, (_tCoord)y};
-				if( blendPos.x < viewOffscreen.width () && blendPos.x >= 0
-				 && blendPos.y < viewOffscreen.height() && blendPos.y >= 0
+				if( blendPos.x < (int32_t)viewOffscreen.width () && blendPos.x >= 0
+				 && blendPos.y < (int32_t)viewOffscreen.height() && blendPos.y >= 0
 				 ) {
 					::cho::SCoord2<_tCoord>													brightDistance									= blendPos - sourcePosition;
 					double																	brightDistanceLength							= brightDistance.Length();
@@ -156,9 +156,9 @@ namespace cho
 		for(int32_t x = ::cho::max(areaMin.x, 0); x < xStop; ++x) {	
 			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
-			int																			w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int																			w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int																			w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
+			int																			w0											= ::cho::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::cho::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::cho::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
 				bitmapTarget[y][x]														= value;
 				++pixelsDrawn;
@@ -167,7 +167,7 @@ namespace cho
 		return pixelsDrawn;
 	}
 
-	template<typename _tCoord, typename _tColor>
+	template<typename _tCoord>
 	static					::cho::error_t									drawTriangle								(const ::cho::SCoord2<uint32_t>& targetMetrics, const ::cho::STriangle2D<_tCoord>& triangle, ::cho::array_pod<::cho::SCoord2<int32_t>>& out_Points)		{
 		::cho::SCoord2	<int32_t>													areaMin										= {(int32_t)::cho::min(::cho::min(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::min(::cho::min(triangle.A.y, triangle.B.y), triangle.C.y)};
 		::cho::SCoord2	<int32_t>													areaMax										= {(int32_t)::cho::max(::cho::max(triangle.A.x, triangle.B.x), triangle.C.x), (int32_t)::cho::max(::cho::max(triangle.A.y, triangle.B.y), triangle.C.y)};
@@ -177,9 +177,9 @@ namespace cho
 		for(int32_t x = ::cho::max(areaMin.x, 0); x < xStop; ++x) {	
 			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
-			int																			w0											= ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
-			int																			w1											= ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
-			int																			w2											= ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
+			int																			w0											= ::cho::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			int																			w1											= ::cho::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			int																			w2											= ::cho::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
 				out_Points.push_back({x, y});
 				++pixelsDrawn;
