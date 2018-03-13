@@ -157,12 +157,18 @@ namespace cho
 			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
 			int																			w0											= ::cho::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			if(w0 < 0)
+				continue;
 			int																			w1											= ::cho::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			if(w1 < 0)
+				continue;
 			int																			w2											= ::cho::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
-			if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
+			if(w2 < 0)
+				continue;
+			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
 				bitmapTarget[y][x]														= value;
 				++pixelsDrawn;
-			}
+			//}
 		}
 		return pixelsDrawn;
 	}
@@ -178,12 +184,18 @@ namespace cho
 			const ::cho::SCoord2<int32_t>												cellCurrent									= {x, y};
 			// Determine barycentric coordinates
 			int																			w0											= ::cho::orient2d({triangle.B, triangle.A}, cellCurrent);	// ::cho::orient2d({triangle.A, triangle.B}, cellCurrent);
+			if(w0 < 0)
+				continue;
 			int																			w1											= ::cho::orient2d({triangle.C, triangle.B}, cellCurrent);	// ::cho::orient2d({triangle.B, triangle.C}, cellCurrent);
+			if(w1 < 0)
+				continue;
 			int																			w2											= ::cho::orient2d({triangle.A, triangle.C}, cellCurrent);	// ::cho::orient2d({triangle.C, triangle.A}, cellCurrent);
-			if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
-				out_Points.push_back({x, y});
-				++pixelsDrawn;
-			}
+			if(w2 < 0)
+				continue;
+			//if (w0 >= 0 && w1 >= 0 && w2 >= 0) { // If p is on or inside all edges, render pixel.
+			out_Points.push_back({x, y});
+			++pixelsDrawn;
+			//}
 		}
 		return pixelsDrawn;
 	}

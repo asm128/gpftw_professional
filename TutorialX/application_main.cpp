@@ -215,22 +215,26 @@ struct SCamera {
 		triangle3dColorList[iTriangle]											= ::cho::BLUE * lightFactor;
 	}
 	::cho::array_pod<::cho::SCoord2<int32_t>>										trianglePixelCoords;
+	::cho::array_pod<::cho::SCoord2<int32_t>>										wireframePixelCoords;
 	::cho::SCoord3<float> cameraFront = (camera.Target - camera.Position).Normalize();
 	for(uint32_t iTriangle = 0; iTriangle < 12; ++iTriangle) {
 		double																		lightFactor									= geometryCubeNormals[iTriangle].Dot(cameraFront);
 		if(lightFactor > 0)
 			continue;
 		error_if(errored(::cho::drawTriangle(offscreen.View, triangle3dColorList[iTriangle], triangle2dList[iTriangle])), "Not sure if these functions could ever fail");
-		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::BLACK, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].A, triangle2dList[iTriangle].B});
-		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::BLACK, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].B, triangle2dList[iTriangle].C});
-		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::BLACK, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].C, triangle2dList[iTriangle].A});
+		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::GREEN, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].A, triangle2dList[iTriangle].B});
+		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::GREEN, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].B, triangle2dList[iTriangle].C});
+		//::cho::drawLine(offscreen.View, (::cho::SColorBGRA)::cho::GREEN, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].C, triangle2dList[iTriangle].A});
+		//trianglePixelCoords.clear();
 		//error_if(errored(::cho::drawTriangle(offscreenMetrics, triangle2dList[iTriangle], trianglePixelCoords)), "Not sure if these functions could ever fail");
-		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].A, triangle2dList[iTriangle].B}, trianglePixelCoords);
-		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].B, triangle2dList[iTriangle].C}, trianglePixelCoords);
-		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].C, triangle2dList[iTriangle].A}, trianglePixelCoords);
+		//for(uint32_t iCoord = 0; iCoord < trianglePixelCoords.size(); ++iCoord)
+		//	::cho::drawPixelLight(offscreen.View, trianglePixelCoords[iCoord], (::cho::SColorBGRA)::cho::BLUE, 0.05f, 2.5);
+		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].A, triangle2dList[iTriangle].B}, wireframePixelCoords);
+		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].B, triangle2dList[iTriangle].C}, wireframePixelCoords);
+		::cho::drawLine(offscreenMetrics, ::cho::SLine2D<int32_t>{triangle2dList[iTriangle].C, triangle2dList[iTriangle].A}, wireframePixelCoords);
 	}
-	for(uint32_t iCoord = 0; iCoord < trianglePixelCoords.size(); ++iCoord)
-		::cho::drawPixelLight(offscreen.View, trianglePixelCoords[iCoord], (::cho::SColorBGRA)::cho::GREEN, 0.05f, 2.5);
+	for(uint32_t iCoord = 0; iCoord < wireframePixelCoords.size(); ++iCoord)
+		::cho::drawPixelLight(offscreen.View, wireframePixelCoords[iCoord], (::cho::SColorBGRA)::cho::GREEN, 0.05f, 2.5);
 
 	//------------------------------------------------
 	static constexpr const ::cho::SCoord2<int32_t>								sizeCharCell								= {9, 16};
