@@ -36,7 +36,7 @@ static				void												setupParticles								()																				{
 					::SApplication										* g_ApplicationInstance						= 0;
 
 static				::cho::error_t										updateSizeDependentResources				(::SApplication& applicationInstance)											{ 
-	static constexpr	const ::cho::SCoord2<uint32_t>							GAME_SCREEN_SIZE							= {640, 360};
+	//static constexpr	const ::cho::SCoord2<uint32_t>							GAME_SCREEN_SIZE							= {640, 360};
 	::cho::updateSizeDependentTarget(applicationInstance.Framework.Offscreen.Texels, applicationInstance.Framework.Offscreen.View, GAME_SCREEN_SIZE);
 	return 0;
 }
@@ -148,19 +148,7 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 	return 0;
 }
 
-					::cho::error_t										drawBackground								(::SApplication& applicationInstance);	
-					::cho::error_t										drawShots									(::SApplication& applicationInstance);	
-					::cho::error_t										drawThrust									(::SApplication& applicationInstance);	
-					::cho::error_t										drawPowerups								(::SApplication& applicationInstance);	
-					::cho::error_t										drawShips									(::SApplication& applicationInstance);	
-					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance);	
-					::cho::error_t										drawCollisions								(::SApplication& applicationInstance);	
-
-
-static				::cho::error_t										textCalcSizeLine							(const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
-	return (::cho::error_t)(sizeCharCell.x * (text0.size() - 1));
-}
-
+static				::cho::error_t										textCalcSizeLine							(const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0)	{ return (::cho::error_t)(sizeCharCell.x * (text0.size() - 1)); }
 static				::cho::error_t										textDrawFixedSize							(::cho::grid_view<::cho::SColorBGRA>& bmpTarget, const ::cho::grid_view<::cho::SColorBGRA>& viewTextureFont, uint32_t characterCellsX, int32_t dstOffsetY, const ::cho::SCoord2<int32_t>& sizeCharCell, const ::cho::view_const_string& text0, const ::cho::SCoord2<int32_t> dstTextOffset)	{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	for(int32_t iChar = 0, charCount = (int32_t)text0.size(); iChar < charCount; ++iChar) {
 		int32_t																	coordTableX										= text0[iChar] % characterCellsX;
@@ -207,6 +195,13 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 }
 
 
+					::cho::error_t										drawBackground								(::SApplication& applicationInstance);	
+					::cho::error_t										drawShots									(::SApplication& applicationInstance);	
+					::cho::error_t										drawThrust									(::SApplication& applicationInstance);	
+					::cho::error_t										drawPowerups								(::SApplication& applicationInstance);	
+					::cho::error_t										drawShips									(::SApplication& applicationInstance);	
+					::cho::error_t										drawCrosshair								(::SApplication& applicationInstance);	
+					::cho::error_t										drawCollisions								(::SApplication& applicationInstance);	
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	
 	error_if(errored(::drawBackground		(applicationInstance)), "Why??");		// --- Draw stars
 	error_if(errored(::drawPowerups			(applicationInstance)), "Why??");		// --- Draw powerups
@@ -221,13 +216,41 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	static constexpr const ::cho::view_const_string								textLine0									= "W: Up, S: Down, A: Left, D: Right";
 	static constexpr const ::cho::view_const_string								textLine1									= "T: Shoot. Y: Thrust. U: Handbrake.";
 	static constexpr const ::cho::view_const_string								textLine2									= "Press ESC to exit.";
-	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= applicationInstance.Framework.Offscreen.View;
+	::cho::SFramework															& framework									= applicationInstance.Framework;
+	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= framework.Offscreen.View;
 	::cho::grid_view<::cho::SColorBGRA>											& fontAtlasView								= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
 	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= offscreenView.metrics();
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset++, offscreenMetrics, sizeCharCell, textLine0, ::cho::SColorBGRA{0, applicationInstance.Framework.FrameInfo.FrameNumber % 0xFF, 0xFFU, 0xFFU});	
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), lineOffset++, offscreenMetrics, sizeCharCell, textLine1, ::cho::SColorBGRA{applicationInstance.Framework.FrameInfo.FrameNumber % 0xFFU, 0xFFU, 0, 0xFFU});	
 	::textDrawAlignedFixedSize(offscreenView, fontAtlasView, lineOffset = offscreenMetrics.y / 16 - 1, offscreenMetrics, sizeCharCell, textLine2);	
 	::textDrawAlignedFixedSize(offscreenView, applicationInstance.TextureFontMonochrome.View, fontAtlasView.metrics(), --lineOffset, offscreenMetrics, sizeCharCell, weaponProperties[applicationInstance.Game.Ships.Weapon[0].IndexProperties].Name, ::cho::SColorBGRA{applicationInstance.Framework.FrameInfo.FrameNumber % 0xFFU, 0xFFU, 0, 0xFFU});	
+	if(applicationInstance.Debugging) {
+		::cho::STimer																& timer										= framework.Timer;
+		::cho::SDisplay																& mainWindow								= framework.MainDisplay;
+		char																		buffer		[512]							= {};
+		int32_t																		lineLen										= sprintf_s(buffer, "[%u x %u]. Projecitle fx count: %u. Thrust fx count: %u."
+			, mainWindow.Size.x, mainWindow.Size.y
+			, applicationInstance.ParticleSystemProjectiles	.Instances.size()
+			, applicationInstance.ParticleSystemThrust		.Instances.size()
+			);
+		::textDrawAlignedFixedSize(offscreenView, fontAtlasView, --lineOffset, offscreenMetrics, sizeCharCell, {buffer, (uint32_t)lineLen});	
+		lineLen																	= sprintf_s(buffer, "Stars fx count: %u. Debris fx count: %u. Projectiles fx count: %u."
+			, applicationInstance.ParticleSystemStars		.Instances.size()
+			, applicationInstance.ParticleSystemDebris		.Instances.size()
+			, applicationInstance.ParticleSystemProjectiles	.Instances.size()
+			);
+		::textDrawAlignedFixedSize(offscreenView, fontAtlasView, --lineOffset, offscreenMetrics, sizeCharCell, {buffer, (uint32_t)lineLen});	
+		lineLen																	= sprintf_s(buffer, "Enemy count: %u. Projectile count: %u. Powerup count: %u."
+			, applicationInstance.Game.CountEnemies
+			, applicationInstance.Game.CountProjectiles
+			, applicationInstance.Game.CountPowerups
+			);
+		::textDrawAlignedFixedSize(offscreenView, fontAtlasView, --lineOffset, offscreenMetrics, sizeCharCell, {buffer, (uint32_t)lineLen});	
+		lineLen																	= sprintf_s(buffer, "FPS: %g. Last frame seconds: %g.", 1 / timer.LastTimeSeconds, timer.LastTimeSeconds);
+		::textDrawAlignedFixedSize(offscreenView, fontAtlasView, --lineOffset, offscreenMetrics, sizeCharCell, {buffer, (uint32_t)lineLen});	
+	}
+	//::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
+	//SetWindowText(windowHandle, buffer);
 	return 0;
 }
 
@@ -240,15 +263,16 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 					::cho::error_t										updateParticles								(::SApplication& applicationInstance);
  					::cho::error_t										updateGUI									(::SApplication& applicationInstance);
 					::cho::error_t										update										(::SApplication& applicationInstance, bool systemRequestedExit)					{ 
-	::cho::SFramework															& framework									= applicationInstance.Framework;
 	retval_info_if(1, systemRequestedExit, "Exiting because the runtime asked for close. We could also ignore this value and just continue execution if we don't want to exit.");
-
+	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::error_t																frameworkResult								= ::cho::updateFramework(framework);
 	ree_if	(errored(frameworkResult), "Unknown error.");
 	rvi_if	(1, frameworkResult == 1, "Framework requested close. Terminating execution.");
 
 	ree_if	(errored(::updateSizeDependentResources	(applicationInstance)), "Cannot update offscreen and textures and this could cause an invalid memory access later on.");
 	error_if(errored(::updateInput					(applicationInstance)), "Unknown error.");
+	if(applicationInstance.Paused)
+		return 0;
 
 	// update background
 	const float																	windDirection								= (float)(sin(framework.FrameInfo.Seconds.Total / 10.0) * .5 + .5);
@@ -263,25 +287,5 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	error_if(errored(::updateShots		(applicationInstance, particleDefinitions)), "Unknown error.");
 	error_if(errored(::updateGUI		(applicationInstance)), "Unknown error.");
 
-	//::cho::STimer																& timer										= framework.Timer;
-	//::cho::SDisplay																& mainWindow								= framework.MainDisplay;
-	//char																		buffer		[256]							= {};
-	//sprintf_s(buffer, "[%u x %u]. Projecitle fx count: %u. Thrust fx count: %u. Stars fx count: %u. Debris fx count: %u. Total fx count: %u. Enemy count: %u. Projectile count: %u. Powerup count: %u. FPS: %g. Last frame seconds: %g."
-	//	, mainWindow.Size.x, mainWindow.Size.y
-	//	, applicationInstance.ParticleSystemProjectiles	.Instances.size()
-	//	, applicationInstance.ParticleSystemThrust		.Instances.size()
-	//	, applicationInstance.ParticleSystemStars		.Instances.size()
-	//	, applicationInstance.ParticleSystemDebris		.Instances.size()
-	//	, applicationInstance.ParticleSystemProjectiles	.Instances.size()
-	//	+ applicationInstance.ParticleSystemThrust		.Instances.size()
-	//	+ applicationInstance.ParticleSystemStars		.Instances.size()
-	//	+ applicationInstance.ParticleSystemDebris		.Instances.size()
-	//	, applicationInstance.Game.CountEnemies
-	//	, applicationInstance.Game.CountProjectiles
-	//	, applicationInstance.Game.CountPowerups
-	//	, 1 / timer.LastTimeSeconds
-	//	, timer.LastTimeSeconds);
-	//::HWND																		windowHandle								= mainWindow.PlatformDetail.WindowHandle;
-	//SetWindowText(windowHandle, buffer);
 	return 0;
 }

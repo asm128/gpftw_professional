@@ -36,6 +36,11 @@
 		}
 	}
 
+	if(inputSystem.KeyDown('P')) 
+		applicationInstance.Paused												= !applicationInstance.Paused;
+	if(inputSystem.KeyDown(VK_F2)) 
+		applicationInstance.Debugging											= !applicationInstance.Debugging;
+
 	for(uint32_t iShip = 0, shipCount = gameInstance.ShipsPlaying; iShip < shipCount; ++iShip)
 		gameInstance.Ships.Direction[iShip].Normalize();
 	return 0;
@@ -586,30 +591,57 @@ static				::cho::error_t										spawnPowOfRandomType						(::SGame & gameInsta
 	}
 	return 0;
 }
+//         3     4      5
+//   --------------------------
+// 2 -------------------------- 8
+//   --------------------------
+// 1 -------------------------- 7
+//   --------------------------
+// 0 -------------------------- 6
+//   --------------------------
+//         9    10     11
+static				const ::cho::array_static<::cho::SCoord2<int32_t>, 12>		spawnerPositions								=
+	{ {(int32_t)0 - 8, (int32_t)GAME_SCREEN_SIZE.y / 4 * 1}						// -- Left							
+	, {(int32_t)0 - 8, (int32_t)GAME_SCREEN_SIZE.y / 4 * 2}
+	, {(int32_t)0 - 8, (int32_t)GAME_SCREEN_SIZE.y / 4 * 3}
 
-static			::cho::error_t										spawnEnemy										(::SGame & gameInstance, const ::cho::SCoord2<uint32_t> & offscreenMetrics)			{
-	int32_t																		indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
+	, {(int32_t)GAME_SCREEN_SIZE.x / 4 * 1, (int32_t)GAME_SCREEN_SIZE.y	+ 8}	// Top
+	, {(int32_t)GAME_SCREEN_SIZE.x / 4 * 2, (int32_t)GAME_SCREEN_SIZE.y	+ 8}
+	, {(int32_t)GAME_SCREEN_SIZE.x / 4 * 3, (int32_t)GAME_SCREEN_SIZE.y	+ 8}
+
+	, {(int32_t)GAME_SCREEN_SIZE.x + 8, (int32_t)GAME_SCREEN_SIZE.y / 4 * 1}	// Right
+	, {(int32_t)GAME_SCREEN_SIZE.x + 8, (int32_t)GAME_SCREEN_SIZE.y / 4 * 2}
+	, {(int32_t)GAME_SCREEN_SIZE.x + 8, (int32_t)GAME_SCREEN_SIZE.y / 4 * 3}
+
+	, {(int32_t)GAME_SCREEN_SIZE.x / 4 * 1	, (int32_t)0 - 8}					// Bottom
+	, {(int32_t)GAME_SCREEN_SIZE.x / 4 * 2	, (int32_t)0 - 8}
+	, {(int32_t)GAME_SCREEN_SIZE.x / 4 * 3	, (int32_t)0 - 8}
+	};
+
+static				::cho::error_t												spawnEnemy										(::SGame & gameInstance, int32_t spawnerIndex, const ::cho::SCoord2<uint32_t> & offscreenMetrics)			{
+	int32_t																				indexToSpawnEnemy								= firstUnused(gameInstance.Enemies.Alive);
 	ree_if(indexToSpawnEnemy == -1, "Not enough space in enemy container to spawn more enemies!");	
-	gameInstance.Enemies.Alive			[indexToSpawnEnemy]					= 1;
-	gameInstance.Enemies.Position		[indexToSpawnEnemy]					= {offscreenMetrics.x - 1.0f, (float)(rand() % offscreenMetrics.y)};
-	gameInstance.Enemies.Health			[indexToSpawnEnemy]					= {5000, 5000};
-	gameInstance.Enemies.Weapon			[indexToSpawnEnemy]					= {(int32_t)(MAX_PLAYER_WEAPONS + (rand() % (::cho::size(::weaponProperties) - MAX_PLAYER_WEAPONS)))};
-	gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]					= 0;
-	gameInstance.Enemies.States			[indexToSpawnEnemy].Firing			= true;
+	gameInstance.Enemies.Alive			[indexToSpawnEnemy]							= 1;
+	gameInstance.Enemies.Position		[indexToSpawnEnemy]							= spawnerPositions[spawnerIndex % 12].Cast<float>();//{offscreenMetrics.x - 1.0f, (float)(rand() % offscreenMetrics.y)};
+	gameInstance.Enemies.Health			[indexToSpawnEnemy]							= {5000, 5000};
+	gameInstance.Enemies.Weapon			[indexToSpawnEnemy]							= {(int32_t)(MAX_PLAYER_WEAPONS + (rand() % (::cho::size(::weaponProperties) - MAX_PLAYER_WEAPONS)))};
+	gameInstance.Enemies.WeaponDelay	[indexToSpawnEnemy]							= 0;
+	gameInstance.Enemies.States			[indexToSpawnEnemy].Firing					= true;
 	++gameInstance.CountEnemies;
+	offscreenMetrics;
 	return 0;
 }
 
-					::cho::error_t										updateEnemies								(::SApplication & applicationInstance)			{
-	::cho::SFramework															& framework									= applicationInstance.Framework;
-	const ::cho::SCoord2<uint32_t>												& offscreenMetrics							= framework.Offscreen.View.metrics();
-	::SGame																		& gameInstance								= applicationInstance.Game;
-	gameInstance.GhostTimer													+= framework.FrameInfo.Seconds.LastFrame;
-	static float																timerSpawn									= 0;
-	timerSpawn																+= (float)framework.FrameInfo.Seconds.LastFrame;
+					::cho::error_t												updateEnemies									(::SApplication & applicationInstance)			{
+	::cho::SFramework																	& framework										= applicationInstance.Framework;
+	const ::cho::SCoord2<uint32_t>														& offscreenMetrics								= framework.Offscreen.View.metrics();
+	::SGame																				& gameInstance									= applicationInstance.Game;
+	gameInstance.GhostTimer															+= framework.FrameInfo.Seconds.LastFrame;
+	static float																		timerSpawn										= 0;
+	timerSpawn																		+= (float)framework.FrameInfo.Seconds.LastFrame;
 	if(timerSpawn > 5.5) {
-		timerSpawn																= 0;
-		cho_necall(::spawnEnemy(gameInstance, offscreenMetrics), "Something prevented to add more enemies. Probably a static limit on the container.");
+		timerSpawn																		= 0;
+		cho_necall(::spawnEnemy(gameInstance, rand() % ::cho::size(spawners), offscreenMetrics), "Something prevented to add more enemies. Probably a static limit on the container.");
 	}
 	for(uint32_t iEnemy = 0; iEnemy < gameInstance.Enemies.Alive.size(); ++iEnemy) {
 		if(0 == gameInstance.Enemies.Alive[iEnemy])

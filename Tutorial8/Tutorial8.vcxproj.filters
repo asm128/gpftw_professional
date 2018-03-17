@@ -47,7 +47,10 @@
     <ClInclude Include="gontrill_base.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="level.h">
+    <ClInclude Include="track.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

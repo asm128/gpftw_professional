@@ -4,15 +4,11 @@
 #include "cho_particle.h"
 #include "cho_framework.h"
 #include "game.h"
-#include "level.h"
+#include "spawner.h"
+#include "track.h"
 
 #ifndef APPLICATION_H_098273498237423
 #define APPLICATION_H_098273498237423
-
-enum SHIP_CONTROL_TYPE : int8_t
-	{	SHIP_CONTROL_TYPE_AI
-	,	SHIP_CONTROL_TYPE_HUMAN
-	};
 
 enum PARTICLE_TYPE : int8_t
 	{	PARTICLE_TYPE_SNOW			= 0
@@ -24,7 +20,6 @@ enum PARTICLE_TYPE : int8_t
 	,	PARTICLE_TYPE_COUNT
 	,	PARTICLE_TYPE_INVALID		= -1
 	};
-
 
 #pragma pack(push, 1)
 struct SGameParticle {
@@ -81,16 +76,26 @@ struct SEffectsDelay {
 						double																						Star;
 };
 
+static constexpr	const ::cho::SCoord2<uint32_t>																GAME_SCREEN_SIZE							= {640, 360};
+			  
+struct SLevelState {
+	int32_t							Number;
+	float							Time;
+};
+
 struct SApplication {
 	typedef				::cho::SParticleSystem<::SGameParticle, float>												TParticleSystem;
 	typedef				TParticleSystem::TParticleInstance															TParticleInstance;
 	typedef				TParticleSystem::TIntegrator																TIntegrator;
 	typedef				TIntegrator::TParticle																		TParticle;
 
-	::cho::SFramework																			Framework									= {};
+						::cho::SFramework																			Framework									;
 
 						::SGame																						Game										= {};
-						::SLevel																					Level										= {};
+						::SLevelState																				Level										= {0, 0};
+						bool																						Playing										= true;
+						bool																						Paused										= true;
+						bool																						Debugging									= true;
 
 						TParticleSystem																				ParticleSystemThrust						= {};
 						TParticleSystem																				ParticleSystemProjectiles					= {};

@@ -30,7 +30,7 @@ static				::cho::error_t										drawShipHealthBar							(::SApplication& appli
 	// ---- Draw enemy ships
 	const ::cho::grid_view<::cho::SColorBGRA>									& enemyView									= applicationInstance.Textures[GAME_TEXTURE_ENEMY].Processed.View;
 	char																		indexPositionsX[]							= {0, 1, 2, 3, 2, 1, 0, -1, -2, -3, -2, -1};
-	::cho::SCoord2<int32_t>														halfMetricsEnemy							= (enemyView.metrics() / 2).Cast<int32_t>();
+	const ::cho::SCoord2<int32_t>												halfMetricsEnemy							= (enemyView.metrics() / 2).Cast<int32_t>();
 	int32_t																		halfMetricsEnemy2y							= halfMetricsEnemy.y;
 	// ---- Draw ghosts.
 	for(uint32_t iEnemy = 0, enemyCount = gameInstance.Enemies.Alive.size(); iEnemy < enemyCount; ++iEnemy) {

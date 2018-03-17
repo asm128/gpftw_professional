@@ -28,9 +28,10 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="gontrill_base.h" />
     <ClInclude Include="enemy.h" />
-    <ClInclude Include="level.h" />
+    <ClInclude Include="spawner.h" />
     <ClInclude Include="ship.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="track.h" />
     <ClInclude Include="weapon.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

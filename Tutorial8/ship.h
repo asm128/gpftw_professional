@@ -12,6 +12,7 @@ enum SHIP_CLASS : int8_t
 	, SHIP_CLASS_MOTHER
 	, SHIP_CLASS_MONSTER
 	, SHIP_CLASS_COUNT
+	, SHIP_CLASS_INVALID
 	};
 
 struct SShipProperties {
@@ -37,10 +38,17 @@ struct SShipState {
 						bool									Brakes							: 1;
 };
 
+enum SHIP_CONTROL_TYPE : int8_t
+	{ SHIP_CONTROL_TYPE_USER
+	, SHIP_CONTROL_TYPE_PATTERN
+	, SHIP_CONTROL_TYPE_SEEK
+	};
+
 struct SShip {
 						int32_t									PropertiesShip					;
 						int32_t									PropertiesWeapon				;
 						SHealthPoints							HealthCurrent					;
+						SHIP_CONTROL_TYPE						ControlType						;
 };
 
 #endif // SHIP_H_2098379238
