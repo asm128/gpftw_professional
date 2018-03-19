@@ -37,10 +37,15 @@ struct STrackEventTable {
 	}
 };
 
-struct STrack {
-						float										TimeStart							;
-						float										Duration							;
-						STrackEventTable							Table								;
+struct STrackState {
+						float										TimeElapsed;
+						int32_t										LastEvent;
 };
+
+//struct STrack {
+//						float										TimeStart							;
+//						float										Duration							;
+//						STrackEventTable							Table								;
+//};
 
 #endif // TRACK_H_9283749823
