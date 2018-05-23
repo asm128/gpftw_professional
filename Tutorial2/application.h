@@ -4,7 +4,7 @@
 #define APPLICATION_H_098273498237423
 
 struct SApplication {
-						::cho::SFramework								Framework									= {};
+						::cho::SFramework								Framework									;
 
 						::cho::STexture<::cho::SColorBGRA>				TextureFont									= {};
 						::cho::STextureProcessable<::cho::SColorBGRA>	TextureBackgroundDay						= {};

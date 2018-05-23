@@ -76,7 +76,7 @@ struct SEffectsDelay {
 						double																						Star;
 };
 
-static constexpr	const ::cho::SCoord2<uint32_t>																GAME_SCREEN_SIZE							= {640, 360};
+static constexpr	const ::cho::SCoord2<uint32_t>																GAME_SCREEN_SIZE							= {1600, 900};
 			  
 struct SLevelState {
 	int32_t							Number;

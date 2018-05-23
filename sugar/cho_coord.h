@@ -1,6 +1,7 @@
 #include "cho_math.h"
 #include "cho_bit.h"
 #include "cho_eval.h"
+#include "cho_log.h"
 
 #ifndef CHO_COORD_H_928374982364923322
 #define CHO_COORD_H_928374982364923322
