@@ -304,7 +304,7 @@ static				::cho::error_t										addParticle
 }
 
 static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
-	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
+	::cho::bit_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	uint32_t																	iProjectile									= ::firstUnused(gameInstance.Projectiles.Alive);
 	rew_if(iProjectile == -1, "Not enough space for storing new projectile.");
 	projectilesAlive[iProjectile]											= 1;
@@ -425,7 +425,7 @@ static				::cho::error_t										updateSpawnShots
 
 					::cho::error_t										removeDeadStuff								(::SApplication& applicationInstance)					{
 	::SGame																		& gameInstance								= applicationInstance.Game;
-	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
+	::cho::bit_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(projectilesAlive[iProjectile]) {
 			::SProjectile																& projectile								= gameInstance.Projectiles.Projectiles[iProjectile];

@@ -6,7 +6,7 @@
 #include "cho_bitmap_file.h"
 #include "cho_grid_copy.h"
 #include "cho_grid_scale.h"
-#include "cho_bit_array_view.h"
+#include "cho_bit_view.h"
 
 #include "cho_app_impl.h"
 
@@ -60,7 +60,7 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 
 	{
 		uint8_t																		testBitfield[]									= {1,3,7,15,31,63,127,255};
-		::cho::bit_array_view<uint8_t>												testView										= testBitfield;
+		::cho::bit_view<uint8_t>												testView										= testBitfield;
 		for(uint32_t i=0; i < testView.size(); ++i)
 			printf("%X", (uint32_t)testView[i]);
 		printf("\n");
@@ -76,19 +76,19 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	printf("\n");
 	{
 		uint8_t																		testBitfield2[]									= {1,3,7,15,31,63,127,255};
-		::cho::bit_array_view<uint8_t>												testView2										= testBitfield2;
-		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); item++) {
+		::cho::bit_view<uint8_t>												testView2										= testBitfield2;
+		for(::cho::bit_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); item++) {
 			bool																		value											= item;
 			printf("%X", (uint32_t)value);
 		}
 		printf("\n");
-		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
+		for(::cho::bit_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
 			item																	= 1;
 			bool																		value											= item;
 			printf("%X", (uint32_t)value);
 		}
 		printf("\n");
-		for(::cho::bit_array_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
+		for(::cho::bit_view_iterator<uint8_t> item = testView2.begin(); item != testView2.end(); ++item) {
 			bool																		value											= item;
 			printf("%X", (uint32_t)value);
 		}
@@ -178,11 +178,11 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureBackgroundNight	.Processed.View, applicationInstance.Rectangle, applicationInstance.Rectangle)), "I believe this never fails.");
 	//error_if(errored(::cho::grid_copy(bmpTarget.Colors, applicationInstance.ViewTextureFont)), "I believe this never fails.");
 	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::WHITE		, geometry0)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::BLUE		, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawRectangle	(offscreen.View, (::cho::SColorBGRA)::cho::BLUE			, ::cho::SRectangle2D<int32_t>{geometry0.Offset + ::cho::SCoord2<int32_t>{1, 1}, geometry0.Size - ::cho::SCoord2<int32_t>{2, 2}})	), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawCircle		(offscreen.View, (::cho::SColorBGRA)::cho::GREEN		, geometry1)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawCircle		(offscreen.View, (::cho::SColorBGRA)::cho::RED		, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawCircle		(offscreen.View, (::cho::SColorBGRA)::cho::RED			, ::cho::SCircle2D<int32_t>{geometry1.Radius - 1, geometry1.Center})									), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawTriangle	(offscreen.View, (::cho::SColorBGRA)::cho::YELLOW		, geometry2)																							), "Not sure if these functions could ever fail");
-	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::MAGENTA	, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
+	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::MAGENTA		, ::cho::SLine2D<int32_t>{geometry2.A, geometry2.B})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::WHITE		, ::cho::SLine2D<int32_t>{geometry2.B, geometry2.C})													), "Not sure if these functions could ever fail");
 	error_if(errored(::cho::drawLine		(offscreen.View, (::cho::SColorBGRA)::cho::LIGHTGREEN	, ::cho::SLine2D<int32_t>{geometry2.C, geometry2.A})													), "Not sure if these functions could ever fail");
 
@@ -207,7 +207,7 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	const ::cho::SRectangle2D<uint32_t>											srcRect3									= ::cho::SRectangle2D<uint32_t>{{36,  applicationInstance.TextureFont.View.height() - 16}, sizeCharCell.Cast<uint32_t>()};
 	const ::cho::SRectangle2D<uint32_t>											srcRect4									= ::cho::SRectangle2D<uint32_t>{{45,  applicationInstance.TextureFont.View.height() - 16}, sizeCharCell.Cast<uint32_t>()};
 	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect0, srcRect0.Offset)), "I believe this never fails.");
-	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect1.Offset, srcRect1.Offset)), "I believe this never fails.");
+	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect1.Offset.Cast<int32_t>() - ::cho::SCoord2<int32_t>{64,}, srcRect1.Offset.Cast<int32_t>())), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, ::cho::SCoord2<uint32_t>{mainWindow.Size.x - applicationInstance.TextureFont.View.width() / 2, dstRect1.Offset.y}, srcRect1.Offset)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect2.Offset, srcRect2)), "I believe this never fails.");
 	error_if(errored(::cho::grid_copy(offscreen.View, applicationInstance.TextureFont.View, dstRect3, srcRect3)), "I believe this never fails.");

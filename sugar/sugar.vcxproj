@@ -182,7 +182,7 @@
   <ItemGroup>
     <ClInclude Include="cho_array_static.h" />
     <ClInclude Include="cho_bit.h" />
-    <ClInclude Include="cho_bit_array_view.h" />
+    <ClInclude Include="cho_bit_view.h" />
     <ClInclude Include="cho_app_impl.h" />
     <ClInclude Include="cho_array.h" />
     <ClInclude Include="cho_array_view.h" />

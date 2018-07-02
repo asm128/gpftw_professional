@@ -5,7 +5,7 @@
 #include "cho_bitmap_file.h"
 #include "cho_bitmap_target.h"
 #include "cho_grid_scale.h"
-#include "cho_bit_array_view.h"
+#include "cho_bit_view.h"
 
 #include "cho_app_impl.h"
 

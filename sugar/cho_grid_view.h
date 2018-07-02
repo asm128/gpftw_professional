@@ -23,8 +23,8 @@ namespace cho
 		inline														grid_view					(_tElement* dataElements, const ::cho::SCoord2<uint32_t>& gridMetrics)					: grid_view(dataElements, gridMetrics.x, gridMetrics.y)		{}
 
 		// Operators
-							::cho::array_view<_tElement>			operator[]					(uint32_t row)																			{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Size.y, ::std::exception(""), "Invalid row."); return ::cho::array_view<_tElement			>(&Data[row * Size.x], Size.x); }
-							::cho::array_view<const _tElement>		operator[]					(uint32_t row)														const				{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Size.y, ::std::exception(""), "Invalid row."); return ::cho::array_view<const _tElement	>(&Data[row * Size.x], Size.x); }
+							::cho::array_view<_tElement>			operator[]					(uint32_t row)																			{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Size.y, ::std::exception(""), "Invalid row: %u.", row); return ::cho::array_view<_tElement			>(&Data[row * Size.x], Size.x); }
+							::cho::array_view<const _tElement>		operator[]					(uint32_t row)														const				{ throw_if(0 == Data, ::std::exception(""), "Uninitialized array pointer."); throw_if(row >= Size.y, ::std::exception(""), "Invalid row: %u.", row); return ::cho::array_view<const _tElement	>(&Data[row * Size.x], Size.x); }
 
 		// Methods
 		inline constexpr	const _tElement*						begin						()																	const	noexcept	{ return Data;						}

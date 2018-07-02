@@ -102,9 +102,6 @@
     <ClInclude Include="cho_layered_view.h">
       <Filter>container</Filter>
     </ClInclude>
-    <ClInclude Include="cho_bit_array_view.h">
-      <Filter>container</Filter>
-    </ClInclude>
     <ClInclude Include="cho_grid_copy.h">
       <Filter>container</Filter>
     </ClInclude>
@@ -134,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="cho_matrix.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="cho_bit_view.h">
+      <Filter>container</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

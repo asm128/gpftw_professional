@@ -210,7 +210,7 @@ static				::cho::error_t										addParticle
 }
 
 static				::cho::error_t										addProjectile								(::SGame & gameInstance, int32_t iShip, PLAYER_TYPE playerType, WEAPON_TYPE weaponType, float projectileSpeed)					{
-	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
+	::cho::bit_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(0 == projectilesAlive[iProjectile]) {
 			projectilesAlive[iProjectile]											= 1;
@@ -296,7 +296,7 @@ static				::cho::error_t										addProjectile								(::SGame & gameInstance, 
 	)
 { 
 	::SGame																		& gameInstance								= applicationInstance.Game;
-	::cho::bit_array_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
+	::cho::bit_view<uint64_t>												& projectilesAlive							= gameInstance.Projectiles.Alive;
 	for(uint32_t iProjectile = 0, projectileCount = projectilesAlive.size(); iProjectile < projectileCount; ++iProjectile) {
 		if(0 == projectilesAlive[iProjectile]) 
 			continue;

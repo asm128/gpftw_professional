@@ -2,7 +2,7 @@
 // Tip: Hold Left ALT + SHIFT while tapping or holding the arrow keys in order to select multiple columns and write on them at once. 
 //		Also useful for copy & paste operations in which you need to copy a bunch of variable or function names and you can't afford the time of copying them one by one.
 #include "cho_coord.h"
-#include "cho_bit_array_view.h"
+#include "cho_bit_view.h"
 #include "cho_array_static.h"
 
 #ifndef GAME_H_982374982374
@@ -70,12 +70,12 @@ static constexpr	const int32_t														MAX_PROJECTILES															= 512;
 #pragma pack(pop)
 
 template<size_t _sizeArray>
-struct SArrayElementState : public ::cho::bit_array_view<uint64_t> { 
+struct SArrayElementState : public ::cho::bit_view<uint64_t> { 
 public:
 	typedef				uint64_t															TStorage;
 						TStorage															Data				[(_sizeArray / (8 * sizeof(TStorage))) + 1]			= {};	
 
-																							SArrayElementState														()						: bit_array_view(Data, _sizeArray) {}
+																							SArrayElementState														()						: bit_view(Data, _sizeArray) {}
 };
 
 template<size_t _sizeArray>

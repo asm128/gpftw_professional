@@ -1,6 +1,6 @@
 #include "cho_array.h"
 #include "cho_grid_view.h"
-#include "cho_bit_array_view.h"
+#include "cho_bit_view.h"
 
 #ifndef CHO_TEXTURE_H_902387498237
 #define CHO_TEXTURE_H_902387498237
@@ -52,11 +52,11 @@ namespace cho
 		typedef				_tTexel												TTexel;
 
 							::cho::array_pod		<_tTexel>					Texels										;
-							::cho::bit_array_view	<_tTexel>					View										;
+							::cho::bit_view	<_tTexel>					View										;
 							uint32_t											Pitch										= 0;
 
 		constexpr																STextureMonochrome							()													= default;
-																				STextureMonochrome							(const ::cho::bit_array_view<_tTexel>& other)		{ 
+																				STextureMonochrome							(const ::cho::bit_view<_tTexel>& other)		{ 
 			Texels																	= other;
 			View																	= {Texels.begin(), Texels.size()};
 			Pitch																	= other.Pitch;
@@ -70,7 +70,7 @@ namespace cho
 			return *this; 
 		}
 
-							::cho::STextureMonochrome<_tTexel>&					operator=									(const ::cho::bit_array_view<_tTexel>& other)		{ 
+							::cho::STextureMonochrome<_tTexel>&					operator=									(const ::cho::bit_view<_tTexel>& other)		{ 
 			Texels																	= other;
 			View																	= {Texels.begin(), Texels.size()};
 			Pitch																	= other.Pitch;
