@@ -1,6 +1,8 @@
 #include "cho_array_view.h"
 #include "cho_memory.h"
 
+#include <memory.h>
+
 #ifndef CHO_ARRAY_H_29837498237498237429837
 #define CHO_ARRAY_H_29837498237498237429837
 
@@ -215,8 +217,8 @@ namespace cho
 			if(Size < Count + chainLength) {
 				_tPOD												* oldData									= Data;
 				uint32_t											newSize										= calc_reserve_size(Count + chainLength);
-				uint32_t											mallocSize									= calc_malloc_size(reserveSize);
-				ree_if(mallocSize != (reserveSize * (uint32_t)sizeof(_tObj)), "Alloc size overflow. Requested size: %u. malloc size: %u.", reserveSize, mallocSize);
+				uint32_t											mallocSize									= calc_malloc_size(newSize);
+				ree_if(mallocSize != (newSize * (uint32_t)sizeof(_tPOD)), "Alloc size overflow. Requested size: %u. malloc size: %u.", newSize, mallocSize);
 				::cho::auto_cho_free								safeguard;
 				_tPOD												* newData									= (_tPOD*)(safeguard.Handle = ::cho::cho_malloc(mallocSize));
 				ree_if(nullptr == newData, "Failed to allocate array for inserting new value.");
@@ -323,7 +325,7 @@ namespace cho
 			for(uint32_t i = 0; i < Count; ++i) {
 				::cho::podcpy(&newStorage[i], &Data[i]);
 				input											+= sizeof(_tPOD);
-				*inout_bytesRead								+= sizeof(_tPOD);
+				*inout_bytesWritten								+= sizeof(_tPOD);
 			}
 			return 0;
 		}

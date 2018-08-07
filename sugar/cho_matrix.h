@@ -47,7 +47,7 @@ namespace cho
 
 		inline				_tMat4&				LinearInterpolate			(const _tMat4&p, const _tMat4&q, double fTime)											noexcept	{ return *this = ((q-p)*fTime)+p; }
 		constexpr			_TCoord3			InverseTranslate			(const _TCoord3& vec)															const	noexcept	{ return { vec.x - _41, vec.y - _42, vec.z - _43 }; }
-							void				InverseTranslateInPlace		(_TCoord3& fpVec)																const	noexcept	{ vec.x -= _41; vec.y -= _42; vec.z -= _43; }
+							void				InverseTranslateInPlace		(_TCoord3& vec	)																const	noexcept	{ vec.x -= _41; vec.y -= _42; vec.z -= _43; }
 		constexpr			_TCoord3			Transform					(const _TCoord3& v)																const				{
 			return 
 			_TCoord3

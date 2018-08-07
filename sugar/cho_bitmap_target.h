@@ -127,7 +127,7 @@ namespace cho
 
 	template<typename _tCoord, typename _tColor>
 	static					::cho::error_t									drawCircle									(const ::cho::SCoord2<uint32_t>& targetMetrics, const ::cho::SCircle2D<_tCoord>& circle, ::cho::array_pod<::cho::SCoord2<int32_t>>& out_Points)			{
-		int32_t																		xStop										= ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)bitmapTarget.width());
+		int32_t																		xStop										= ::cho::min((int32_t)(circle.Center.x + circle.Radius), (int32_t)targetMetrics.x);
 		double																		radiusSquared								= circle.Radius * circle.Radius;
 		int32_t																		pixelsDrawn									= 0;
 		for(int32_t y = ::cho::max(0, (int32_t)(circle.Center.y - circle.Radius)), yStop = ::cho::min((int32_t)(circle.Center.y + circle.Radius), (int32_t)targetMetrics.y); y < yStop; ++y)

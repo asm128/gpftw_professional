@@ -42,7 +42,7 @@ namespace cho
 							_tElement											Damping										= .99f;	// A vector representing the speed in a given direction 
 
 		inline				void												SetMass										(const double mass)																			noexcept	{ InverseMass = mass ? ((_tElement)(1.0 / mass)) : 0;		}
-		inline constexpr	double												GetMass										()																					const	noexcept	{ return (InverseMass == 0) ? DBL_MAX : 1.0 / InverseMass;	}
+		inline constexpr	double												GetMass										()																					const	noexcept	{ return (InverseMass == 0) ? 988999999999.0 : 1.0 / InverseMass;	}
 		inline constexpr	bool												HasFiniteMass								()																					const	noexcept	{ return InverseMass >= 0.0f;								}
 	};
 

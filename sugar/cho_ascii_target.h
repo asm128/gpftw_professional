@@ -24,7 +24,7 @@ namespace cho
 							::cho::error_t									asciiTargetClear							(::cho::SASCIITarget& target, uint8_t character = ' ', uint16_t color = ASCII_COLOR_WHITE);
 
 	template<typename _tUnit>
-	static inline			::cho::error_t									asciiTargetCreate							(::cho::SASCIITarget& target, const ::cho::SCoord2<_tUnit>& size)						{ return ::cho::asciiTargetCreate(console, (uint32_t)size.x, (uint32_t)size.y); }
+	static inline			::cho::error_t									asciiTargetCreate							(::cho::SASCIITarget& target, const ::cho::SCoord2<_tUnit>& size)						{ return ::cho::asciiTargetCreate(target, (uint32_t)size.x, (uint32_t)size.y); }
 
 	// ------------------------------------------------------ 
 #pragma pack( push, 1 )

@@ -159,8 +159,8 @@ namespace cho
 		typedef				SCoord3		<_tBase>	TCoord3;
 							_tBase					x, y, z, w;
 		//
-		inline				const _tBase&	operator[]				(uint32_t index)											const				{ throw_if(index > 3, "Invalid quaternion element being accessed: %u", index); return *((&_11)[index]); }
-		inline				_tBase&			operator[]				(uint32_t index)																{ throw_if(index > 3, "Invalid quaternion element being accessed: %u", index); return *((&_11)[index]); }
+		inline				const _tBase&	operator[]				(uint32_t index)											const				{ throw_if(index > 3, "Invalid quaternion element being accessed: %u", index); return *((&x)[index]); }
+		inline				_tBase&			operator[]				(uint32_t index)																{ throw_if(index > 3, "Invalid quaternion element being accessed: %u", index); return *((&x)[index]); }
 		// 
 		constexpr			bool			operator ==				(const TQuat& other)										const	noexcept	{ return x == other.x && y == other.y && z == other.z && w == other.w; }
 		constexpr inline	bool			operator !=				(const TQuat& other)										const	noexcept	{ return !operator==(other); }

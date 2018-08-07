@@ -4,6 +4,8 @@
 //#include "cho_safe.h"
 #include "cho_auto_handler.h"
 
+#include <memory.h>
+
 #ifndef CHO_MEMORY_H__92836409283642038462309846
 #define CHO_MEMORY_H__92836409283642038462309846
 
