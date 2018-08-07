@@ -99,7 +99,9 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
-      <AdditionalOptions>/permissive-</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -117,7 +119,9 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
-      <AdditionalOptions>/permissive-</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -137,7 +141,9 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
-      <AdditionalOptions>/permissive-</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -159,7 +165,9 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>..\..\gpftw_professional\sugar_core; ..\..\gpftw_professional\sugar; </AdditionalIncludeDirectories>
-      <AdditionalOptions>/permissive-</AdditionalOptions>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
