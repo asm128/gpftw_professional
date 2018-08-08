@@ -36,9 +36,9 @@ CHO_DEFINE_APPLICATION_ENTRY_POINT(::SApplication);
 					::cho::error_t										setup										(::SApplication& applicationInstance)											{ 
 	g_ApplicationInstance													= &applicationInstance;
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
-	static constexpr	const char												bmpFileName0	[]									= "earth_color.bmp";
-	static constexpr	const char												bmpFileName1	[]									= "earth_light.bmp";
-	static constexpr	const char												bmpFileName2	[]									= "Codepage-437-24.bmp";
+	static constexpr	const char												bmpFileName0	[]									= "..\\gpk_data\\images\\earth_color.bmp";
+	static constexpr	const char												bmpFileName1	[]									= "..\\gpk_data\\images\\earth_light.bmp";
+	static constexpr	const char												bmpFileName2	[]									= "..\\gpk_data\\images\\Codepage-437-24.bmp";
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureBackgroundDay	)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TextureBackgroundNight	)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureFont				)), "Failed to load bitmap from file: %s.", bmpFileName2);
