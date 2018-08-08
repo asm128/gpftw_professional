@@ -86,8 +86,11 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		, "pow_icon_0.bmp"
 		, "enemy_0.bmp"
 		};
-	for(uint32_t iSprite = 0, spriteCount = ::cho::size(bmpFileNames); iSprite < spriteCount; ++iSprite)
-		::setupSprite(applicationInstance.Textures[iSprite], applicationInstance.TextureCenters[iSprite], {bmpFileNames[iSprite], (uint32_t)strlen(bmpFileNames[iSprite])});
+	for(uint32_t iSprite = 0, spriteCount = ::cho::size(bmpFileNames); iSprite < spriteCount; ++iSprite) {
+		char																		temp	[1024];
+		sprintf_s(temp, "..\\gpk_data\\images\\%s", bmpFileNames[iSprite]);
+		::setupSprite(applicationInstance.Textures[iSprite], applicationInstance.TextureCenters[iSprite], temp);
+	}
 
 	const ::cho::grid_view<::cho::SColorBGRA>									& fontAtlas									= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
 	const ::cho::SCoord2<uint32_t>												& textureFontMetrics						= fontAtlas.metrics();

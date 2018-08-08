@@ -77,9 +77,9 @@ static				::cho::error_t										updateSizeDependentResources				(::SApplicatio
 	error_if(errored(::mainWindowCreate(applicationInstance.Framework.MainDisplay, applicationInstance.Framework.RuntimeValues.PlatformDetail.EntryPointArgs.hInstance)), "Failed to create main window why?????!?!?!?!?");
 	::setupParticles();
 
-	static constexpr	const char												bmpFileName0	[]							= "ship_2.bmp";
-	static constexpr	const char												bmpFileName1	[]							= "pow_core_1.bmp";
-	static constexpr	const char												bmpFileName2	[]							= "crosshair_template.bmp";
+	static constexpr	const char												bmpFileName0	[]							= "..\\gpk_data\\images\\ship_0.bmp";
+	static constexpr	const char												bmpFileName1	[]							= "..\\gpk_data\\images\\pow_core_1.bmp";
+	static constexpr	const char												bmpFileName2	[]							= "..\\gpk_data\\images\\crosshair_template.bmp";
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName0), applicationInstance.TextureShip			.Original)), "Failed to load bitmap from file: %s.", bmpFileName0);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName1), applicationInstance.TexturePowerup		.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);
 	error_if(errored(::cho::bmpFileLoad(::cho::view_const_string(bmpFileName2), applicationInstance.TextureCrosshair	.Original)), "Failed to load bitmap from file: %s.", bmpFileName1);

@@ -71,8 +71,11 @@ static				::cho::error_t										setupSprites								(::SApplication& applicati
 		, "pow_icon_0.bmp"
 		, "enemy_0.bmp"
 		};
-	for(uint32_t iSprite = 0, spriteCount = ::cho::size(bmpFileNames); iSprite < spriteCount; ++iSprite)
-		::setupSprite(applicationInstance.Textures[iSprite], applicationInstance.TextureCenters[iSprite], {bmpFileNames[iSprite], (uint32_t)strlen(bmpFileNames[iSprite])});
+	for(uint32_t iSprite = 0, spriteCount = ::cho::size(bmpFileNames); iSprite < spriteCount; ++iSprite) {
+		char																		temp	[1024];
+		sprintf_s(temp, "..\\gpk_data\\images\\%s", bmpFileNames[iSprite]);
+		::setupSprite(applicationInstance.Textures[iSprite], applicationInstance.TextureCenters[iSprite], temp);
+	}
 
 	applicationInstance.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWERUP0	].Processed.View);
 	applicationInstance.TexturesPowerup0.push_back(applicationInstance.Textures[GAME_TEXTURE_POWICON	].Processed.View);
