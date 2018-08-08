@@ -61,7 +61,7 @@ static				::cho::error_t										setupSprite									(::cho::STextureProcessabl
 	bool																		failedFromFile								= errored(::cho::bmpFileLoad(filename, textureToProcess.Original));
 	char_t																		filenameBMGCompo	[256]					= {};
 	strcpy_s(filenameBMGCompo, filename.begin());
-	filenameBMGCompo[filename.size() - 1]									= 'g';
+	filenameBMGCompo[strlen(filenameBMGCompo) - 1]									= 'g';
 	const ::cho::view_const_string												filenameBMG									= filenameBMGCompo;
 	if(failedFromFile) {
 		error_printf("Failed to load bitmap from file: %s.", filename);

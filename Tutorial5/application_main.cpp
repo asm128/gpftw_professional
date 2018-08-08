@@ -310,21 +310,21 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 					::cho::error_t										updateGUI									(::SApplication& applicationInstance)					{ 
 	applicationInstance.StuffToDraw.CollisionPoints.clear();
 	for(uint32_t iProjectilePath = 0, projectilePathCount = applicationInstance.StuffToDraw.ProjectilePaths.size(); iProjectilePath < projectilePathCount; ++iProjectilePath) {
-		const cho::SCoord2<float>						& posXHair				= applicationInstance.PositionCrosshair;
-		float											halfSizeBox				= 5.0f;
-		::cho::SLine2D<float>							rectangleSegments[]		= 
+		const cho::SCoord2<float>													& posXHair									= applicationInstance.PositionCrosshair;
+		float																		halfSizeBox									= 5.0f;
+		::cho::SLine2D<float>														rectangleSegments[]							= 
 			{ {posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{ halfSizeBox - 1	,-halfSizeBox}}
 			, {posXHair + ::cho::SCoord2<float>{-halfSizeBox	, halfSizeBox - 1}, posXHair + ::cho::SCoord2<float>{-halfSizeBox		,-halfSizeBox}}
 			};
 
-		const ::SLaserToDraw							& laserToDraw			= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
-		const ::cho::SLine2D<float>						& projectilePath		= laserToDraw.Segment;
-		::cho::SCoord2<float>							collisions	[::cho::size(rectangleSegments)]	= {};
+		const ::SLaserToDraw														& laserToDraw								= applicationInstance.StuffToDraw.ProjectilePaths[iProjectilePath];
+		const ::cho::SLine2D<float>													& projectilePath							= laserToDraw.Segment;
+		::cho::SCoord2<float>														collisions	[::cho::size(rectangleSegments)]	= {};
 		for(uint32_t iSeg = 0; iSeg < ::cho::size(rectangleSegments); ++iSeg) {
-			::cho::SCoord2<float>							& collision										= collisions		[iSeg];
-			const ::cho::SLine2D<float>						& segSelected									= rectangleSegments	[iSeg]; 
+			::cho::SCoord2<float>														& collision										= collisions		[iSeg];
+			const ::cho::SLine2D<float>													& segSelected									= rectangleSegments	[iSeg]; 
 			if(::cho::line_line_intersect(projectilePath, segSelected, collision)) {
-				bool											bFound											= false;
+				bool																		bFound											= false;
 				for(uint32_t iS2 = 0; iS2 < iSeg; ++iS2) {
 					if(collision == collisions[iS2]) {
 						bFound = true;
