@@ -234,7 +234,7 @@ static				::cho::error_t										textDrawAlignedFixedSize					(::cho::grid_view
 	uint32_t																	lineOffset									= 0;
 	static constexpr const ::cho::view_const_string								textLine0									= "W: Up, S: Down, A: Left, D: Right";
 	static constexpr const ::cho::view_const_string								textLine1									= "T: Shoot. Y: Thrust. U: Handbrake.";
-	static constexpr const ::cho::view_const_string								textLine2									= "Press ESC to exit.";
+	static constexpr const ::cho::view_const_string								textLine2									= "Press ESC to exit or P to Pause.";
 	::cho::SFramework															& framework									= applicationInstance.Framework;
 	::cho::grid_view<::cho::SColorBGRA>											& offscreenView								= framework.Offscreen.View;
 	::cho::grid_view<::cho::SColorBGRA>											& fontAtlasView								= applicationInstance.Textures[GAME_TEXTURE_FONT_ATLAS].Processed.View;
