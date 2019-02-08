@@ -64,7 +64,7 @@ namespace cho
 		constexpr					SColorBGR						()																noexcept	= default;
 		constexpr					SColorBGR						(const SColorBGR& otherColorInt)								noexcept	= default;
 		constexpr					SColorBGR						(uint8_t b_, uint8_t g_, uint8_t r_)							noexcept	: b(b_), g(g_), r(r_)																																													{}
-		constexpr					SColorBGR						(const SColorBGRA& other)										noexcept	: b(other.b), g(other.b), r(other.r)																																									{}
+		constexpr					SColorBGR						(const SColorBGRA& other)										noexcept	: b(other.b), g(other.g), r(other.r)																																									{}
 		constexpr					SColorBGR						(const SColor16& other)											noexcept	: b((uint8_t)((other & 0x001F) / ((float)(0x1F))*255))	, g((uint8_t)(((other & 0x07E0) >>5) / ((float)(0x3F))*255)), r((uint8_t)(((other & 0xF800) >>11) / ((float)(0x1F))*255))						{}
 		constexpr					SColorBGR						(uint32_t other)												noexcept	: b((uint8_t)(((other & 0x000000FF) >> 0)))				, g((uint8_t)((other & 0x0000FF00) >> 8))					, r((uint8_t)(((other & 0x00FF0000) >> 16)))										{}
 
@@ -103,7 +103,17 @@ namespace cho
 
 									SColorFloat&	operator=		(const SColorFloat& color)													= default;
 		constexpr					operator		uint32_t		()														const	noexcept	{ return (((uint32_t)(a * 255.0f)) << 24) | (((uint32_t)(r * 255.0f)) << 16) | (((uint32_t)(g * 255.0f)) << 8) | ((uint32_t)(b*255.0f));															}
-		constexpr					operator		SColorBGRA		()														const	noexcept	{ return SColorBGRA((uint8_t)(b * 255), (uint8_t)(g * 255), (uint8_t)(r * 255), (uint8_t)(a * 255));																								}
+
+		// For some reason this cast returns a different result if the error_printf() line is enabled. This is noticed in release builds where this operator turns a literal RED into YELLOW. 
+		// At first I thought that this could be floating point precision optimizations causing the green channel to underflow. However, 
+		// it is extremely unlikely that literal zeros in (g) turn into -0.00392f or less due to such optimizations. 
+		// What comes to my mind is that optimizations could be messing up somehow and folding the code incorrectly.
+		// Removing constexpr doesn't seem to affect this behavior, but it's still possible that optimizations are still resolving this in compile time because of its simplicity, 
+		// so the problem certainly affects the compile time and it's also possible that it doesn't happen in runtime as debug builds perform the operation just fine.
+		constexpr					operator		SColorBGRA		()														const	noexcept	{ 
+			//error_printf("Color Cast:{r:%f, g:%f, b:%f, a:%f}", (float)r, (float)g, (float)b, (float)a);
+			return SColorBGRA((uint8_t)(b * 255), (uint8_t)(g * 255), (uint8_t)(r * 255), (uint8_t)(a * 255));																								
+		}
 		constexpr					operator		SColorBGR		()														const	noexcept	{ return SColorBGR ((uint8_t)(b * 255), (uint8_t)(g * 255), (uint8_t)(r * 255));																													}
 		constexpr					operator		SColor16		()														const	noexcept	{ return ((((uint16_t)(r * 0x1F)) << 11) | (((uint16_t)(g * 0x3F)) << 5) | (((uint16_t)(b * 0x1F)) << 0));																							}
 		constexpr					operator		const float*	()														const	noexcept	{ return &r;																																														}
@@ -117,14 +127,14 @@ namespace cho
 									SColorFloat&	operator +=		(const SColorBGRA& color)										noexcept	{ r = r + (color.r * (1/255.0f));	g = g + (color.g * (1/255.0f));	b = b + (color.b * (1/255.0f));	return Clamp();																					}
 									SColorFloat&	operator *=		(const SColorBGR& color)										noexcept	{ r = r * (color.r * (1/255.0f));	g = g * (color.g * (1/255.0f));	b = b * (color.b * (1/255.0f));	return Clamp();																					}
 									SColorFloat&	operator +=		(const SColorBGR& color)										noexcept	{ r = r + (color.r * (1/255.0f));	g = g + (color.g * (1/255.0f));	b = b + (color.b * (1/255.0f));	return Clamp();																					}
-									SColorFloat		operator *		(const SColorBGRA& color)								const	noexcept	{ return ::cho::SColorFloat{r * (color.r * (1/255.0f)), g * (color.g * (1/255.0f)), b * (color.b * (1/255.0f)), a}.Clamp();																				}
-									SColorFloat		operator +		(const SColorBGRA& color)								const	noexcept	{ return ::cho::SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																				}
-									SColorFloat		operator *		(const SColorBGR& color)								const	noexcept	{ return ::cho::SColorFloat{r * (color.r * (1/255.0f)), g * (color.g * (1/255.0f)), b * (color.b * (1/255.0f)), a}.Clamp();																				}
-									SColorFloat		operator +		(const SColorBGR& color)								const	noexcept	{ return ::cho::SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																				}
+									SColorFloat		operator *		(const SColorBGRA& color)								const	noexcept	{ return ::cho::SColorFloat{r * (color.r * (1/255.0f)), g * (color.g * (1/255.0f)), b * (color.b * (1/255.0f)), a}.Clamp();																			}
+									SColorFloat		operator +		(const SColorBGRA& color)								const	noexcept	{ return ::cho::SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																			}
+									SColorFloat		operator *		(const SColorBGR& color)								const	noexcept	{ return ::cho::SColorFloat{r * (color.r * (1/255.0f)), g * (color.g * (1/255.0f)), b * (color.b * (1/255.0f)), a}.Clamp();																			}
+									SColorFloat		operator +		(const SColorBGR& color)								const	noexcept	{ return ::cho::SColorFloat{r + (color.r * (1/255.0f)), g + (color.g * (1/255.0f)), b + (color.b * (1/255.0f)), a}.Clamp();																			}
 		constexpr					SColorFloat		operator *		(const SColorFloat& color)								const	noexcept	{ return ::cho::SColorFloat{::cho::clamp(r * color.r, 0.0f, 1.0f),	::cho::clamp(g * color.g, 0.0f, 1.0f),	::cho::clamp(b * color.b, 0.0f, 1.0f)};													}
 		constexpr					SColorFloat		operator +		(const SColorFloat& color)								const	noexcept	{ return ::cho::SColorFloat{::cho::clamp(r + color.r, 0.0f, 1.0f),	::cho::clamp(g + color.g, 0.0f, 1.0f),	::cho::clamp(b + color.b, 0.0f, 1.0f)};													}
-		constexpr					SColorFloat		operator *		(double scalar)											const	noexcept	{ return ::cho::SColorFloat{(float)::cho::clamp(r * scalar, 0.0, 1.0), (float)::cho::clamp(g * scalar, 0.0, 1.0), (float)::cho::clamp(b * scalar, 0.0, 1.0)};											}
-		constexpr					SColorFloat		operator /		(double scalar)											const				{ return ::cho::SColorFloat{(float)::cho::clamp(r / scalar, 0.0, 1.0), (float)::cho::clamp(g / scalar, 0.0, 1.0), (float)::cho::clamp(b / scalar, 0.0, 1.0)};											}
+		constexpr					SColorFloat		operator *		(double scalar)											const	noexcept	{ return ::cho::SColorFloat{(float)::cho::clamp(r * scalar, 0.0, 1.0), (float)::cho::clamp(g * scalar, 0.0, 1.0), (float)::cho::clamp(b * scalar, 0.0, 1.0)};										}
+		constexpr					SColorFloat		operator /		(double scalar)											const				{ return ::cho::SColorFloat{(float)::cho::clamp(r / scalar, 0.0, 1.0), (float)::cho::clamp(g / scalar, 0.0, 1.0), (float)::cho::clamp(b / scalar, 0.0, 1.0)};										}
 									SColorFloat&	operator *=		(float scalar)													noexcept	{ r = r * scalar;					g = g * scalar;					b = b * scalar;					return Clamp();																					}
 									SColorFloat&	operator /=		(float scalar)																{ r = r / scalar;					g = g / scalar;					b = b / scalar;					return Clamp();																					}
 		constexpr					SColorFloat		operator *		(float scalar)											const	noexcept	{ return ::cho::SColorFloat(::cho::clamp(r * scalar, 0.0f, 1.0f),	::cho::clamp(g * scalar, 0.0f, 1.0f),	::cho::clamp(b * scalar, 0.0f, 1.0f));													}
