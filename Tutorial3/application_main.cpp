@@ -160,17 +160,23 @@ void																	addParticle
 
 					::cho::error_t										draw										(::SApplication& applicationInstance)											{	// --- This function will draw some coloured symbols in each cell of the ASCII screen.
 	::cho::grid_view<::cho::SColorBGRA>											& viewOffscreen								= applicationInstance.Framework.Offscreen.View;
+	//memset(applicationInstance.Framework.Offscreen.Texels.begin(), 0, sizeof(::cho::SColorBGRA) * applicationInstance.Framework.Offscreen.Texels.size());
 	::cho::array_pod<::SApplication::TParticleSystem::TParticleInstance>		& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	for(uint32_t iParticle = 0, particleCount = (uint32_t)particleInstances.size(); iParticle < particleCount; ++iParticle) {
 		::cho::SParticleBinding<PARTICLE_TYPE>										& particleInstance							= particleInstances[iParticle];
 		const int32_t																physicsId									= particleInstance.IndexParticlePhysics;
 		const ::cho::SCoord2<float>													particlePosition							= applicationInstance.ParticleSystem.Integrator.Particle[physicsId].Position;
-		viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x]	
+		::cho::SColorBGRA															& colorDst									= viewOffscreen[(uint32_t)particlePosition.y][(uint32_t)particlePosition.x];
+		//if(PARTICLE_TYPE_FIRE == particleInstance.Binding)
+		//	error_printf("Color Pre:{r:%u, g:%u, b:%u, a:%u}", (uint32_t)colorDst.r, (uint32_t)colorDst.g, (uint32_t)colorDst.b, (uint32_t)colorDst.a);
+		colorDst
 			= (PARTICLE_TYPE_SNOW == particleInstance.Binding) ? ::cho::SColorBGRA(::cho::CYAN)
 			: (PARTICLE_TYPE_FIRE == particleInstance.Binding) ? ::cho::SColorBGRA(::cho::RED )
 			: (PARTICLE_TYPE_RAIN == particleInstance.Binding) ? ::cho::SColorBGRA(::cho::BLUE)
 			: ::cho::SColorBGRA(::cho::ORANGE)// (PARTICLE_TYPE_LAVA == particleInstance.Type) ?
 			;
+		//if(PARTICLE_TYPE_FIRE == particleInstance.Binding)
+		//	error_printf("Color Post:{r:%u, g:%u, b:%u, a:%u}", (uint32_t)colorDst.r, (uint32_t)colorDst.g, (uint32_t)colorDst.b, (uint32_t)colorDst.a);
 	}
 	return 0;
 }
