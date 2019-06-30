@@ -47,7 +47,7 @@ namespace cho
 		_aligned_free(_pepe);
 	}
 
-	struct auto_cho_free : public ::cho::auto_handler<void*, 0>					{ using TWrapper::auto_handler; inline ~auto_cho_free() { close(); } inline void close() { safe_cho_free(Handle); } };
+	struct auto_cho_free : public ::cho::auto_handler<void*, nullptr>					{ using TWrapper::auto_handler; inline ~auto_cho_free() { close(); } inline void close() { safe_cho_free(Handle); } };
 
 #define GREF_PAGE_SIZE_MAX (4096)
 	template<typename _tBase>	static inline constexpr		uint32_t							get_page_size				()													noexcept	{ return (uint32_t)(sizeof(_tBase) <= GREF_PAGE_SIZE_MAX) ? GREF_PAGE_SIZE_MAX/sizeof(_tBase) : 1; };
