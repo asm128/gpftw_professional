@@ -1,4 +1,5 @@
 #include "cho_typeint.h"
+#include "cho_eval.h"
 
 #include <cmath>
 

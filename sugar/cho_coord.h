@@ -277,7 +277,7 @@ namespace cho
 				r12									= 2 * (x*y - w*z);
 				r13									= 2 * (x*z + w*y);
 				*fPitch								= 0.0f;
-				*fYaw								= -((::cho::math_pi2) * r31/tmp);
+				*fYaw								= -((::cho::math_pi_2) * r31/tmp);
 				*fRoll								= ::atan2(-r12, -r31*r13);
 			}
 			else {

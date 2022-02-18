@@ -1,6 +1,8 @@
 #include "cho_texture.h"
 #include "cho_color.h"
 #include "cho_coord.h"
+#include "cho_grid_scale.h"
+
 #include <memory> // this is required for ::std::swap()
 
 #ifndef BITMAP_TARGET_H_98237498023745654654

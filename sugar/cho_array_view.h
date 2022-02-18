@@ -1,5 +1,6 @@
+#include "cho_math.h"
+
 #include "cho_log.h"
-#include "cho_eval.h"
 
 #include <exception>	// for ::std::exception
 
@@ -26,7 +27,7 @@ namespace cho
 		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount])									noexcept	: Data(_dataElements), Count(_elementCount)										{}
 
 		template <size_t _elementCount>
-		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)						: Data(_dataElements), Count(::cho::min(_elementCount, elementCount))			{
+		inline constexpr							array_view					(_tElement (&_dataElements)[_elementCount], uint32_t elementCount)						: Data(_dataElements), Count(::cho::min((uint32_t)_elementCount, elementCount))			{
 			throw_if(elementCount > _elementCount, ::std::exception(""), "Element count out of range.");
 		}
 

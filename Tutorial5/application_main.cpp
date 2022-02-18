@@ -160,7 +160,7 @@ static				::cho::error_t										updateParticles								(::SApplication& applic
 	const float																	lastFrameSeconds							= (float)framework.FrameInfo.Seconds.LastFrame;
 	ree_if(errored(particleIntegrator.Integrate(lastFrameSeconds, framework.FrameInfo.Seconds.LastFrameHalfSquared)), "Not sure why would this fail.");
 
-	const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
+	//const float																	windDirection								= (float)sin(framework.FrameInfo.Seconds.Total/3.0f) * .025f;
 
 	::cho::array_pod<TParticleInstance>											& particleInstances							= applicationInstance.ParticleSystem.Instances;
 	::cho::clear
